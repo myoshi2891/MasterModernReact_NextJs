@@ -9,6 +9,11 @@ const authConfig = {
 		}),
 		// CredentialProvider
 	],
+	callbacks: {
+		authorized({ auth, request }) {
+			return !!auth?.user;
+		},
+	},
 };
 
 export const {
