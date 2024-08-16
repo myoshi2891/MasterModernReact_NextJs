@@ -1,14 +1,14 @@
-import Head from "next/head";
-import { useRouter } from "next/router";
+import CabinList from "@/components/CabinList";
+import { getCabins } from "@/lib/data-service";
 
-export default function Cabins() {
-	const router = useRouter();
+export async function getStaticProps() {
+	const cabins = await getCabins();
+	return { props: { cabins } };
+}
+
+export default function Cabins({ cabins }) {
 	return (
 		<>
-			<Head>
-				<title>Cain #{router.query.cabinId} | The Wild Oasis</title>
-			</Head>
-
 			<div>
 				<h1 className="text-4xl mb-5 text-accent-400 font-medium">
 					Our Luxury Cabins
@@ -22,6 +22,7 @@ export default function Cabins() {
 					home. The perfect spot for a peaceful, calm vacation.
 					Welcome to paradise.
 				</p>
+				<CabinList cabins={cabins} />
 			</div>
 		</>
 	);
