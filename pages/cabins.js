@@ -3,10 +3,11 @@ import { getCabins } from "@/lib/data-service";
 
 export async function getStaticProps() {
 	const cabins = await getCabins();
-	return { props: { cabins } };
+	return { props: { cabins }, revalidate: 3600 };
 }
 
-export default function Cabins({ cabins }) {
+function Cabins({ cabins }) {
+	console.log(cabins);
 	return (
 		<>
 			<div>
@@ -19,7 +20,7 @@ export default function Cabins({ cabins }) {
 					views, spending your days exploring the dark forests around,
 					or just relaxing in your private hot tub under the stars.
 					Enjoy nature&apos;s beauty in your own little home away from
-					home. The perfect spot for a peaceful, calm vacation.
+					home. The perfect spot for a peaceful, calm vacation.”
 					Welcome to paradise.
 				</p>
 				<CabinList cabins={cabins} />
@@ -27,3 +28,5 @@ export default function Cabins({ cabins }) {
 		</>
 	);
 }
+
+export default Cabins;
