@@ -1,155 +1,209 @@
-# 概要
+# The Wild Oasis キャビン予約アプリケーション
 
-## 関連ソースファイル
-本ドキュメントは、ラグジュアリーキャビン宿泊の予約が可能なモダンな Next.js Web アプリケーション「The Wild Oasis Cabin Booking Application」の包括的な概要を提供します。  
-このシステムでは、ゲストがキャビンを閲覧・予約し、統合されたアカウント管理システムを通じて予約を管理できます。
+## 概要
 
-本概要では、アプリケーションのアーキテクチャ、技術スタック、および主要機能システムについて説明します。  
-各サブシステムの詳細な実装については以下を参照してください：
-- **Authentication System**
-- **Booking System**
-- **Account Management**
+この文書は、高級キャビン宿泊施設の予約を行うモダンなNext.jsウェブアプリケーション「The Wild Oasis」の包括的な概要を提供します。このシステムでは、ゲストが利用可能なキャビンを閲覧し、予約を行い、統合されたアカウント管理システムを通じて予約を管理できます。
 
----
+この概要では、アプリケーションのアーキテクチャ、技術スタック、コア機能システムについて説明します。特定のサブシステムの詳細な実装については、**認証システム**、**予約システム**、**アカウント管理**を参照してください。
+
+### 関連ソースファイル
+- `app/layout.js (1-39行目)`
+- `app/page.js (1-31行目)`
+- `app/_components/Header.js (1-15行目)`
+- `package.json (12-27行目)`
 
 ## アプリケーションの目的
-The Wild Oasis は、以下の機能を提供するキャビンホテル予約システムです。
 
-- キャビンの閲覧とフィルタリング機能
-- 日付ベースの空室確認と予約機能
-- Google OAuth を用いたユーザー認証
-- アカウント管理（プロフィール編集・予約管理）
-- Supabase を利用したデータ永続化とストレージ連携
+The Wild Oasisは以下の機能を提供するキャビンホテル予約システムです：
 
----
+- キャビンの閲覧・フィルタリング機能
+- 日付ベースの空室確認と予約予約
+- Google OAuthベースのユーザー認証
+- プロフィール編集と予約管理を含むアカウント管理
+- データの永続化とストレージのためのSupabaseとの統合
 
 ## システムアーキテクチャ概要
-本アプリケーションは **Next.js 14 App Router** アーキテクチャを採用し、サーバーサイドレンダリング（SSR）と必要に応じたクライアントサイドインタラクションを組み合わせています。
 
-## ハイレベルアーキテクチャ図
-```text
- ┌─────────────────────────┐
- │        クライアント       │
- │  React + Tailwind CSS   │
- │  ─────────────────────  │
- │  ページ遷移 / UI表示      │
- └───────────┬───────────┘
-             │
-             ▼
- ┌─────────────────────────┐
- │      Next.js 14 App     │
- │ Server Components +     │
- │ Server Actions          │
- └───────────┬───────────┘
-             │
-             ▼
- ┌─────────────────────────┐
- │       Supabase          │
- │ DB (PostgreSQL)         │
- │ ファイルストレージ         │
- │ リアルタイム機能           │
- └─────────────────────────┘
+アプリケーションは、サーバーサイドレンダリングと選択的クライアントサイドインタラクティビティを持つモダンなNext.js 14 App Routerアーキテクチャに従います。
+
+### 高レベルアーキテクチャ
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        A[React Components]
+        B[Client Components]
+        C[Server Components]
+    end
+    
+    subgraph "Next.js App Layer"
+        D[App Router]
+        E[Server Actions]
+        F[API Routes]
+    end
+    
+    subgraph "Authentication Layer"
+        G[NextAuth 5]
+        H[Google OAuth]
+    end
+    
+    subgraph "Data Layer"
+        I[Supabase Database]
+        J[PostgreSQL]
+        K[Real-time Features]
+    end
+    
+    subgraph "External Services"
+        L[restcountries.com]
+        M[Google Fonts]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    D --> F
+    E --> G
+    G --> H
+    F --> I
+    I --> J
+    I --> K
+    F --> L
+    A --> M
 ```
-**Sources:**
-- `app/layout.js` 1-39
-- `app/page.js` 1-31
-- `app/_components/Header.js` 1-15
-
----
 
 ## 技術スタック
-本アプリケーションは、パフォーマンスと開発体験を最適化したモダンな Web 開発技術を活用しています。
 
-| カテゴリ | 技術 | 用途 |
-|----------|------|------|
-| フロントエンドフレームワーク | Next.js 14 | App Router, Server Components, Server Actions |
-| UI ライブラリ | React 18 | コンポーネントベース UI + SSR |
-| 認証 | NextAuth 5 | OAuth 連携とセッション管理 |
-| データベース | Supabase | PostgreSQL + リアルタイム機能 |
-| スタイリング | Tailwind CSS | ユーティリティファースト CSS |
-| アイコン | Heroicons | React アイコンライブラリ |
-| 日付処理 | date-fns, react-day-picker | 日付操作とカレンダー UI |
-| フォント | Josefin Sans | Google Fonts 連携 |
+アプリケーションは、パフォーマンスと開発者体験に最適化されたモダンなウェブ開発技術を活用しています。
 
-**Sources:**
-- `package.json` 12-27
+| カテゴリ | 技術 | 目的 |
+|---------|------|------|
+| フロントエンドフレームワーク | Next.js 14 | App Router、Server Components、Server Actions |
+| UIライブラリ | React 18 | SSRサポートによるコンポーネントベースUI |
+| 認証 | NextAuth 5 | OAuth統合とセッション管理 |
+| データベース | Supabase | リアルタイム機能を持つPostgreSQLデータベース |
+| スタイリング | Tailwind CSS | ユーティリティファーストCSSフレームワーク |
+| アイコン | Heroicons | Reactアイコンライブラリ |
+| 日付処理 | date-fns, react-day-picker | 日付操作とカレンダーUI |
+| フォント | Josefin Sans | Google Fonts統合 |
 
----
+## コア機能エリア
 
-## 主要機能領域
+アプリケーションは3つの主要機能ドメインに整理されています：
 
-### 1. キャビン管理システム
-- キャビン一覧：フィルタ付き SSR レンダリング
-- キャビン詳細：画像ギャラリー・アメニティ表示
-- 空室確認：日付ベースの空室検索
+### キャビン管理システム
 
-### 2. 予約システム
-- 日付選択：チェックイン/チェックアウトのカレンダー UI
-- 予約フォーム：ゲスト情報入力と予約作成
-- 状態管理：`ReservationContext` による日付状態共有
+- **キャビン閲覧**: フィルタリング機能付きサーバーレンダリングキャビンリスト
+- **キャビン詳細**: 画像ギャラリーとアメニティを含む個別キャビンページ
+- **空室確認**: 日付ベースのキャビン空室照会
 
-### 3. アカウント管理
-- プロフィール管理：国選択付きプロフィール編集
-- 予約管理：既存予約の表示・編集・キャンセル
-- 認証フロー：Google OAuth ログイン/ログアウト
+### 予約システム
 
----
+- **日付選択**: チェックイン/チェックアウト日のインタラクティブカレンダー
+- **予約フォーム**: ゲスト情報キャプチャと予約作成
+- **状態管理**: コンポーネント間の日付状態のための`ReservationContext`
 
-## アプリケーションのファイル構造
-本コードベースは Next.js App Router の規約に従い、機能ごとに整理されています。
+### アカウント管理
 
-**ファイル構造図**
-```text
-app/
- ├─ layout.js
- ├─ page.js
- ├─ _components/
- │    └─ Header.js
- ├─ cabins/
- │    ├─ page.js
- │    └─ [id].js
- ├─ account/
- │    ├─ page.js
- │    └─ reservations.js
- └─ booking/
-      ├─ page.js
-      └─ confirm.js
+- **プロフィール管理**: 国選択機能付きゲストプロフィール編集
+- **予約管理**: 既存予約の表示、編集、キャンセル
+- **認証フロー**: Google OAuthログイン/ログアウト機能
+
+## アプリケーションファイル構造
+
+コードベースは、機能ベースの組織化を伴うNext.js App Router規約に従います。
+
+### ファイル構造図
+
 ```
-**Sources:**
-- `app/layout.js` 15-22
-- `package.json` 1-28
-
----
-
-## 主な設定要素
-アプリケーションのメタデータとグローバル設定はルートレイアウトで定義されています。
-
-- **タイトルテンプレート**：`%s | The Wild Oasis`（ページタイトルの統一）
-- **SEO 説明**：イタリア・ドロミテ地方のラグジュアリーキャビン市場向け
-- **グローバルスタイル**：Josefin Sans フォント + Tailwind CSS ユーティリティ
-- **レイアウト構造**：`Header` + メインコンテンツ + `ReservationProvider` コンテキスト
-
-**Sources:**
-- `app/layout.js` 15-22
-- `app/layout.js` 24-39
-
----
-
-## 外部サービス・内部モジュール連携
-本システムは以下の外部サービスおよび内部モジュールと統合されています。
-```text
-Google OAuth  ──▶ NextAuth  ──▶ 認証管理
-Supabase     ──▶ データベース操作・ファイル保存
-restcountries.com ──▶ 国データ取得
-ReservationContext ──▶ 予約状態管理
+the-wild-oasis/
+├── app/
+│   ├── layout.js              # アプリケーションのルートレイアウト
+│   ├── page.js                # ホームページ
+│   ├── _components/           # 共有コンポーネント
+│   │   ├── Header.js          # アプリケーションヘッダー
+│   │   ├── Navigation.js      # ナビゲーションコンポーネント
+│   │   └── ReservationProvider.js # 予約状態管理
+│   ├── cabins/                # キャビン関連ページ
+│   │   ├── page.js            # キャビン一覧
+│   │   └── [cabinId]/         # 動的キャビン詳細
+│   ├── reservations/          # 予約関連ページ
+│   │   ├── page.js            # 予約一覧
+│   │   └── [reservationId]/   # 個別予約管理
+│   ├── account/               # アカウント管理
+│   │   ├── page.js            # プロフィール
+│   │   └── profile/           # プロフィール編集
+│   └── api/                   # APIルート
+│       └── auth/              # 認証関連API
+├── lib/                       # ユーティリティ関数
+│   ├── supabase.js            # Supabaseクライアント
+│   ├── auth.js                # 認証設定
+│   └── utils.js               # ヘルパー関数
+├── public/                    # 静的ファイル
+├── package.json               # プロジェクト設定
+└── next.config.js             # Next.js設定
 ```
-- **Supabase**：DB 操作・ファイルストレージ・リアルタイム購読
-- **Google OAuth**：ユーザー認証・プロフィール取得
-- **NextAuth**：セッション管理・認証ミドルウェア
-- **restcountries.com**：国データ取得（プロフィール用）
-- **ReservationContext**：予約フローにおけるクライアントサイド状態管理
 
----
+## 主要設定要素
 
-このアーキテクチャにより、スケーラブルで高性能、かつ最新の開発手法とユーザー体験を備えたキャビン予約システムが実現されています。
-[For more details](https://deepwiki.com/myoshi2891/MasterModernReact_NextJs/1-overview)
+アプリケーションのメタデータとグローバル設定は、ルートレイアウトで定義されています：
+
+- **アプリケーションタイトルテンプレート**: 一貫したページタイトルのための`%s | The Wild Oasis`
+- **SEO説明**: イタリアドロミテの高級キャビンホテル市場をターゲット
+- **グローバルスタイリング**: Tailwind CSSユーティリティクラスとJosefin Sansフォント
+- **レイアウト構造**: ReservationProviderコンテキストを含むヘッダー + メインコンテンツエリア
+
+## 統合ポイント
+
+システムは複数の外部サービスと内部モジュールと統合されています：
+
+### 外部統合
+- **Supabase**: データベース操作、ファイルストレージ、リアルタイムサブスクリプション
+- **Google OAuth**: ユーザー認証とプロフィールデータ
+- **NextAuth**: セッション管理と認証ミドルウェア
+- **restcountries.com**: プロフィール管理用の国データ
+
+### 内部統合
+- **ReservationContext**: 予約フローコーディネーションのためのクライアントサイド状態
+
+## システムフロー図
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant C as Client
+    participant N as Next.js
+    participant A as NextAuth
+    participant S as Supabase
+    participant G as Google OAuth
+
+    U->>C: アプリケーションにアクセス
+    C->>N: ページリクエスト
+    N->>S: キャビンデータ取得
+    S-->>N: キャビンデータ返却
+    N-->>C: Server Component レンダリング
+    C-->>U: ページ表示
+
+    U->>C: ログインボタンクリック
+    C->>A: 認証開始
+    A->>G: Google OAuth リダイレクト
+    G-->>A: 認証コールバック
+    A->>S: ユーザー情報保存
+    A-->>C: セッション作成
+    C-->>U: ログイン完了
+
+    U->>C: 予約フォーム送信
+    C->>N: Server Action実行
+    N->>S: 予約データ保存
+    S-->>N: 保存完了
+    N-->>C: リダイレクト
+    C-->>U: 予約確認画面
+```
+
+このアーキテクチャにより、モダンな開発プラクティスとユーザーエクスペリエンスパターンを備えたスケーラブルで高性能なキャビン予約システムが実現されています。
+
+## まとめ
+
+The Wild Oasisは、Next.js 14のApp Routerを活用した現代的なウェブアプリケーションであり、高級キャビン予約体験を提供します。Supabaseとの統合により堅牢なデータ管理を実現し、Google OAuthによる認証システムでセキュアなユーザー体験を提供しています。
+
+この技術スタックの組み合わせにより、パフォーマンス、スケーラビリティ、開発者体験の全てにおいて優れたソリューションを実現しています。
