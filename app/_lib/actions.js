@@ -10,13 +10,18 @@ export async function updateGuest(formData) {
 	const session = await auth();
 	if (!session) throw new Error("You must be logged in");
 
-	const nationalID = formData.get("nationalID");
-	const [nationality, countryFlag] = formData.get("nationality").split("%");
+	const nationalIDRaw = formData.get("nationalID")?.toString().trim() ?? "";
+	const nationalityField = formData.get("nationality")?.toString() ?? "";
+	const [nationality = "", countryFlag = ""] = nationalityField.split("%");
 
-	if (!/^[a-zA-Z0-9]{6,12}$/.test(nationalID))
+	if (nationalIDRaw && !/^[a-zA-Z0-9]{6,12}$/.test(nationalIDRaw))
 		throw new Error("Please provide a valid national ID");
 
-	const updateData = { nationality, countryFlag, nationalID };
+	const updateData = {
+		nationality: nationality || null,
+		countryFlag: countryFlag || null,
+		nationalID: nationalIDRaw || null,
+	};
 
 	const { data, error } = await supabase
 		.from("guests")
