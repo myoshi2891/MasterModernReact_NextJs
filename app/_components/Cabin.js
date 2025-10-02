@@ -14,8 +14,8 @@ function Cabin({ cabin }) {
 	} = cabin;
 
 	return (
-		<div className="grid grid-cols-[3fr_4fr] gap-20 border border-primary-800 py-3 px-10 mb-24">
-			<div className="relative scale-[1.15] -translate-x-3">
+		<div className="mx-auto mb-24 grid w-full max-w-3xl gap-10 rounded-lg border border-primary-800 px-4 py-6 sm:px-6 lg:max-w-6xl lg:grid-cols-[5fr_4fr] lg:items-center lg:gap-24 lg:px-12 lg:py-10">
+			<div className="relative aspect-[4/3] overflow-hidden rounded-md sm:aspect-[3/2] lg:aspect-[5/3] lg:h-[28rem]">
 				<Image
 					src={image}
 					fill
@@ -24,12 +24,12 @@ function Cabin({ cabin }) {
 				/>
 			</div>
 
-			<div>
-				<h3 className="text-accent-100 font-black text-7xl mb-5 translate-x-[-254px] bg-primary-950 p-6 pb-1 w-[150%]">
+			<div className="lg:pl-10">
+				<h3 className="mb-5 bg-primary-950 px-4 py-2 text-4xl font-black text-accent-100 sm:text-5xl md:text-6xl lg:-translate-x-32 lg:px-6 lg:pb-1 lg:text-7xl">
 					Cabin {name}
 				</h3>
 
-				<p className="text-lg text-primary-300 mb-10">
+				<p className="text-base text-primary-300 mb-8 sm:text-lg md:mb-10">
 					<TextExpander>{description}</TextExpander>
 				</p>
 
