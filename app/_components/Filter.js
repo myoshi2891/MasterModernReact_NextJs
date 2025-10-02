@@ -16,7 +16,7 @@ function Filter() {
 	}
 
 	return (
-		<div className="border border-primary-800 flex">
+		<div className="flex w-full flex-col gap-2 rounded-2xl border border-primary-800 bg-primary-950/40 p-2 mb-2 sm:w-auto sm:flex-row sm:gap-0 sm:overflow-hidden sm:rounded-full sm:bg-transparent sm:p-0 sm:[&_button:not(:first-child)]:border-l sm:[&_button:not(:first-child)]:border-primary-800">
 			<Button
 				filter="all"
 				handleFilter={handleFilter}
@@ -52,8 +52,8 @@ function Filter() {
 function Button({ filter, handleFilter, activeFilter, children }) {
 	return (
 		<button
-			className={`px-5 py-2 hover:bg-primary-700 ${
-				filter === activeFilter ? "bg-primary-700 text-primary-50" : ""
+			className={`w-full rounded-xl px-4 py-2 text-center text-sm font-medium transition-colors duration-150 hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 sm:w-auto sm:rounded-none sm:px-5 sm:text-base ${
+				filter === activeFilter ? "bg-primary-700 text-primary-50" : "text-primary-200"
 			}`}
 			onClick={() => handleFilter(filter)}
 		>

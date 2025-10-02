@@ -29,11 +29,24 @@
     }
   }
 }
-/* For data picker */
+/* React Day Picker defaults */
 .rdp {
-  --rdp-cell-size: 32px !important;
-  --rdp-accent-color: theme('colors.accent.500') !important;
-  --rdp-background-color: theme('colors.accent.600') !important;
-  margin: 0 !important;
+  --rdp-cell-size: clamp(2.4rem, 9vw, 2.8rem);
+  --rdp-accent-color: theme('colors.accent.500');
+  --rdp-background-color: theme('colors.accent.600');
+  margin: 0;
 }
 
+@media (max-width: 640px) {
+  .rdp {
+    --rdp-cell-size: clamp(1.7rem, 10vw, 2.3rem);
+  }
+
+  .rdp-dropdown {
+    font-size: 0.8rem;
+  }
+
+  .rdp-caption_label {
+    font-size: 0.9rem;
+  }
+}
