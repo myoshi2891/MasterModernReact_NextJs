@@ -1,6 +1,6 @@
 {
 	"name": "the-wild-oasis-website",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
 	"engines": {
 		"node": ">=20.19.0 <21"
@@ -27,7 +27,7 @@
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.0",
 		"@types/jest": "^30.0.0",
-		"eslint": "^8",
+		"eslint": "^8.57.0",
 		"eslint-config-next": "14.2.5",
 		"msw": "^2.11.3",
 		"postcss": "^8",
