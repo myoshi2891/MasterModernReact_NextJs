@@ -5,11 +5,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "ffzgyauorgklffmfhzjg.supabase.co",
-        port: "",
         pathname: "/storage/v1/object/public/cabin-images/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/a/**",
+      },
     ],
-    domains: ["lh3.googleusercontent.com"],
   },
   // output: "export",
 };

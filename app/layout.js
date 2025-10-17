@@ -1,7 +1,18 @@
-import { Josefin_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
-const josefin = Josefin_Sans({
-  subsets: ["latin"],
+const josefin = localFont({
+  src: [
+    {
+      path: "./fonts/JosefinSans-VariableFont_wght.ttf",
+      weight: "100 700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/JosefinSans-Italic-VariableFont_wght.ttf",
+      weight: "100 700",
+      style: "italic",
+    },
+  ],
   display: "swap",
 });
 
