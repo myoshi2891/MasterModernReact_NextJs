@@ -10,14 +10,10 @@ function Logo() {
 				height="60"
 				width="60"
 				quality={100}
+				priority
+				sizes="60px"
 				alt="The Wild Oasis logo"
 			/>
-			{/* <Image
-				src="/logo.png"
-				height="60"
-				width="60"
-				alt="The Wild Oasis logo"
-			/> */}
 			<span className="text-xl font-semibold text-primary-100">
 				The Wild Oasis
 			</span>

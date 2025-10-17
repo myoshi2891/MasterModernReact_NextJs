@@ -76,7 +76,7 @@ function NavigationMenu({ session }) {
       </nav>
 
       {isOpen ? (
-        <div className="absolute right-0 top-12 z-20 w-36 rounded-md border border-primary-800 bg-primary-950 p-2 shadow-lg md:hidden">
+        <div className="absolute left-0 top-12 z-20 w-72 rounded-md border border-primary-800 bg-primary-950 p-2 shadow-lg md:hidden opacity-80">
           <nav>
             <ul className="flex flex-col gap-3 items-center text-base">
               <li>
