@@ -50,6 +50,7 @@ export default async function Page() {
 					placeholder="blur"
 					className="object-cover"
 					quality={80}
+					sizes="(min-width: 1024px) 40vw, 100vw"
 					alt="Family sitting around a fire pit in front of cabin"
 				/>
 			</div>
@@ -60,6 +61,7 @@ export default async function Page() {
 					fill
 					placeholder="blur"
 					className="object-cover"
+					sizes="(min-width: 1024px) 40vw, 100vw"
 					alt="Family that manages The Wild Oasis"
 				/>
 			</div>
