@@ -1,602 +1,1652 @@
-# The Wild Oasis - システム概要ドキュメント
+# 🏕️ The Wild Oasis - アーキテクチャドキュメント
 
-## 目次
-- [目的とスコープ](#目的とスコープ)
-- [アプリケーションの目的](#アプリケーションの目的)
+## 📋 目次
+
+- [概要](#概要)
 - [技術スタック](#技術スタック)
-- [アーキテクチャ概要](#アーキテクチャ概要)
-- [主要機能システム](#主要機能システム)
+- [アーキテクチャ構成](#アーキテクチャ構成)
+- [コア機能システム](#コア機能システム)
 - [ファイル構造](#ファイル構造)
-- [設定ファイル](#設定ファイル)
 - [統合ポイント](#統合ポイント)
-- [データフローアーキテクチャ](#データフローアーキテクチャ)
 - [パフォーマンス最適化](#パフォーマンス最適化)
 - [開発ワークフロー](#開発ワークフロー)
+- [実装パターン集](#実装パターン集)
+- [セキュリティ](#セキュリティ)
+- [テスト](#テスト)
+- [デプロイメント](#デプロイメント)
 
-## 目的とスコープ
+---
 
-本ドキュメントは、Next.jsベースの高級キャビン予約アプリケーション「The Wild Oasis」の高レベル概要を提供します。アプリケーションの目的、アーキテクチャ、技術スタック、主要機能システム、統合ポイントをカバーしています。
+## 概要
 
-### 関連ドキュメント
+### 🎯 アプリケーション目的
 
-特定のサブシステムの詳細情報については、以下を参照してください:
+**The Wild Oasis** は、Next.js ベースのラグジュアリーキャビン予約システムです。ゲストが高級キャビンを閲覧し、空室確認、予約、予約管理を統合インターフェースで実施できます。
 
-- **認証とセッション管理**: Authentication System
-- **データアクセスパターンとSupabase統合**: Data Access Layer
-- **ミューテーション操作とキャッシュ無効化**: Server Actions
-- **キャビンの閲覧とフィルタリング**: Cabin Management System
-- **予約フローと日付選択**: Reservation & Booking System
-- **ユーザープロフィールと予約管理**: Account Management
+#### 🌟 主要機能
 
-## アプリケーションの目的
+| 機能 | 説明 |
+|------|------|
+| キャビン閲覧 | 容量ベースのフィルタリング対応 |
+| 空室確認 | 日付ベースの予約チェック |
+| 予約システム | 直感的な日付選択UI |
+| Google OAuth | ソーシャルログイン統合 |
+| プロフィール管理 | 国選択などのゲスト情報管理 |
+| 予約管理 | 閲覧・編集・削除機能 |
+| データ永続化 | Supabase PostgreSQL |
 
-The Wild Oasisは、ゲストが高級キャビンを閲覧し、空室状況を確認し、予約を行い、統合されたアカウントシステムを通じて予約を管理できるキャビンホテル予約システムです。
-
-### 主な機能
-
-- 収容人数ベースのフィルタリング機能付きキャビン閲覧
-- 日付ベースの空室確認と予約
-- Google OAuthベースのユーザー認証
-- 国選択機能付きゲストプロフィール管理
-- 予約管理（表示、編集、削除）
-- データ永続化のためのSupabase統合
+---
 
 ## 技術スタック
 
-このアプリケーションは、パフォーマンスと開発者体験に最適化された最新のWeb開発技術を活用しています。
-
-### コア依存関係
+### 📦 コア依存関係
 
 | カテゴリ | 技術 | バージョン | 目的 |
 |---------|------|-----------|------|
-| フレームワーク | next | 14.2.32 | App Router、Server Components、ISR |
-| UIライブラリ | react | ^18 | SSRサポート付きコンポーネントベースUI |
-| 認証 | next-auth | ^5.0.0-beta.23 | OAuth統合とセッション管理 |
-| データベース | @supabase/supabase-js | ^2.56.0 | リアルタイム機能付きPostgreSQLデータベース |
-| スタイリング | tailwindcss | ^3.4.1 | ユーティリティファーストCSSフレームワーク |
-| アイコン | @heroicons/react | ^2.1.5 | Reactアイコンライブラリ |
+| フレームワーク | Next.js | 14.2.32 | App Router、Server Components、ISR |
+| UIライブラリ | React | ^18 | コンポーネントベースUI、SSR対応 |
+| 認証 | next-auth | ^5.0.0-beta.23 | OAuth統合、セッション管理 |
+| データベース | @supabase/supabase-js | ^2.56.0 | PostgreSQL、リアルタイム機能 |
+| スタイリング | Tailwind CSS | ^3.4.1 | ユーティリティファーストCSS |
+| アイコン | @heroicons/react | ^2.1.5 | React用アイコンライブラリ |
 | 日付処理 | date-fns | ^3.6.0 | 日付操作ユーティリティ |
 | 日付ピッカー | react-day-picker | ^8.10.1 | カレンダーUIコンポーネント |
 
-### 開発依存関係
+### 🧪 開発用依存関係
 
 | カテゴリ | 技術 | バージョン | 目的 |
 |---------|------|-----------|------|
-| テスト | @playwright/test | ^1.55.1 | E2Eテスト |
-| テスト | @testing-library/react | ^16.3.0 | Reactコンポーネントテスト |
-| テスト | vitest | ^3.2.4 | ユニットテストフレームワーク |
-| モック | msw | ^2.11.3 | テスト用APIモック |
-| リント | eslint-config-next | 14.2.5 | Next.js ESLint設定 |
+| E2Eテスト | @playwright/test | ^1.55.1 | ブラウザ統合テスト |
+| コンポーネントテスト | @testing-library/react | ^16.3.0 | React コンポーネント単体テスト |
+| ユニットテスト | vitest | ^3.2.4 | ユニットテスト用フレームワーク |
+| APIモック | msw | ^2.11.3 | テスト用API モッキング |
+| Lint設定 | eslint-config-next | 14.2.5 | Next.js ESLint設定 |
 
-### Node.js環境
+### 🔧 環境要件
 
-アプリケーションは `engines` 設定で指定されている通り、**Node.js バージョン >=20.19.0 <21** を必要とします。
-
-## アーキテクチャ概要
-
-The Wild OasisはNext.js 14 App Routerアーキテクチャに従い、サーバーサイドレンダリングと選択的なクライアントサイドインタラクティビティを採用しています。
-
-### システムアーキテクチャ図
-
-```mermaid
-graph TB
-    subgraph "クライアント層"
-        Browser[ブラウザ]
-    end
-    
-    subgraph "Next.js App Router"
-        Pages[Pages/Routes]
-        ServerComponents[Server Components]
-        ClientComponents[Client Components]
-        ServerActions[Server Actions]
-        Middleware[Middleware]
-    end
-    
-    subgraph "データ層"
-        DataService[data-service.js]
-        SupabaseClient[Supabase Client]
-    end
-    
-    subgraph "外部サービス"
-        Supabase[(Supabase DB)]
-        GoogleOAuth[Google OAuth]
-        CountriesAPI[restcountries.com]
-    end
-    
-    Browser --> Pages
-    Pages --> ServerComponents
-    Pages --> ClientComponents
-    ClientComponents --> ServerActions
-    Middleware --> Pages
-    ServerActions --> DataService
-    ServerComponents --> DataService
-    DataService --> SupabaseClient
-    SupabaseClient --> Supabase
-    ServerActions --> GoogleOAuth
-    DataService --> CountriesAPI
+```bash
+Node.js: >=20.19.0 <21
+npm: 10.x以上推奨
 ```
 
-### リクエストフロー図
+---
+
+## アーキテクチャ構成
+
+### 🏗️ システムアーキテクチャ図
 
 ```mermaid
-sequenceDiagram
-    participant User as ユーザー
-    participant Browser as ブラウザ
-    participant Middleware as Middleware
-    participant Page as Page Component
-    participant SC as Server Component
-    participant SA as Server Action
-    participant DS as Data Service
-    participant Supabase as Supabase DB
-    
-    User->>Browser: /cabins にアクセス
-    Browser->>Middleware: リクエスト
-    Middleware->>Page: 認証チェック後、転送
-    Page->>SC: Server Componentをレンダリング
-    SC->>DS: getCabins() 呼び出し
-    DS->>Supabase: データクエリ
-    Supabase-->>DS: キャビンデータ
-    DS-->>SC: データ返却
-    SC-->>Page: HTMLを生成
-    Page-->>Browser: レンダリング済みページ
-    Browser-->>User: 表示
-    
-    User->>Browser: 予約を作成
-    Browser->>SA: createBooking() 実行
-    SA->>DS: データ挿入
-    DS->>Supabase: INSERT操作
-    Supabase-->>DS: 成功
-    DS-->>SA: 確認
-    SA->>SA: revalidatePath() でキャッシュ無効化
-    SA-->>Browser: リダイレクト
-    Browser-->>User: 確認ページ表示
+flowchart TD
+CabinMgmt[Cabins Management]
+AccountMgmt[Account Management]
+ReservMgmt[Reservation System]
+CabinMgmt --> ResContext
+AccountMgmt --> ResContext
+ReservMgmt --> ResContext
+ResContext[ReservationContext Client State]
+ResContext --> ServerAction
+ServerAction[Server Actions Mutations]
+ServerAction --> Supabase
+Supabase[Supabase PostgreSQL Database]
 ```
 
-## 主要機能システム
-
-アプリケーションは3つの主要な機能ドメインに分かれています。
-
-### 1. キャビン管理システム
-
-キャビンデータの表示と空室確認を処理します。
+### 🔄 完全なリクエスト-レスポンスフロー
 
 ```mermaid
-graph LR
-    subgraph "キャビン管理"
-        CabinList["Cabin List<br/>app/cabins/page.js"]
-        CabinDetails["Cabin Details<br/>app/cabins/#91;cabinId#93;/page.js"]
-        Filter["Capacity Filter"]
-        Availability["Availability Check<br/>getBookedDatesByCabinId"]
-    end
-    
-    CabinList --> Filter
-    CabinList --> CabinDetails
-    CabinDetails --> Availability
+flowchart TD
+Browser[Browser User GET Request]
+Router[Next.js Router Matcher]
+Static[generateStaticParams Check]
+CDN[Static Page CDN Cache]
+Query[getCabin Server Query]
+Render[React Server Component]
+HTML[HTML plus Client JS]
+Hydrate[Browser Hydration]
+Interact[User Interaction]
+Browser --> Router
+Router --> Static
+Static --> CDN
+CDN --> Query
+Query --> Render
+Render --> HTML
+HTML --> Hydrate
+Hydrate --> Interact
 ```
 
-**主要コンポーネント:**
-- **Cabin List**: `app/cabins/page.js` で収容人数フィルタリング機能付きのサーバーレンダリングされたキャビンカード
-- **Cabin Details**: `app/cabins/[cabinId]/page.js` で静的生成された個別キャビンページ
-- **Availability**: `data-service.js` の `getBookedDatesByCabinId()` を通じた日付ベースの空室クエリ
+---
 
-詳細なドキュメントは **Cabin Management System** を参照してください。
+## コア機能システム
 
-### 2. 予約・ブッキングシステム
+### 1️⃣ キャビン管理システム
 
-日付選択から確認までの予約フローを管理します。
+#### 📍 責務
+
+キャビンデータの表示と空室確認を多層アーキテクチャで管理します。
+
+#### 📊 処理パイプライン
 
 ```mermaid
-graph LR
-    subgraph "予約システム"
-        DateSelection[Date Selection<br/>ReservationContext]
-        ReservationForm[Reservation Form<br/>ReservationForm.js]
-        PriceCalc[Price Calculation]
-        CreateBooking[createBooking<br/>Server Action]
-    end
-    
-    DateSelection --> ReservationForm
-    ReservationForm --> PriceCalc
-    ReservationForm --> CreateBooking
+flowchart TD
+A[CabinList Server Component]
+B[Filter Client Component]
+C[getBookedDatesByCabinId]
+D[Supabase Query]
+E[CabinCard Rendering]
+F[Static ISR Output]
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
 ```
 
-**主要コンポーネント:**
-- **Date Selection**: `app/_components/ReservationContext.js` の ReservationContext を使用したインタラクティブカレンダー
-- **Reservation Form**: 価格計算機能付きの `app/_components/ReservationForm.js` による予約作成
-- **Server Actions**: データミューテーションのための `app/_lib/actions.js` の `createBooking()` アクション
+#### 🔗 主要コンポーネント
 
-詳細なドキュメントは **Reservation & Booking System** を参照してください。
+```javascript
+// app/cabins/page.js - キャビン一覧（Server Component）
+export const revalidate = 3600;
 
-### 3. アカウント管理
+export default async function CabinsPage({ searchParams }) {
+  const capacity = searchParams?.capacity;
+  let cabins = await getCabins();
+  
+  if (capacity) {
+    cabins = cabins.filter(c => c.maxCapacity >= Number(capacity));
+  }
+  
+  return (
+    <div className="grid gap-8">
+      {cabins.map(cabin => (
+        <CabinCard key={cabin.id} cabin={cabin} />
+      ))}
+    </div>
+  );
+}
 
-認証済みユーザー機能を提供します。
+// app/cabins/[cabinId]/page.js
+export async function generateStaticParams() {
+  const cabins = await getCabins();
+  return cabins.map(cabin => ({ cabinId: String(cabin.id) }));
+}
+
+export default async function CabinPage({ params }) {
+  const cabin = await getCabin(params.cabinId);
+  const reservations = await getReservations(params.cabinId);
+  
+  return (
+    <>
+      <Cabin cabin={cabin} />
+      <ReservationForm cabin={cabin} reservations={reservations} />
+    </>
+  );
+}
+```
+
+#### ⚙️ 主要関数
+
+| 関数 | ファイル | 説明 | 戻り値 |
+|------|---------|------|-------|
+| getCabins | data-service.js | 全キャビン取得 | Cabin[] |
+| getCabin | data-service.js | ID指定キャビン取得 | Cabin |
+| getBookedDatesByCabinId | data-service.js | 予約済み日付取得 | Date[] |
+| generateStaticParams | [cabinId]/page.js | ビルド時静的生成 | {cabinId}[] |
+
+---
+
+### 2️⃣ 予約・ブッキングシステム
+
+#### 📍 責務
+
+日付選択から確認までの予約フローを管理し、クライアント・サーバー間の状態同期を実現します。
+
+#### 🔄 状態フロー図
 
 ```mermaid
-graph LR
-    subgraph "アカウント管理"
-        Profile[Profile Management<br/>updateGuest]
-        Reservations[Reservation Management<br/>app/account/reservations]
-        Auth[Authentication Flow<br/>Google OAuth]
-    end
-    
-    Auth --> Profile
-    Auth --> Reservations
-    Reservations --> Edit[Edit]
-    Reservations --> Delete[Delete]
-    Reservations --> View[View]
+flowchart TD
+Provider[ReservationProvider Root Layout]
+State1[State range from to]
+State2[setRange function]
+State3[resetRange function]
+DateSel[DateSelector Client]
+ReservForm[ReservationForm Client]
+Price[Calculate totalPrice]
+Action[createBooking Server Action]
+Provider --> State1
+Provider --> State2
+Provider --> State3
+State1 --> DateSel
+State1 --> ReservForm
+State2 --> DateSel
+ReservForm --> Price
+Price --> Action
 ```
 
-**主要機能:**
-- **Profile Management**: `updateGuest()` サーバーアクションによるゲストプロフィール更新
-- **Reservation Management**: `app/account/reservations/` を通じた予約の表示、編集、削除
-- **Authentication Flow**: `signInAction()` と `signOutAction()` によるGoogle OAuthログイン/ログアウト
+#### 🔗 コンポーネント構成
 
-詳細なドキュメントは **Account Management** を参照してください。
+```javascript
+// app/_components/ReservationContext.js
+'use client';
+
+import { createContext, useState } from 'react';
+
+export const ReservationContext = createContext();
+
+export function ReservationProvider({ children }) {
+  const [range, setRange] = useState({ from: null, to: null });
+  
+  const resetRange = () => {
+    setRange({ from: null, to: null });
+  };
+  
+  return (
+    <ReservationContext.Provider value={{ range, setRange, resetRange }}>
+      {children}
+    </ReservationContext.Provider>
+  );
+}
+
+// app/_components/DateSelector.js
+'use client';
+
+import { DayPicker } from 'react-day-picker';
+import { useContext } from 'react';
+import { ReservationContext } from './ReservationContext';
+
+export default function DateSelector({ cabin, bookedDates }) {
+  const { range, setRange } = useContext(ReservationContext);
+  const disabled = bookedDates.map(date => new Date(date));
+  
+  return (
+    <DayPicker
+      mode="range"
+      selected={range}
+      onSelect={setRange}
+      disabled={disabled}
+      min={2}
+      max={180}
+    />
+  );
+}
+
+// app/_components/ReservationForm.js
+'use client';
+
+import { useContext, useState } from 'react';
+import { ReservationContext } from './ReservationContext';
+import { createBooking } from '@/app/_lib/actions';
+
+export default function ReservationForm({ cabin, reservations }) {
+  const { range } = useContext(ReservationContext);
+  const [numGuests, setNumGuests] = useState(cabin.maxCapacity);
+  const [observations, setObservations] = useState('');
+  
+  const nights = range?.from && range?.to 
+    ? Math.floor((range.to - range.from) / (1000 * 60 * 60 * 24))
+    : 0;
+  const totalPrice = nights * cabin.regularPrice;
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await createBooking({
+        cabinId: cabin.id,
+        startDate: range.from,
+        endDate: range.to,
+        numGuests,
+        observations,
+        totalPrice,
+      });
+    } catch (error) {
+      console.error('予約エラー:', error);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg">
+      <div className="mb-4">
+        <label>ゲスト数: {numGuests}</label>
+        <input
+          type="range"
+          min={1}
+          max={cabin.maxCapacity}
+          value={numGuests}
+          onChange={(e) => setNumGuests(Number(e.target.value))}
+        />
+      </div>
+      
+      <div className="mb-4">
+        <label>備考</label>
+        <textarea
+          value={observations}
+          onChange={(e) => setObservations(e.target.value)}
+          placeholder="特別なリクエストがあれば記入してください"
+        />
+      </div>
+      
+      <div className="text-2xl font-bold mb-4">
+        ¥{totalPrice.toLocaleString()}
+      </div>
+      
+      <button
+        type="submit"
+        disabled={!range?.from || !range?.to}
+        className="w-full bg-blue-600 text-white py-2 rounded"
+      >
+        予約確定
+      </button>
+    </form>
+  );
+}
+```
+
+#### 🚀 Server Action: createBooking()
+
+```javascript
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { auth } from './auth';
+import { supabaseAdmin } from './supabase';
+
+export async function createBooking(bookingData) {
+  const session = await auth();
+  if (!session) throw new Error('認証が必要です');
+  
+  if (!bookingData.cabinId || !bookingData.startDate || !bookingData.endDate) {
+    throw new Error('必須フィールドが不足しています');
+  }
+  
+  if (new Date(bookingData.startDate) >= new Date(bookingData.endDate)) {
+    throw new Error('終了日は開始日より後である必要があります');
+  }
+  
+  const { data: conflicts } = await supabaseAdmin
+    .from('bookings')
+    .select('id')
+    .eq('cabinId', bookingData.cabinId)
+    .or(
+      `and(startDate.lte.${bookingData.endDate},` +
+      `endDate.gte.${bookingData.startDate})`
+    );
+    
+  if (conflicts && conflicts.length > 0) {
+    throw new Error('この期間は既に予約されています');
+  }
+  
+  const { error: insertError } = await supabaseAdmin
+    .from('bookings')
+    .insert([
+      {
+        cabinId: bookingData.cabinId,
+        guestId: session.user.id,
+        startDate: bookingData.startDate,
+        endDate: bookingData.endDate,
+        numGuests: bookingData.numGuests,
+        observations: bookingData.observations,
+        totalPrice: bookingData.totalPrice,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+      }
+    ]);
+    
+  if (insertError) throw new Error('予約の作成に失敗しました');
+  
+  revalidatePath(`/cabins/${bookingData.cabinId}`);
+  revalidatePath('/account/reservations');
+  
+  redirect(`/cabins/${bookingData.cabinId}/thankyou`);
+}
+```
+
+---
+
+### 3️⃣ アカウント管理システム
+
+#### 📍 責務
+
+認証ユーザー機能を提供し、ロールベースのアクセス制御を実装します。
+
+#### 🔐 認証フロー
+
+```mermaid
+flowchart TD
+User[User SignIn Click]
+SignIn[signInAction Server]
+OAuth[NextAuth OAuth Flow]
+Google[Google OAuth]
+Auth[User Authorizes]
+Callback[NextAuth Callback]
+JWT[JWT Token Gen]
+Session[Session Create]
+Cookie[Set Cookie Token]
+Dashboard[Dashboard Route]
+User --> SignIn
+SignIn --> OAuth
+OAuth --> Google
+Google --> Auth
+Auth --> Callback
+Callback --> JWT
+JWT --> Session
+Session --> Cookie
+Cookie --> Dashboard
+```
+
+#### 🔧 実装コード
+
+```javascript
+// app/_lib/auth.js
+import NextAuth from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+
+export const authConfig = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+  ],
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    
+    async session({ session, token }) {
+      session.user.id = token.id;
+      return session;
+    },
+    
+    authorized({ auth }) {
+      return !!auth?.user;
+    },
+  },
+};
+
+export const { auth, signIn, signOut, handlers } = NextAuth(authConfig);
+```
+
+#### 🛡️ ルート保護
+
+```javascript
+// middleware.js
+import { auth } from '@/app/_lib/auth';
+
+export const middleware = auth((request) => {
+  const { pathname } = request.nextUrl;
+  
+  if (pathname.startsWith('/account')) {
+    if (!request.auth) {
+      const newUrl = new URL('/login', request.url);
+      return Response.redirect(newUrl);
+    }
+  }
+  
+  return Response.next();
+});
+
+export const config = {
+  matcher: ['/account/:path*'],
+};
+```
+
+#### 👤 プロフィール管理
+
+```javascript
+// app/account/profile/page.js
+import { auth } from '@/app/_lib/auth';
+import { getGuest } from '@/app/_lib/data-service';
+import UpdateProfileForm from '@/app/_components/UpdateProfileForm';
+
+export default async function ProfilePage() {
+  const session = await auth();
+  if (!session?.user) redirect('/login');
+  
+  const guest = await getGuest(session.user.id);
+  
+  return (
+    <div className="max-w-2xl">
+      <h2 className="text-2xl font-bold mb-6">プロフィール管理</h2>
+      <UpdateProfileForm guest={guest} />
+    </div>
+  );
+}
+
+// Server Action
+'use server';
+
+export async function updateGuest(formData) {
+  const session = await auth();
+  if (!session?.user) throw new Error('認証が必要です');
+  
+  const { error } = await supabaseAdmin
+    .from('guests')
+    .update({
+      fullName: formData.fullName,
+      email: formData.email,
+      country: formData.country,
+      updatedAt: new Date().toISOString(),
+    })
+    .eq('id', session.user.id);
+    
+  if (error) throw new Error('更新に失敗しました');
+  
+  revalidatePath('/account/profile');
+}
+```
+
+#### 📋 予約管理
+
+```javascript
+// app/account/reservations/page.js
+import { auth } from '@/app/_lib/auth';
+import { getReservations } from '@/app/_lib/data-service';
+import ReservationList from '@/app/_components/ReservationList';
+
+export default async function ReservationsPage() {
+  const session = await auth();
+  if (!session?.user) redirect('/login');
+  
+  const reservations = await getReservations(session.user.id);
+  
+  return (
+    <div className="space-y-6">
+      <h2 className="text-3xl font-bold">予約履歴</h2>
+      {reservations.length === 0 ? (
+        <p className="text-gray-500">予約がありません</p>
+      ) : (
+        <ReservationList reservations={reservations} userId={session.user.id} />
+      )}
+    </div>
+  );
+}
+
+// Server Actions
+'use server';
+
+export async function updateBooking(bookingId, updates) {
+  const session = await auth();
+  if (!session?.user) throw new Error('認証が必要です');
+  
+  const { data: booking } = await supabaseAdmin
+    .from('bookings')
+    .select('guestId')
+    .eq('id', bookingId)
+    .single();
+    
+  if (booking.guestId !== session.user.id) {
+    throw new Error('権限がありません');
+  }
+  
+  await supabaseAdmin
+    .from('bookings')
+    .update({ ...updates, updatedAt: new Date().toISOString() })
+    .eq('id', bookingId);
+    
+  revalidatePath('/account/reservations');
+}
+
+export async function deleteBooking(bookingId) {
+  const session = await auth();
+  if (!session?.user) throw new Error('認証が必要です');
+  
+  const { data: booking } = await supabaseAdmin
+    .from('bookings')
+    .select('guestId, startDate')
+    .eq('id', bookingId)
+    .single();
+    
+  if (booking.guestId !== session.user.id) {
+    throw new Error('権限がありません');
+  }
+  
+  if (new Date(booking.startDate) < new Date()) {
+    throw new Error('チェックイン前の予約のみ削除できます');
+  }
+  
+  await supabaseAdmin
+    .from('bookings')
+    .delete()
+    .eq('id', bookingId);
+    
+  revalidatePath('/account/reservations');
+}
+```
+
+---
 
 ## ファイル構造
 
-コードベースはNext.js App Routerの規約に従い、機能ベースの構成になっています。
+### 📂 プロジェクトレイアウト
 
 ```
 the-wild-oasis-website/
 ├── app/
-│   ├── layout.js                    # ReservationProviderを含むルートレイアウト
-│   ├── page.js                      # ホームページ (/)
-│   ├── error.js                     # グローバルエラーバウンダリ
-│   ├── not-found.js                 # 404ページ
-│   │
-│   ├── _components/                 # 共有コンポーネント
-│   │   ├── Header.js                # ナビゲーション付きアプリヘッダー
-│   │   ├── Navigation.js            # メインナビゲーションメニュー
-│   │   ├── ReservationProvider.js   # 予約状態コンテキスト
-│   │   ├── Spinner.js               # ローディングスピナー
-│   │   └── ...                      # その他の共有コンポーネント
-│   │
-│   ├── _lib/                        # ライブラリコード
-│   │   ├── actions.js               # サーバーアクション
-│   │   ├── auth.js                  # NextAuth設定
-│   │   ├── data-service.js          # Supabaseデータ層
-│   │   └── supabase.js              # Supabaseクライアント設定
-│   │
-│   ├── cabins/                      # キャビンルート
-│   │   ├── page.js                  # キャビン一覧 (/cabins)
-│   │   ├── [cabinId]/               # 動的キャビン詳細
-│   │   │   └── page.js              # 個別キャビンページ
-│   │   └── thankyou/                # 予約後の確認ページ
-│   │
-│   ├── account/                     # アカウントルート (保護)
-│   │   ├── layout.js                # サイドナビ付きアカウントレイアウト
-│   │   ├── page.js                  # アカウントダッシュボード
-│   │   ├── profile/                 # プロフィール管理
-│   │   │   └── page.js              # プロフィール編集フォーム
-│   │   └── reservations/            # 予約管理
-│   │       ├── page.js              # 予約一覧
-│   │       └── edit/[bookingId]/    # 予約編集
-│   │
-│   ├── about/                       # Aboutページ
+│   ├── layout.js
+│   ├── page.js
+│   ├── error.js
+│   ├── not-found.js
+│   ├── _components/
+│   │   ├── Header.js
+│   │   ├── Navigation.js
+│   │   ├── ReservationProvider.js
+│   │   ├── ReservationContext.js
+│   │   ├── DateSelector.js
+│   │   ├── ReservationForm.js
+│   │   ├── Filter.js
+│   │   └── Spinner.js
+│   ├── _lib/
+│   │   ├── actions.js
+│   │   ├── auth.js
+│   │   ├── data-service.js
+│   │   └── supabase.js
+│   ├── cabins/
+│   │   ├── page.js
+│   │   ├── [cabinId]/
+│   │   │   └── page.js
+│   │   └── thankyou/
+│   │       └── page.js
+│   ├── account/
+│   │   ├── layout.js
+│   │   ├── page.js
+│   │   ├── profile/
+│   │   │   └── page.js
+│   │   └── reservations/
+│   │       ├── page.js
+│   │       └── edit/[bookingId]/
+│   │           └── page.js
+│   ├── about/
 │   │   └── page.js
-│   │
-│   ├── login/                       # ログインページ
+│   ├── login/
 │   │   └── page.js
-│   │
-│   └── api/                         # APIルート
-│       └── auth/[...nextauth]/      # NextAuth APIエンドポイント
-│
-├── middleware.js                    # ルート保護ミドルウェア
-├── public/                          # 静的アセット
-├── package.json                     # 依存関係とスクリプト
-├── next.config.js                   # Next.js設定
-├── tailwind.config.js               # Tailwind CSS設定
-├── jsconfig.json                    # JavaScriptコンパイラオプション
-└── .eslintrc.json                   # ESLint設定
+│   └── api/
+│       └── auth/[...nextauth]/
+│           └── route.js
+├── middleware.js
+├── public/
+├── package.json
+├── next.config.js
+├── tailwind.config.js
+├── jsconfig.json
+└── .eslintrc.json
 ```
 
-## 設定ファイル
+### 🔗 パスエイリアス設定
 
-### パスエイリアス
-
-`jsconfig.json` で設定されたパスエイリアス:
-
-```json
+```javascript
+// jsconfig.json
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+  },
+  "include": ["**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules"]
+}
+```
+
+**利点:**
+
+```javascript
+// ✅ Good - 相対パス不要
+import { auth } from "@/app/_lib/auth";
+import { CabinCard } from "@/app/_components/CabinCard";
+
+// ❌ Avoid - 相対パスの煩雑さ
+import { auth } from "../../app/_lib/auth";
+import { CabinCard } from "../../../_components/CabinCard";
+```
+
+---
+
+## 統合ポイント
+
+### 🌐 外部サービス統合
+
+#### **1. Supabase PostgreSQL**
+
+```javascript
+// app/_lib/supabase.js
+import { createClient } from '@supabase/supabase-js';
+
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+export function createAdminClient() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
+
+export const supabaseAdmin = createAdminClient();
+```
+
+**データベーススキーマ:**
+
+```sql
+CREATE TABLE cabins (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  maxCapacity INT NOT NULL,
+  regularPrice INT NOT NULL,
+  discount INT,
+  description TEXT,
+  image TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE bookings (
+  id BIGINT PRIMARY KEY,
+  cabinId BIGINT REFERENCES cabins(id),
+  guestId UUID REFERENCES guests(id),
+  startDate DATE NOT NULL,
+  endDate DATE NOT NULL,
+  numGuests INT NOT NULL,
+  totalPrice INT NOT NULL,
+  status TEXT DEFAULT 'confirmed',
+  observations TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE guests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  fullName TEXT NOT NULL,
+  country TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### **2. Google OAuth**
+
+```javascript
+// app/_lib/auth.js
+import GoogleProvider from 'next-auth/providers/google';
+
+export const authConfig = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
+  ],
+};
+
+// 環境変数
+// AUTH_GOOGLE_ID=your_client_id.apps.googleusercontent.com
+// AUTH_GOOGLE_SECRET=your_secret
+// AUTH_SECRET=$(openssl rand -base64 32)
+```
+
+#### **3. RestCountries API**
+
+```javascript
+// app/_lib/data-service.js
+export async function getCountries() {
+  try {
+    const res = await fetch('https://restcountries.com/v3.1/all', {
+      next: { revalidate: 604800, tags: ['countries'] },
+    });
+    
+    const data = await res.json();
+    
+    return data
+      .map(country => ({
+        code: country.cca2,
+        name: country.name.common,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+      
+  } catch (error) {
+    console.error('API Error:', error);
+    return [];
   }
 }
 ```
 
-これにより、以下のようなインポートが可能になります:
-```javascript
-import { auth } from "@/app/_lib/auth"
-```
-
-### ESLint設定
-
-コード品質とパフォーマンスチェックのためにNext.jsコアウェブバイタルルールを拡張しています。
-
-```json
-{
-  "extends": "next/core-web-vitals"
-}
-```
-
-### ルートレイアウト設定
-
-`app/layout.js` ファイルでグローバルアプリケーション設定を定義:
-
-- **Title Template**: `%s | The Wild Oasis` で一貫したページタイトル
-- **Description**: 高級キャビン市場をターゲットにしたSEOメタデータ
-- **Font**: Google FontsのJosefin Sans
-- **Provider**: 予約状態管理のために ReservationProvider でアプリケーションをラップ
-
-## 統合ポイント
-
-### 外部サービス統合
-
-アプリケーションは複数の外部サービスと統合されています。
-
-```mermaid
-graph TB
-    subgraph "The Wild Oasis"
-        App[Application]
-    end
-    
-    subgraph "外部サービス"
-        Supabase[Supabase Database<br/>PostgreSQL + Real-time]
-        Google[Google OAuth<br/>Authentication]
-        NextAuth[NextAuth 5<br/>Session Management]
-        Countries[restcountries.com<br/>Country Data API]
-    end
-    
-    App -->|createClient<br/>createAdminClient| Supabase
-    App -->|signInAction<br/>signOutAction| Google
-    App -->|auth config<br/>middleware| NextAuth
-    App -->|getCountries| Countries
-```
-
-#### 1. Supabase Database
-
-- **Client**: `app/_lib/supabase.js` の `createClient()` で作成
-- **Admin Client**: 特権操作用の `createAdminClient()` で作成
-- **目的**: キャビン、予約、ゲスト、設定用のPostgreSQLデータベース
-- **Real-time**: ライブデータ更新のためのサブスクリプション機能
-
-#### 2. Google OAuth
-
-- **Provider**: `app/_lib/auth.js` でNextAuthを通じて設定
-- **目的**: ユーザー認証とプロフィールデータ取得
-- **Flow**: `signInAction()` と `signOutAction()` サーバーアクションで管理
-
-#### 3. NextAuth 5
-
-- **Configuration**: `app/_lib/auth.js` で定義
-- **Session Management**: ルート保護のための `middleware.js` のミドルウェア
-- **Callbacks**: ユーザーとセッション処理のためのカスタムコールバック
-
-#### 4. restcountries.com API
-
-- **Endpoint**: `https://restcountries.com/v2/all`
-- **目的**: プロフィール管理用の国データ取得
-- **実装**: `data-service.js` の `getCountries()` 関数で呼び出し
-
-### 内部統合パターン
-
-#### ReservationContext
-
-```mermaid
-graph LR
-    RootLayout[Root Layout] --> ReservationProvider[ReservationProvider]
-    ReservationProvider --> DateSelector[Date Selector]
-    ReservationProvider --> ReservationForm[Reservation Form]
-    
-    DateSelector -.->|range state| ReservationProvider
-    ReservationForm -.->|reads range| ReservationProvider
-```
-
-- **File**: `app/_components/ReservationContext.js`
-- **目的**: 予約日付範囲のクライアントサイド状態管理
-- **使用方法**: ルートレイアウトでラップされ、日付セレクターと予約フォームで使用
-- **State**: `range` (開始/終了日) と `resetRange()` 関数
-
-#### Server Actions キャッシュ無効化
-
-- **パターン**: ミューテーション後の `revalidatePath()` 呼び出し
-- **場所**: `app/_lib/actions.js` 全体
-- **目的**: 更新後にUIが最新データを反映することを保証
-
-## データフローアーキテクチャ
-
-### 予約作成フロー
-
-```mermaid
-sequenceDiagram
-    participant User as ユーザー
-    participant Calendar as ReservationContext<br/>(Calendar UI)
-    participant Form as ReservationForm<br/>(Client Component)
-    participant Action as createBooking<br/>(Server Action)
-    participant Service as data-service.js
-    participant Supabase as Supabase DB
-    
-    User->>Calendar: 日付範囲を選択
-    Calendar->>Calendar: range状態を更新
-    User->>Form: 予約詳細を入力
-    Form->>Calendar: range を読み取り
-    Form->>Form: 価格を計算
-    User->>Form: フォームを送信
-    Form->>Action: createBooking(formData) 呼び出し
-    Action->>Action: セッションを検証
-    Action->>Service: Supabaseクライアントを使用
-    Service->>Supabase: INSERT booking データ
-    Supabase-->>Service: 成功
-    Service-->>Action: 予約ID返却
-    Action->>Action: revalidatePath('/account/reservations')
-    Action->>Action: revalidatePath('/cabins/[cabinId]')
-    Action-->>Form: リダイレクト to /cabins/thankyou
-    Form-->>User: 確認ページ表示
-```
-
-### 認証フロー
-
-```mermaid
-sequenceDiagram
-    participant User as ユーザー
-    participant LoginPage as Login Page
-    participant Action as signInAction<br/>(Server Action)
-    participant NextAuth as NextAuth
-    participant Google as Google OAuth
-    participant Middleware as Middleware
-    participant Protected as Protected Page
-    
-    User->>LoginPage: "Googleでログイン"をクリック
-    LoginPage->>Action: signInAction() 実行
-    Action->>NextAuth: signIn('google')
-    NextAuth->>Google: OAuth リダイレクト
-    Google-->>User: 認証プロンプト
-    User->>Google: 認証情報を提供
-    Google-->>NextAuth: OAuth トークン
-    NextAuth->>NextAuth: セッションを作成
-    NextAuth-->>User: リダイレクト to /account
-    User->>Middleware: /account にアクセス
-    Middleware->>Middleware: セッションをチェック
-    Middleware-->>Protected: 認証済み、続行
-    Protected-->>User: アカウントページ表示
-```
+---
 
 ## パフォーマンス最適化
 
-アプリケーションはいくつかのNext.jsパフォーマンス機能を活用しています。
-
-### 1. 静的サイト生成 (SSG)
+### ⚡ レンダリング戦略比較
 
 ```mermaid
-graph LR
-    Build[ビルド時] --> Generate[generateStaticParams]
-    Generate --> PreRender[全キャビンページを事前レンダリング]
-    PreRender --> InstantLoad[即座のページロード]
+flowchart TD
+SSG[Static Site Generation]
+ISR[Incremental Static Regen]
+SSR[Server Components]
+Client[Client Components]
+SSG -->|Build Time| CDN[CDN Cache Fastest]
+ISR -->|Periodic Update| BG[Background Revalidate]
+SSR -->|Per Request| DB[Real time Query]
+Client -->|Browser| UI[User Interaction]
 ```
 
-- **Cabin Pages**: `generateStaticParams()` でビルド時にキャビン詳細ページを事前生成
-- **利点**: すべてのキャビンページの即座のページロード
-
-### 2. インクリメンタル静的再生成 (ISR)
+#### **SSG - ビルド時生成**
 
 ```javascript
-// app/cabins/page.js
-export const revalidate = 3600; // 1時間ごとに再検証
+export async function generateStaticParams() {
+  const cabins = await getCabins();
+  return cabins.map(cabin => ({ cabinId: String(cabin.id) }));
+}
+
+export default async function CabinPage({ params }) {
+  const cabin = await getCabin(params.cabinId);
+  return <CabinDetail cabin={cabin} />;
+}
 ```
 
-- **パターン**: ページコンポーネントでの `revalidate` エクスポート
-- **使用法**: キャビン一覧と詳細ページがスケジュールに従って更新
-- **利点**: 新鮮なデータを保ちながら静的パフォーマンス
+| 特性 | 説明 |
+|------|------|
+| 生成タイミング | npm run build 時 |
+| ページロード | 🚀 最速 CDN キャッシュ |
+| データ更新 | 再ビルドが必要 |
+| 用途 | 変更頻度が低いページ |
 
-### 3. Server Components
+#### **ISR - 定期更新**
+
+```javascript
+export const revalidate = 3600;
+
+export default async function CabinsPage() {
+  const cabins = await getCabins();
+  return <CabinList cabins={cabins} />;
+}
+```
+
+| 特性 | 説明 |
+|------|------|
+| 生成タイミング | ビルド時 + 定期更新 |
+| ページロード | ✈️ 高速 キャッシュ |
+| データ更新 | 自動 バックグラウンド |
+| 用途 | 定期的に更新されるデータ |
+
+#### **Server Components - リクエスト毎**
+
+```javascript
+export default async function CabinList() {
+  const cabins = await getCabins();
+  return <div>{cabins.map(c => <CabinCard key={c.id} cabin={c} />)}</div>;
+}
+```
+
+| 特性 | 説明 |
+|------|------|
+| 生成タイミング | リクエスト毎 |
+| ページロード | 👍 普通 |
+| データ更新 | リアルタイム |
+| 用途 | 常に最新データが必要 |
+
+#### **Client Components - ブラウザ側**
+
+```javascript
+'use client';
+
+import { useContext } from 'react';
+import { ReservationContext } from './ReservationContext';
+
+export default function DateSelector({ cabin }) {
+  const { range, setRange } = useContext(ReservationContext);
+  return <DayPicker selected={range} onSelect={setRange} />;
+}
+```
+
+| 特性 | 説明 |
+|------|------|
+| 生成タイミング | ブラウザ側で実行 |
+| ページロード | ⏳ 可変 |
+| データ更新 | ユーザー操作時 |
+| 用途 | インタラクション必須 |
+
+### 📊 Core Web Vitals 最適化
 
 ```mermaid
-graph TB
-    subgraph "デフォルト: Server Components"
-        SC1[Cabin List]
-        SC2[Cabin Details]
-        SC3[Account Dashboard]
-    end
-    
-    subgraph "'use client': Client Components"
-        CC1[ReservationForm]
-        CC2[DateRangePicker]
-        CC3[Navigation]
-    end
-    
-    SC1 -.->|必要に応じて| CC1
-    SC2 -.->|必要に応じて| CC2
+flowchart TD
+LCP[LCP less than 2.5s]
+FID[FID less than 100ms]
+CLS[CLS less than 0.1]
+LCP --> SSG_ISR[SSG ISR Static]
+LCP --> ImageOpt[Image Optimization]
+FID --> ServerComp[Server Components]
+FID --> Bundle[Code Splitting]
+CLS --> FixedHeight[Fixed Height Image]
+CLS --> Skeleton[Skeleton Loading]
 ```
 
-- **デフォルト**: 'use client' でマークされていない限り、すべてのコンポーネントはサーバーコンポーネント
-- **利点**: JavaScriptバンドルサイズの削減、初期ページロードの改善
+### 🖼️ 画像最適化
 
-### 4. 画像最適化
+```javascript
+import Image from 'next/image';
 
-- **Component**: Next.js Imageコンポーネントを全体で使用
-- **利点**: 自動画像最適化、遅延読み込み、適切なサイジング
-
-## 開発ワークフロー
-
-### 利用可能なコマンド
-
-```bash
-# ホットリロード付き開発サーバー
-npm run dev
-
-# 本番ビルドを作成
-npm run build
-
-# 本番サーバーを実行
-npm start
-
-# リントチェックを実行
-npm run lint
-
-# ビルドして本番を開始 (組み合わせ)
-npm run prod
+export default function CabinCard({ cabin }) {
+  return (
+    <Image
+      src={cabin.image}
+      alt={cabin.name}
+      fill
+      sizes="(max-width: 768px) 100vw, 50vw"
+      className="object-cover"
+      priority={false}
+      quality={80}
+      placeholder="blur"
+    />
+  );
+}
 ```
 
-### 環境要件
-
-- **Node.js**: >=20.19.0 <21
-- **環境変数**: 必要 (Project Setup & Configuration を参照)
-
-### NPMスクリプト一覧
-
-| スクリプト | コマンド | 目的 |
-|----------|---------|------|
-| dev | next dev | 開発サーバーを起動 |
-| build | next build | 本番ビルドを作成 |
-| start | next start | 本番サーバーを実行 |
-| lint | next lint | ESLintチェックを実行 |
-| prod | next build && next start | ビルドして本番を開始 |
-
-## まとめ
-
-The Wild Oasisは、包括的なキャビン予約体験を提供する最新のNext.js 14アプリケーションです。
-
-### 主要なアーキテクチャ決定
-
-```mermaid
-mindmap
-  root((The Wild Oasis))
-    Next.js App Router
-      Server Components
-      最適なパフォーマンス
-    Supabase統合
-      PostgreSQLデータベース
-      リアルタイム機能
-    NextAuth 5
-      セキュアな認証
-      Google OAuth
-    Server Actions
-      型安全なミューテーション
-      自動キャッシュ無効化
-    Context API
-      クライアントサイド状態
-      予約フロー
-    Tailwind CSS
-      ユーティリティファースト
-      迅速な開発
-```
-
-### システム構成
-
-アプリケーションは3つのコア機能システム（キャビン管理、予約システム、アカウント管理）に編成され、明確な関心の分離とサービス指向のデータアクセス層を持っています。
-
-### 技術的ハイライト
-
-- ✅ **Next.js 14 App Router**: 最新のルーティングとレンダリング戦略
-- ✅ **Server Components First**: デフォルトでサーバーレンダリング
-- ✅ **Type-Safe Mutations**: Server Actionsによる型安全な操作
-- ✅ **Real-time Capabilities**: Supabaseのリアルタイム機能
-- ✅ **Performance Optimized**: SSG、ISR、画像最適化
-- ✅ **Modern Authentication**: NextAuth 5 + Google OAuth
-- ✅ **Developer Experience**: Tailwind CSS、ESLint、明確な構造
+| 最適化項目 | 効果 |
+|----------|------|
+| 自動WebP変換 | -30% ファイルサイズ |
+| レスポンシブサイジング | モバイル最適化 |
+| Lazy Loading | 初期ロード削減 |
+| blur placeholder | CLS 削減 |
 
 ---
 
-**注意**: このドキュメントは概要を提供します。各サブシステムの詳細な実装については、関連する専門ドキュメントを参照してください。
+## 開発ワークフロー
+
+### 🚀 利用可能なコマンド
+
+```bash
+npm run dev
+npm run build
+npm start
+npm run lint
+npm run prod
+```
+
+| コマンド | 説明 |
+|---------|------|
+| npm run dev | 開発サーバー ホットリロード |
+| npm run build | 本番ビルド .next 生成 |
+| npm start | 本番サーバー起動 |
+| npm run lint | ESLint チェック実行 |
+| npm run prod | ビルド と 起動 一括実行 |
+
+### 📝 開発フロー例
+
+```mermaid
+flowchart TD
+Start[Step 1 npm run dev]
+Browser[Step 2 Browser localhost 3000]
+Edit[Step 3 Edit Code HotReload]
+Lint[Step 4 ESLint Check]
+Test[Step 5 Run Tests]
+Commit[Step 6 Git Commit]
+Prod[Step 7 Production Deploy]
+Start --> Browser
+Browser --> Edit
+Edit --> Lint
+Lint --> Test
+Test --> Commit
+Commit --> Prod
+```
+
+---
+
+## 実装パターン集
+
+### 📌 パターン1: Server Action標準形
+
+```javascript
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { auth } from './auth';
+
+export async function myServerAction(formData) {
+  // Step 1: 認証チェック
+  const session = await auth();
+  if (!session) throw new Error('認証が必要です');
+  
+  // Step 2: バリデーション
+  if (!formData.title || formData.title.trim() === '') {
+    throw new Error('タイトルは必須です');
+  }
+  
+  // Step 3: 認可チェック
+  // ユーザーが権限を持つか確認
+  
+  // Step 4: データ操作
+  const result = await database.insert(formData);
+  
+  // Step 5: キャッシュ無効化
+  revalidatePath('/path');
+  
+  // Step 6: リダイレクト
+  redirect('/success');
+}
+```
+
+### 📌 パターン2: Client Component での非同期処理
+
+```javascript
+'use client';
+
+import { useTransition } from 'react';
+import { updateItem } from '@/app/_lib/actions';
+
+export function ItemUpdateForm({ item }) {
+  const [isPending, startTransition] = useTransition();
+  
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    
+    startTransition(async () => {
+      try {
+        const formData = new FormData(e.currentTarget);
+        await updateItem(item.id, Object.fromEntries(formData));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  };
+  
+  return (
+    <form onSubmit={handleUpdate}>
+      <input type="text" name="title" defaultValue={item.title} />
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Updating...' : 'Update'}
+      </button>
+    </form>
+  );
+}
+```
+
+### 📌 パターン3: Error Boundary
+
+```javascript
+// app/error.js
+'use client';
+
+export default function Error({ error, reset }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="bg-white p-8 rounded-lg shadow">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">
+          エラーが発生しました
+        </h2>
+        <p className="text-gray-600 mb-6">{error.message}</p>
+        <button
+          onClick={reset}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          もう一度試す
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+### 📌 パターン4: Dynamic Imports Code Splitting
+
+```javascript
+import dynamic from 'next/dynamic';
+import Spinner from './Spinner';
+
+const InteractiveMap = dynamic(
+  () => import('./InteractiveMap'),
+  {
+    loading: () => <Spinner />,
+    ssr: false,
+  }
+);
+
+export default function CabinDetail({ cabin }) {
+  return (
+    <div>
+      <h1>{cabin.name}</h1>
+      <InteractiveMap location={cabin.location} />
+    </div>
+  );
+}
+```
+
+### 📌 パターン5: Streaming with Suspense
+
+```javascript
+import { Suspense } from 'react';
+import CabinSkeleton from '@/app/_components/CabinSkeleton';
+
+async function CabinContent({ cabinId }) {
+  const cabin = await getCabin(cabinId);
+  return <CabinDetail cabin={cabin} />;
+}
+
+async function BookingContent({ cabinId }) {
+  const bookings = await getBookings(cabinId);
+  return <BookingList bookings={bookings} />;
+}
+
+export default function CabinPage({ params }) {
+  return (
+    <div>
+      <Suspense fallback={<CabinSkeleton />}>
+        <CabinContent cabinId={params.cabinId} />
+      </Suspense>
+      
+      <Suspense fallback={<div>Loading bookings...</div>}>
+        <BookingContent cabinId={params.cabinId} />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+### 📌 パターン6: Form Validation
+
+```javascript
+'use client';
+
+import { useActionState } from 'react';
+import { createBooking } from '@/app/_lib/actions';
+
+export function BookingForm({ cabin }) {
+  const [state, formAction, isPending] = useActionState(
+    createBooking,
+    { message: '', errors: {} }
+  );
+  
+  return (
+    <form action={formAction} className="space-y-4">
+      <div>
+        <label>ゲスト数</label>
+        <input
+          type="number"
+          name="numGuests"
+          min={1}
+          max={cabin.maxCapacity}
+          aria-invalid={!!state.errors.numGuests}
+        />
+        {state.errors.numGuests && (
+          <p className="text-red-600 text-sm">
+            {state.errors.numGuests}
+          </p>
+        )}
+      </div>
+      
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Processing...' : 'Book Now'}
+      </button>
+      
+      {state.message && (
+        <p className="text-green-600">{state.message}</p>
+      )}
+    </form>
+  );
+}
+```
+
+---
+
+## セキュリティ
+
+### 🔐 認可チェック テンプレート
+
+```javascript
+'use server';
+
+import { auth } from './auth';
+import { supabaseAdmin } from './supabase';
+
+async function checkAuthorization(userId, resourceId) {
+  const { data: resource } = await supabaseAdmin
+    .from('bookings')
+    .select('guestId')
+    .eq('id', resourceId)
+    .single();
+  
+  if (!resource || resource.guestId !== userId) {
+    throw new Error('Permission denied');
+  }
+  
+  return resource;
+}
+
+export async function deleteBooking(bookingId) {
+  const session = await auth();
+  if (!session?.user) throw new Error('Authentication required');
+  
+  await checkAuthorization(session.user.id, bookingId);
+  
+  const { data: booking } = await supabaseAdmin
+    .from('bookings')
+    .select('startDate, status')
+    .eq('id', bookingId)
+    .single();
+  
+  if (booking.status === 'cancelled') {
+    throw new Error('Already cancelled');
+  }
+  
+  if (new Date(booking.startDate) < new Date()) {
+    throw new Error('Cannot delete past bookings');
+  }
+  
+  await supabaseAdmin
+    .from('bookings')
+    .update({ status: 'cancelled' })
+    .eq('id', bookingId);
+  
+  revalidatePath('/account/reservations');
+}
+```
+
+### 🛡️ SQL インジェクション防止
+
+```javascript
+// ✅ Correct - Supabase auto escaping
+export async function getBookingsByDateRange(startDate, endDate) {
+  const { data } = await supabase
+    .from('bookings')
+    .select('*')
+    .gte('startDate', startDate)
+    .lte('endDate', endDate);
+  
+  return data;
+}
+
+// ❌ Wrong - String concatenation risk
+export async function getBookingsDangerous(startDate, endDate) {
+  const query = `
+    SELECT * FROM bookings 
+    WHERE startDate >= '${startDate}' 
+    AND endDate <= '${endDate}'
+  `;
+}
+```
+
+### 🔑 API キー管理
+
+```bash
+## .env.local
+NEXT_PUBLIC_SUPABASE_URL=https://...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ... (public)
+SUPABASE_URL=https://...
+SUPABASE_SERVICE_ROLE_KEY=eyJ... (secret server only)
+AUTH_GOOGLE_ID=xxx.apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=xxx (secret)
+AUTH_SECRET=xxx (secret NextAuth)
+```
+
+---
+
+## テスト
+
+### 🧪 Vitest ユニットテスト
+
+```javascript
+// app/_lib/__tests__/data-service.test.js
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { getCabins, getBookedDatesByCabinId } from '../data-service';
+
+describe('data-service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+  
+  describe('getCabins', () => {
+    it('should return all cabins', async () => {
+      const cabins = await getCabins();
+      
+      expect(Array.isArray(cabins)).toBe(true);
+      expect(cabins.length).toBeGreaterThan(0);
+      expect(cabins[0]).toHaveProperty('id');
+      expect(cabins[0]).toHaveProperty('name');
+    });
+  });
+  
+  describe('getBookedDatesByCabinId', () => {
+    it('should return booked dates for cabin', async () => {
+      const dates = await getBookedDatesByCabinId(1);
+      
+      expect(Array.isArray(dates)).toBe(true);
+      dates.forEach(date => {
+        expect(date instanceof Date).toBe(true);
+      });
+    });
+    
+    it('should return empty array if no bookings', async () => {
+      const dates = await getBookedDatesByCabinId(999);
+      expect(dates).toEqual([]);
+    });
+  });
+});
+```
+
+### 🧪 React Testing Library
+
+```javascript
+// app/_components/__tests__/DateSelector.test.jsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ReservationProvider } from '../ReservationProvider';
+import DateSelector from '../DateSelector';
+
+describe('DateSelector', () => {
+  const mockCabin = {
+    id: 1,
+    name: 'Mountain Cabin',
+  };
+  
+  it('should render calendar', () => {
+    render(
+      <ReservationProvider>
+        <DateSelector cabin={mockCabin} bookedDates={[]} />
+      </ReservationProvider>
+    );
+    
+    const calendar = screen.getByRole('application');
+    expect(calendar).toBeInTheDocument();
+  });
+  
+  it('should select date range', async () => {
+    render(
+      <ReservationProvider>
+        <DateSelector cabin={mockCabin} bookedDates={[]} />
+      </ReservationProvider>
+    );
+    
+    const startDay = screen.getByText('15');
+    fireEvent.click(startDay);
+    
+    const endDay = screen.getByText('20');
+    fireEvent.click(endDay);
+    
+    expect(startDay).toHaveClass('selected');
+  });
+});
+```
+
+### 🧪 Playwright E2E テスト
+
+```javascript
+// e2e/booking.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Booking Flow', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('http://localhost:3000/cabins/1');
+  });
+  
+  test('should complete booking successfully', async ({ page }) => {
+    const calendar = page.locator('[role="application"]');
+    await calendar.waitFor();
+    
+    const startDate = page.locator('button:has-text("15")');
+    await startDate.click();
+    
+    const endDate = page.locator('button:has-text("20")');
+    await endDate.click();
+    
+    await page.fill('input[name="numGuests"]', '2');
+    await page.fill('textarea[name="observations"]', 'Special');
+    
+    await page.click('button:has-text("Book Now")');
+    
+    await expect(page).toHaveURL(/\/thankyou/);
+    await expect(page.locator('h1')).toContainText('Complete');
+  });
+  
+  test('should show error for past dates', async ({ page }) => {
+    const pastDate = page.locator('button:has-text("01")');
+    await pastDate.click();
+    
+    const error = page.locator('[role="alert"]');
+    await expect(error).toContainText('cannot select');
+  });
+});
+```
+
+---
+
+## デプロイメント
+
+### 🚀 Vercel へのデプロイ
+
+```bash
+npm install -g vercel
+
+vercel login
+
+vercel
+
+# Environment Variables 設定
+# Settings > Environment Variables
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
+# AUTH_GOOGLE_ID
+# AUTH_GOOGLE_SECRET
+# AUTH_SECRET
+
+vercel --prod
+```
+
+### 📋 デプロイ前チェック
+
+```mermaid
+flowchart TD
+A[ESLint Check npm run lint]
+B[Build Success npm run build]
+C[Env Vars Complete]
+D[DB Migration Done]
+E[Keys in .gitignore]
+F[CORS Configured]
+G[Auth Settings OK]
+H[Ready to Deploy]
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+G --> H
+```
+
+| 項目 | チェック | コマンド |
+|------|---------|--------|
+| ESLint | エラーなし | npm run lint |
+| ビルド | 成功 | npm run build |
+| 環境変数 | 完了 | .env.production.local |
+| DB | マイグレーション完了 | Supabase SQL Editor |
+| Git | 秘密キー除外 | .gitignore 確認 |
+| CORS | 設定完了 | Supabase Settings |
+| OAuth | リダイレクト設定 | Google Console |
+
+---
+
+## トラブルシューティング
+
+### 🐛 よくある問題と解決
+
+#### 問題1: Supabase 認証エラー
+
+```
+Error: Supabase client not initialized
+```
+
+**原因:** 環境変数が設定されていない
+
+**解決:**
+
+```bash
+cat > .env.local << 'EOF'
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+SUPABASE_URL=your_url
+SUPABASE_SERVICE_ROLE_KEY=your_key
+AUTH_GOOGLE_ID=your_id
+AUTH_GOOGLE_SECRET=your_secret
+AUTH_SECRET=$(openssl rand -base64 32)
+EOF
+
+npm run dev
+```
+
+#### 問題2: Server Action が実行されない
+
+```
+Error: Server action not found
+```
+
+**原因:** 'use server' ディレクティブ欠落
+
+**解決:**
+
+```javascript
+// ✅ Correct
+'use server';
+
+export async function myAction() {
+  // Server Action
+}
+
+// ❌ Wrong
+export async function myAction() {
+  // Missing 'use server'
+}
+```
+
+#### 問題3: ISR が反映されない
+
+```
+古いデータが表示され続ける
+```
+
+**原因:** revalidate 設定がない
+
+**解決:**
+
+```javascript
+export const revalidate = 3600;
+
+export async function updateData(data) {
+  // ... 更新処理
+  revalidatePath('/cabins');
+  revalidateTag('cabins-data');
+  redirect('/cabins');
+}
+```
+
+#### 問題4: Hydration mismatch エラー
+
+```
+Text content does not match server-rendered HTML
+```
+
+**原因:** サーバー側とクライアント側でレンダリング結果が異なる
+
+**解決:**
+
+```javascript
+// ❌ Wrong
+'use client';
+
+export function DateDisplay() {
+  return <div>{new Date().toLocaleString()}</div>;
+}
+
+// ✅ Correct
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export function DateDisplay() {
+  const [date, setDate] = useState('');
+  
+  useEffect(() => {
+    setDate(new Date().toLocaleString());
+  }, []);
+  
+  return <div>{date}</div>;
+}
+```
+
+#### 問題5: 予約重複エラー
+
+```
+Error: This period is already booked
+```
+
+**原因:** 日付チェック ロジックが不正確
+
+**解決:**
+
+```javascript
+'use server';
+
+export async function createBooking(bookingData) {
+  const { data: conflicts } = await supabaseAdmin
+    .from('bookings')
+    .select('id')
+    .eq('cabinId', bookingData.cabinId)
+    .or(
+      `and(` +
+      `startDate.lt.${bookingData.endDate},` +
+      `endDate.gt.${bookingData.startDate}` +
+      `)`
+    );
+  
+  if (conflicts && conflicts.length > 0) {
+    throw new Error('Already booked');
+  }
+}
+```
+
+---
+
+## 📚 参考リソース
+
+| リソース | URL | 説明 |
+|---------|-----|------|
+| Next.js 公式 | https://nextjs.org | フレームワーク公式ドキュメント |
+| React 公式 | https://react.dev | React 最新機能解説 |
+| Supabase | https://supabase.com/docs | PostgreSQL マネージドDB |
+| NextAuth | https://next-auth.js.org | 認証ライブラリ |
+| Tailwind CSS | https://tailwindcss.com | CSS フレームワーク |
+| date-fns | https://date-fns.org | 日付処理ライブラリ |
+
+---
+
+## 🎯 まとめ
+
+### ✨ アーキテクチャ特徴
+
+```mermaid
+flowchart TD
+Perf[パフォーマンス重視]
+Scale[スケーラビリティ]
+DevExp[開発効率]
+Secure[セキュリティ]
+Perf -->|SSG ISR| Fast[超高速配信]
+Scale -->|PostgreSQL| Data[大規模データ]
+DevExp -->|TypeScript| Type[型安全]
+Secure -->|OAuth| Auth[認可制御]
+```
+
+**パフォーマンス:** SSG/ISR で静的配信、Server Components でバンドル削減
+
+**スケーラビリティ:** Supabase PostgreSQL でエンタープライズ対応
+
+**開発効率:** Next.js 14 App Router で直感的なルーティング
+
+**セキュリティ:** NextAuth v5 + 認可チェックで堅牢性確保
+
+---
+
+**最終更新:** 2025年10月19日
