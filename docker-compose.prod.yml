@@ -1,0 +1,29 @@
+services:
+  web:
+    build:
+      context: .
+      target: prod-runtime   # ← 上の Dockerfile の本番ターゲット
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_KEY: ${NEXT_PUBLIC_SUPABASE_KEY}
+    working_dir: /app
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # prod は基本ボリューム不要（再現性重視）
+    # healthcheck（任意）
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s

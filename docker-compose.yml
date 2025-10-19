@@ -1,29 +1,6 @@
 services:
-  web:
-    build:
-      context: .
-    platform: linux/arm64/v8
-    working_dir: /app
-    command: npm run dev -- --hostname 0.0.0.0
-    volumes:
-      - .:/app
-      - web-node-modules:/app/node_modules
-      - web-next-cache:/app/.next
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: development
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
-
   postgres:
     image: supabase/postgres:17.6.1.011
-    platform: linux/arm64/v8
     restart: unless-stopped
     environment:
       TZ: Asia/Tokyo
@@ -51,5 +28,3 @@ services:
 
 volumes:
   postgres-data:
-  web-node-modules:
-  web-next-cache:

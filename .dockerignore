@@ -1,21 +1,16 @@
-# General
-.DS_Store
+# Git files
 .git
 .gitignore
-.vercel
-.vscode
-.idea
+
+# Dependencies
 node_modules
 web-node-modules
-coverage
-playwright-report
-test-results
-.playwright
 
 # Next.js build output
 .next
 out
 build
+dist
 
 # Logs and diagnostics
 npm-debug.log*
@@ -27,20 +22,21 @@ yarn-error.log*
 .env.*
 .env*.local
 
-# Supabase CLI cache (not needed inside images)
+# Testing
+coverage
+playwright-report
+test-results
+.playwright
+
+# Supabase
 supabase/.temp
 
-# Documentation assets (not needed in runtime image)
+# Documentation
 README*.md
 docs
 
-node_modules
-npm-debug.log
-.git
-.gitignore
-.env
-.env.local
+# Editor, OS, and deployment specific files
 .DS_Store
-dist
-build
-coverage
+.vscode
+.idea
+.vercel

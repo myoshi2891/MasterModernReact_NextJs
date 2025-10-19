@@ -1,0 +1,48 @@
+services:
+  web:
+    build:
+      context: .
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    env_file:
+      - .env
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - web-src:/app                 # アプリ本体（高速I/O）
+      - web-node-modules:/app/node_modules
+      - web-next-cache:/app/.next
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - node_modules
+            - .next
+            - out
+            - dist
+            - build
+            - coverage
+            - playwright-report
+            - test-results
+            - .playwright
+            - docs
+            - .git
+            - .gitignore
+            - .DS_Store
+            - .vscode
+            - .idea
+
+volumes:
+  web-src:
+  web-node-modules:
+  web-next-cache:
