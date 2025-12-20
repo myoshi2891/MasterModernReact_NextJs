@@ -6,6 +6,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/myoshi2891/MasterModernReact_NextJs)
 
 ## 目次
+
 - [目的と範囲](#目的と範囲)
 - [アプリケーションの目的](#アプリケーションの目的)
 - [技術スタック](#技術スタック)
