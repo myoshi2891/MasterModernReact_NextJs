@@ -45,3 +45,7 @@ next-env.d.ts
 .vscode
 config.toml
 supabase
+
+# Kilo Code / Spec Kit cache
+.kilocode/.cache/
+.specify/.cache/
