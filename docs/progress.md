@@ -1,0 +1,417 @@
+# 進捗一覧
+Status: 未確認 / 確認中 / 完了 / 差し戻し
+
+## コミット進捗
+
+| Status | Commit | Date | Summary | Notes |
+| --- | --- | --- | --- | --- |
+| 完了 | b8a43e9 | 2025-12-21 | Added Kilo Code/Spec Kit scaffolding (rules, workflows, constitution, templates, sample spec) plus a short usage README, and refactored the root-level spec plans for clearer structure while leaving application code untouched and only appending minimal cache ignores to .gitignore. | |
+| 完了 | ce3c6ef | 2025-12-21 | Next.js 14 App Router のJSコードベースを、挙動を変えずに段階的にTypeScriptへ移行&npm→Bun移行の計画 | |
+| 完了 | a84a143 | 2025-12-21 | Merge branch 'main' of github.com:myoshi2891/MasterModernReact_NextJs | |
+| 完了 | f883897 | 2025-11-18 | Merge pull request #15 from myoshi2891/dependabot/npm_and_yarn/js-yaml-4.1.1 | |
+| 完了 | b95dea4 | 2025-11-16 | Bump js-yaml from 4.1.0 to 4.1.1 | |
+
+## 作業ログ（統合）
+
+このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-21 変更内容まとめ（詳細）
+
+#### 概要
+
+- Kilo Code / Spec Kit の最小構成を導入
+- spec/plan/tasks のテンプレートとサンプルを追加
+- 既存の移行計画（TypeScript 移行 / npm → Bun）を構造化
+- Spec Kit 関連キャッシュを `.gitignore` に追加
+
+#### 1. Kilo Code ルール/ワークフローの土台追加
+
+- 対象ファイル:
+  - `.kilocode/rules/00-readme.md`
+  - `.kilocode/rules/01-engineering-standards.md`
+  - `.kilocode/workflows/submit-pr.md`
+  - `.kilocode/launchConfig.json`
+  - `README_kilocode_speckit.md`
+- 原因:
+  - ルール・PR 手順・運用ルールが未整備で属人化しやすい
+  - Spec Kit 運用の入口がなく、どこに何があるかが分かりづらい
+- 具体的修正:
+  - ルールディレクトリにガイドと土台ルール（placeholder）を追加
+  - PR 提出フローを明文化（ブランチ命名、変更点まとめ、テスト記載、チェックリスト）
+  - Kilo Code 起動設定にデフォルト workflow を設定
+  - 導入メモで全体構成と運用ルールを説明
+- 変更例:
+
+```json
+{
+  "project": {
+    "name": "TODO",
+    "root": "."
+  },
+  "defaults": {
+    "workflow": "submit-pr"
+  }
+}
+```
+
+```markdown
+## 1. ブランチ命名
+- feat/<short>
+- fix/<short>
+- chore/<short>
+- docs/<short>
+```
+
+#### 2. Spec Kit 憲法/テンプレートの追加
+
+- 対象ファイル:
+  - `.specify/memory/constitution.md`
+  - `.specify/templates/spec.md.tpl`
+  - `.specify/templates/plan.md.tpl`
+  - `.specify/templates/tasks.md.tpl`
+- 原因:
+  - spec/plan/tasks の記載フォーマットが統一されていない
+  - 品質・非機能・セキュリティの合意事項が起点として存在しない
+- 具体的修正:
+  - 憲法（Draft）を追加し、合意内容を記載する場所を確保
+  - spec/plan/tasks のテンプレートを追加し、最低限の見出し構成を標準化
+- 変更例:
+
+```markdown
+# Spec: <feature-name>
+
+## 背景 / 目的
+TODO
+
+## 受入基準
+TODO
+```
+
+```markdown
+## 品質基準
+- TODO: リント/フォーマット、レビュー基準、必須テスト
+```
+
+#### 3. サンプル spec の追加
+
+- 対象ファイル:
+  - `specs/001-sample-feature/spec.md`
+  - `specs/001-sample-feature/plan.md`
+  - `specs/001-sample-feature/tasks.md`
+- 原因:
+  - テンプレートの実例がなく、運用開始時の迷いが発生しやすい
+- 具体的修正:
+  - 例示用の spec/plan/tasks を追加し、書き換え前提のサンプルとして配置
+- 変更例:
+
+```markdown
+## タスク分解
+- [ ] 例: データ取得関数を追加
+- [ ] 例: UI へ表示する
+- [ ] 例: テストを追加
+```
+
+#### 4. 既存の移行計画ドキュメントを構造化
+
+- 対象ファイル:
+  - `typescript-migration-plan.md`
+  - `npm-to-bun-migration-plan.md`
+- 原因:
+  - 既存の計画ドキュメントが章立て不足で追跡しづらい
+- 具体的修正:
+  - YAML フロントマターで `name`/`description` を付与
+  - Summary / Requirements / Scope / Files / Action items / Testing / Risks を追加
+  - 具体的なタスク分解を `Action items` に整理
+- 変更例:
+
+```markdown
+---
+name: typescript-migration-plan
+description: Next.js App Router TS migration plan (phased)
+---
+
+## Action items
+- [ ] Add TypeScript tooling and config
+- [ ] Generate Supabase types
+```
+
+```markdown
+## Requirements
+- Replace npm with Bun for installs and `package.json` script execution
+- Use `bun.lockb` as the single source of truth
+```
+
+#### 5. Spec Kit キャッシュの ignore 追加
+
+- 対象ファイル: `.gitignore`
+- 原因:
+  - Kilo Code / Spec Kit のキャッシュが Git に出現し作業ノイズになる
+- 具体的修正:
+  - `.kilocode/.cache/` と `.specify/.cache/` を除外対象に追加
+- 変更例:
+
+```gitignore
+# Kilo Code / Spec Kit cache
+.kilocode/.cache/
+.specify/.cache/
+```
+
+#### 成果/効果
+
+- 仕様策定の入口（spec/plan/tasks）と進め方が可視化され、新規機能の立ち上げがスムーズになる
+- PR 提出フローが明文化され、レビュー観点と必要情報の抜け漏れが減る
+- 計画ドキュメントの構造化により、移行作業の進捗と依存関係が追いやすくなる
+- キャッシュ除外により、差分のノイズが減りレビュー効率が向上する
+
+#### 運用ルール
+
+- 新規機能は `specs/NNN-<feature-name>/` を作成し、`spec.md`/`plan.md`/`tasks.md` を追加する
+- ルール類は `.kilocode/rules/` に集約し、1ファイル=1テーマで短く保つ
+- 変更時はチーム合意のうえで更新し、`README_kilocode_speckit.md` に要点を反映する
+- PR 提出時は `.kilocode/workflows/submit-pr.md` のチェックリストを満たす
+
+### 2025-10-18 変更内容まとめ（詳細）
+
+#### 概要
+
+- Supabase クライアント再編と認証機能の改善
+- 予約システムの機能強化と UX 向上
+- UI パフォーマンスの最適化
+- Docker 開発環境の整備
+- ドキュメントと設定の改善
+
+#### 1. セキュリティ対策の実施
+
+- 対象ファイル: `next.config.mjs`
+- 現状の課題: `lh3.googleusercontent.com` の `remotePatterns` にパス制限がなく許可範囲が広い
+- 対策内容:
+  - `pathname: "/a/**"` を追加し、Google アバター画像の取得を `/a/` 配下に限定
+  - Supabase ストレージの配信パスを `remotePatterns` で明示
+- 変更例:
+
+```javascript
+// 変更前
+{
+  protocol: "https",
+  hostname: "lh3.googleusercontent.com"
+}
+
+// 変更後
+{
+  protocol: "https",
+  hostname: "lh3.googleusercontent.com",
+  pathname: "/a/**"
+}
+```
+
+- 影響箇所:
+  - `app/_components/ReservationForm.js` のプロフィール画像表示
+  - `app/_components/NavigationMenu.js` のプロフィール画像表示
+- 効果:
+  - 外部リソースの取得範囲を最小化し、意図しないリソースへのアクセスを防止
+
+#### 2. Supabase クライアント再編と認証周り
+
+- 対象ファイル:
+  - `app/_lib/supabaseServer.js`
+  - `app/_lib/supabaseBrowser.js`
+  - `app/_lib/actions.js`
+  - `app/_lib/data-service.js`
+- 対応内容:
+  - サーバー専用クライアントを新設し、`SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` の存在チェックと `server-only` ガードを追加
+  - ブラウザ用クライアントを分離し、`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_KEY` の存在チェックと `persistSession: true` を明示
+  - サーバー/ブラウザのクライアントを用途ごとに切り替え、誤用を防止
+  - 旧 `app/_lib/supabase.js`/`app/_lib/supabase-admin.js` を削除して責務を整理
+- 効果:
+  - サービスロールキーの露出リスクを低減
+  - RLS をバイパスする操作をサーバー専用に限定
+
+#### 3. 予約システムの改善（バグ修正 + UX）
+
+- 対象ファイル:
+  - `app/_lib/data-service.js`
+  - `app/account/reservations/page.js`
+  - `app/account/reservations/edit/[bookingId]/page.js`
+  - `app/_components/ReservationCard.js`
+- 発生していた問題:
+  - `Unhandled Runtime Error: Booking could not get loaded`
+  - 予約編集ページで `cabins` 情報が取得できず `maxCapacity` が空になる
+- 原因:
+  - `getBooking` でブラウザクライアントを使用していた
+  - 予約詳細取得で `cabins` の関連情報が未取得だった
+- 対応内容:
+  - `getBooking` を `supabaseServer` に統一し、`cabins(name, maxCapacity, image)` を join
+  - 予約編集ページで `try/catch` を追加し、失敗時のエラーを明示化
+  - `booking?.numGuests` などを null セーフに取得して初期値の欠落を回避
+  - 予約一覧ページを `dynamic = "force-dynamic"` にし、セッションを常に最新化
+  - 予約カードの画像 `sizes` とレイアウトを調整し、モバイル表示を改善
+- 変更例:
+
+```javascript
+export async function getBooking(id) {
+  const { data, error } = await supabaseServer
+    .from("bookings")
+    .select("*, cabins(name, maxCapacity, image)")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    throw new Error("Booking could not get loaded");
+  }
+
+  if (!data) {
+    throw new Error("Booking not found");
+  }
+
+  return data;
+}
+```
+
+```javascript
+const numGuests = booking?.numGuests ?? 1;
+const observations = booking?.observations ?? "";
+const maxCapacity = booking?.cabins?.maxCapacity ?? 4;
+```
+
+- 効果:
+  - 予約編集ページの取得エラーを抑止し、フォーム表示が安定
+  - サーバー側でのデータ取得に統一され、挙動の一貫性が向上
+
+#### 4. UI とパフォーマンスの改善
+
+- 対象ファイル:
+  - `app/layout.js`
+  - `app/page.js`
+  - `app/_components/ReservationCard.js`
+- 対応内容:
+  - Google Fonts の配信を停止し、`app/fonts/` の可変フォントを `next/font/local` で配信
+  - ヒーロー見出しのサイズを `text-4xl → sm:text-6xl → md:text-8xl` に調整
+  - 画像 `sizes` などを明示して LCP を改善
+- 効果:
+  - フォント読み込みが安定し、CLS 低減
+  - 画面幅ごとの読みやすさが向上
+
+#### 5. 開発環境の整備（Docker）
+
+- 対象ファイル:
+  - `Dockerfile`
+  - `docker-compose.yml`
+  - `docker/start-dev.sh`
+  - `docker/postgres-healthcheck.sh`
+  - `docker/initdb/00_create_roles.sql`
+  - `docker/initdb/01_create_supabase_admin.sh`
+  - `docker/initdb/05_set_timezone.sql`
+  - `docker/initdb/10_apply_migrations.sh`
+- 対応内容:
+  - `Dockerfile` で `npm ci` を利用し、`gosu` と非 root 実行を整備
+  - `.next` キャッシュ用ボリュームの追加とヘルスチェックの刷新
+  - Supabase 管理ロールの作成/更新時に `RAISE NOTICE` を追加しログを可視化
+  - タイムゾーン設定を SQL で自動化し、初期化スクリプトの順序を明確化
+- 変更例:
+
+```sql
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'supabase_admin') THEN
+    EXECUTE format(
+      'CREATE ROLE supabase_admin LOGIN SUPERUSER PASSWORD %L',
+      :'admin_password'
+    );
+    RAISE NOTICE 'Created role supabase_admin with superuser privileges';
+    RETURN;
+  END IF;
+
+  EXECUTE format(
+    'ALTER ROLE supabase_admin WITH PASSWORD %L',
+    :'admin_password'
+  );
+  RAISE NOTICE 'Updated password for existing supabase_admin role';
+END
+$$;
+```
+
+```bash
+echo "[supabase-admin] Database role setup completed successfully" >&2
+```
+
+- 効果:
+  - 初期化の再現性向上とログの明確化
+  - 開発環境起動時のトラブルシュートが容易化
+
+#### 6. ドキュメントと設定の改善
+
+- 対象ファイル:
+  - `README_supabase.md`
+  - `.gitignore`
+  - `package.json`
+- 対応内容:
+  - README の見出しレベルとコードブロックの言語指定を統一
+  - `eslint` を `^8.57.0` に固定
+  - Playwright/IDE キャッシュを `.gitignore` に追加
+
+#### 7. 追加の改善内容（本日分の詳細）
+
+- 予約編集ページのエラーハンドリング強化:
+  - 取得失敗時に `予約データの取得に失敗しました。予約ID: ${bookingId}` を明示
+  - `booking` 欠落時は例外として扱い、フォーム描画時の不整合を防止
+- 開発環境スクリプトの堅牢性向上:
+  - `docker/start-dev.sh` で `gosu` 未導入時の警告とフォールバック実行を追加
+- レスポンシブデザインの強化:
+  - `app/page.js` のヒーロー見出しを段階的に拡大し、視認性を改善
+
+#### 継続的な改善項目
+
+1. セキュリティ強化
+
+   - 外部リソースのパス制限を定期的に見直す
+   - 認証エラーハンドリングの強化
+
+1. パフォーマンス最適化
+
+   - クエリの更なる最適化
+   - クライアント/サーバー境界の整理
+
+1. 運用改善
+
+   - ログ出力の標準化
+   - エラーメッセージの多言語対応
+
+### 2025-10-13 作業メモ（Postgres メンテナンス）
+
+#### 1. Postgres ボリューム初期化エラー調査と対応
+
+- `docker compose up --build` 時に `data directory has wrong ownership` が発生したため、`mastermodernreact_nextjs_postgres-data` ボリュームを調査
+- BusyBox コンテナで `chown -R 70:70 /var/lib/postgresql/data` を実施しても改善せず、Supabase イメージの `postgres` UID/GID が `101:102` であることを確認
+- `chown -R 101:102 /var/lib/postgresql/data` と `chmod 700 /var/lib/postgresql/data /var/lib/postgresql/data/pgdata` を実施
+- ボリューム内に `pgdata` サブディレクトリが存在し、`PG_VERSION` が親ディレクトリに無いことを確認。`pgdata` 配下のデータを `/var/lib/postgresql/data` 直下へ移動し、`pgdata` を削除
+- `docker-compose.yml` の `PGDATA` を `/var/lib/postgresql/data` に修正し、再起動でエラー解消
+
+#### 2. タイムゾーン設定
+
+- `docker-compose.yml` に `TZ: Asia/Tokyo` を追加
+- `docker/initdb/05_set_timezone.sql` を作成し、`ALTER SYSTEM SET timezone = 'Asia/Tokyo'; SELECT pg_reload_conf();` を追加
+
+#### 3. 環境変数と Next.js 側設定
+
+- `.env` と `.env.local` の `POSTGRES_USER` を `postgres` に変更
+- `docker-compose.yml` の `web` サービスで `DATABASE_URL` に `?options=-c%20TimeZone=Asia/Tokyo` を追加してアプリ側のタイムゾーンも合わせた
+- `docker-compose.yml` の `postgres` サービスにおいて、`POSTGRES_USER` を環境変数参照からリテラル `postgres` に固定
+
+#### 4. コンテナ再生成と認証エラー対応
+
+- `docker compose down` → `docker compose up --build`（必要に応じて `--force-recreate`）を繰り返し、更新した環境変数と設定を反映
+- `docker inspect` と `docker exec env` でコンテナ内の `POSTGRES_USER=postgres` を確認
+- `supabase_map` に存在しないユーザーで peer 認証しようとするログを解消するため、環境変数の修正後に古いユーザー名を使うヘルスチェックを更新 (`pg_isready -U postgres`)
+- 既存データベースに `postgres` ロールが無かったため、`psql` で `CREATE ROLE postgres WITH LOGIN SUPERUSER PASSWORD '<PASSWORD>';` を実行
+- `docker compose logs postgres` で `peer authentication failed` ログが出ていないことを確認
+
+#### 5. 動作確認
+
+- `docker compose ps` で `postgres` コンテナが `healthy` であることを確認
+- 必要に応じて `SHOW timezone;` や `SELECT now();` を実行し、`Asia/Tokyo` が反映されていることを確認
+
+#### 6. 留意点
+
+- 環境変数を変更した際は必ず `docker compose down` でコンテナを削除してから `docker compose up --build`（または `up -d --force-recreate`）で再生成すること
+- 既存データを保持する場合は所有権とパーミッション (`chown`, `chmod`) を再確認し、`PG_VERSION` を含めたファイル構成が `PGDATA` の期待と一致しているかをチェックする
