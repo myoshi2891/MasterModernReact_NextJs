@@ -1,0 +1,10 @@
+{
+  "comment": "ここをプロジェクトに合わせて調整",
+  "project": {
+    "name": "TODO",
+    "root": "."
+  },
+  "defaults": {
+    "workflow": "submit-pr"
+  }
+}
