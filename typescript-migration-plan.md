@@ -5,6 +5,7 @@ description: Next.js App Router TS migration plan (phased)
 
 # Plan
 
+## Summary
 Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScript without changing runtime behavior. Enable strict type checking from the start, introduce shared domain types and generated Supabase types, then convert files from the data layer outward to UI. Finish by disabling allowJs and validating build/lint/typecheck.
 
 ## Requirements
@@ -38,16 +39,16 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 - No runtime/API behavior changes; types only
 
 ## Action items
-[ ] Add TypeScript tooling and config: `typescript`, `@types/node`, `@types/react`, `@types/react-dom`; create `tsconfig.json` with `strict: true`, `allowJs: true`, `checkJs: false`, `noEmit: true`, `jsx: "preserve"`, `baseUrl`/`paths` from `jsconfig.json`, and add `typecheck` script
-[ ] Create `next-env.d.ts` and `types/` folder for shared types and module augmentations
-[ ] Generate Supabase types (`supabase gen types typescript`) into `types/supabase.ts` and wire to Supabase clients
-[ ] Migrate data/auth layer files to `.ts` and add explicit input/output types, including `FormData` parsing and session token types
-[ ] Migrate API route handlers to `.ts`, type `params`, request bodies, and JSON response shapes
-[ ] Convert shared context and client components to `.tsx` with typed props/state/context values
-[ ] Convert pages/layouts/loading/error/not-found files to `.tsx` and type route/search params
-[ ] Resolve strict errors with explicit null handling, narrowings, and small type guards
-[ ] Disable `allowJs`, ensure no JS remains under `app/`/`app/_lib`/`app/_components`, and keep config JS files outside TS `include`
-[ ] Run lint/build/typecheck and fix any remaining type or build issues
+- [ ] Add TypeScript tooling and config: `typescript`, `@types/node`, `@types/react`, `@types/react-dom`; create `tsconfig.json` with `strict: true`, `allowJs: true`, `checkJs: false`, `noEmit: true`, `jsx: "preserve"`, `baseUrl`/`paths` from `jsconfig.json`, and add `typecheck` script
+- [ ] Create `next-env.d.ts` and `types/` folder for shared types and module augmentations
+- [ ] Generate Supabase types (`supabase gen types typescript`) into `types/supabase.ts` and wire to Supabase clients
+- [ ] Migrate data/auth layer files to `.ts` and add explicit input/output types, including `FormData` parsing and session token types
+- [ ] Migrate API route handlers to `.ts`, type `params`, request bodies, and JSON response shapes
+- [ ] Convert shared context and client components to `.tsx` with typed props/state/context values
+- [ ] Convert pages/layouts/loading/error/not-found files to `.tsx` and type route/search params
+- [ ] Resolve strict errors with explicit null handling, narrowings, and small type guards
+- [ ] Disable `allowJs`, ensure no JS remains under `app/`/`app/_lib`/`app/_components`, and keep config JS files outside TS `include`
+- [ ] Run lint/build/typecheck and fix any remaining type or build issues
 
 ## Testing and validation
 - `npm run lint`
