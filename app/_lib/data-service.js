@@ -85,6 +85,12 @@ export async function getBooking(id) {
   return data;
 }
 
+/**
+ * Retrieve all bookings for a specific guest, ordered by start date.
+ *
+ * @param {string|number} guestId - Identifier of the guest whose bookings to fetch.
+ * @returns {Array<Object>} An array of booking objects containing: `id`, `created_at`, `startDate`, `endDate`, `numNights`, `numGuests`, `totalPrice`, `guestId`, `cabinId`, and a `cabins` object with `name`, `image`, and `maxCapacity`.
+ */
 export async function getBookings(guestId) {
   const { data, error } = await supabaseServer
     .from("bookings")
