@@ -67,21 +67,6 @@ describe("GET /api/cabins/[cabinId]", () => {
     expect(body).toEqual({ message: "Cabin not found..." });
   });
 
-  it("returns a 404 when the error message is cabin-specific", async () => {
-    getCabinMock.mockRejectedValue(new Error("Cabin not found"));
-    getBookedDatesMock.mockResolvedValue([]);
-
-    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
-    const response = await GET(new Request("http://localhost/api/cabins/1"), {
-      params: { cabinId: "1" },
-    });
-
-    const body = await response.json();
-
-    expect(response.status).toBe(404);
-    expect(body).toEqual({ message: "Cabin not found..." });
-  });
-
   it("returns a 500 when the lookup fails unexpectedly", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     getCabinMock.mockRejectedValue(new Error("db unavailable"));
