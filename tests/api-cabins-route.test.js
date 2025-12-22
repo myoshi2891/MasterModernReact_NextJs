@@ -46,6 +46,7 @@ describe("GET /api/cabins/[cabinId]", () => {
 
     const body = await response.json();
 
+    expect(response.status).toBe(404);
     expect(body).toEqual({ message: "Cabin not found..." });
   });
 });
