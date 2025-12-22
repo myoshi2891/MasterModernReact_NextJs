@@ -3,6 +3,11 @@
 import Image from "next/image";
 import { signIn } from "next-auth/react";
 
+/**
+ * Render a button that initiates Google OAuth sign-in and redirects the user to /account on success.
+ *
+ * @returns {JSX.Element} A button element containing the Google logo and the label "Continue with Google".
+ */
 function SignInButton() {
   return (
     <button

@@ -46,6 +46,12 @@ export function isRangeBooked(range, bookedDates) {
   );
 }
 
+/**
+ * Determines whether a date should be disabled for booking.
+ * @param {Date} date - The date to check.
+ * @param {Date[]|null|undefined} bookedDates - An array of already booked dates; treated as empty when `null` or `undefined`.
+ * @returns {boolean} `true` if the date is in the past or matches any booked date, `false` otherwise.
+ */
 export function isDateDisabled(date, bookedDates) {
   const dates = bookedDates ?? [];
   return isPast(date) || dates.some((day) => isSameDay(day, date));

@@ -9,6 +9,23 @@ export const formatDistanceFromNow = (dateStr) =>
     addSuffix: true,
   }).replace("about ", "");
 
+/**
+ * Render a reservation card for a cabin booking that displays dates, status, pricing, guest count, booking date, and edit/delete actions.
+ *
+ * @param {Object} props.booking - Booking data for the card.
+ * @param {string|number} props.booking.id - Booking identifier.
+ * @param {string} props.booking.startDate - ISO date string for the reservation start.
+ * @param {string} props.booking.endDate - ISO date string for the reservation end.
+ * @param {number} props.booking.numNights - Number of nights for the booking.
+ * @param {number} props.booking.totalPrice - Total price for the booking.
+ * @param {number} props.booking.numGuests - Number of guests for the booking.
+ * @param {string} props.booking.created_at - ISO date string for when the booking was created.
+ * @param {Object} props.booking.cabins - Cabin information.
+ * @param {string} props.booking.cabins.name - Cabin name.
+ * @param {string} props.booking.cabins.image - URL or path to the cabin image.
+ * @param {Function} props.onDelete - Callback invoked when the reservation is deleted via the card's delete action.
+ * @returns {JSX.Element} The rendered reservation card component.
+ */
 function ReservationCard({ booking, onDelete }) {
   const {
     id,

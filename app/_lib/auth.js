@@ -3,7 +3,12 @@ import { getServerSession } from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 import { createGuest, getGuest } from "./data-service";
 
-// 補助: ゲストを取得 or 作成
+/**
+ * Fetches a guest by email and creates one if none exists.
+ * @param {string} email - The guest's email address to look up or create.
+ * @param {string|null|undefined} name - Optional full name for a new guest; if omitted, the guest's `fullName` will be set to `null`.
+ * @returns {Object} The guest record for the given email, either existing or newly created.
+ */
 async function getOrCreateGuestByEmail(email, name) {
   const existing = await getGuest(email); // publicクライアントでOK（SELECT）
   if (existing) return existing;

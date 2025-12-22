@@ -3,6 +3,11 @@ import Link from "next/link";
 
 import bg from "@/public/bg.png";
 
+/**
+ * Render the landing page hero: full-bleed background image with centered heading and a CTA link to /cabins.
+ *
+ * @returns {JSX.Element} The React element tree for the page's hero section.
+ */
 export default function Page() {
   return (
     <main className="relative min-h-screen">
