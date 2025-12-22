@@ -22,6 +22,13 @@ describe("booking utils", () => {
     expect(calculateNumNights(start, end)).toBe(3);
   });
 
+  it("returns a negative night count when the end date is before start", () => {
+    const start = new Date("2025-01-05T00:00:00.000Z");
+    const end = new Date("2025-01-03T00:00:00.000Z");
+
+    expect(calculateNumNights(start, end)).toBe(-2);
+  });
+
   it("handles PST dates without shifting nights", () => {
     const start = new Date("2025-02-01T00:00:00-08:00");
     const end = new Date("2025-02-02T00:00:00-08:00");
@@ -51,6 +58,14 @@ describe("booking utils", () => {
     expect(calculateCabinPrice(2, 150, 0)).toBe(300);
   });
 
+  it("calculates cabin price with a negative discount", () => {
+    expect(calculateCabinPrice(2, 150, -20)).toBe(340);
+  });
+
+  it("calculates cabin price when discount exceeds regular price", () => {
+    expect(calculateCabinPrice(1, 100, 150)).toBe(-50);
+  });
+
   it("returns false when the range is incomplete", () => {
     const range = { from: new Date("2025-01-01T00:00:00.000Z") };
     const bookedDates = [new Date("2025-01-02T00:00:00.000Z")];
@@ -76,6 +91,15 @@ describe("booking utils", () => {
     const bookedDates = [new Date("2025-01-03T00:00:00.000Z")];
 
     expect(isRangeBooked(range, bookedDates)).toBe(false);
+  });
+
+  it("treats missing booked dates as an empty list", () => {
+    const range = {
+      from: new Date("2025-01-01T00:00:00.000Z"),
+      to: new Date("2025-01-02T00:00:00.000Z"),
+    };
+
+    expect(isRangeBooked(range, null)).toBe(false);
   });
 
   it("disables past dates", () => {
@@ -115,7 +139,7 @@ describe("booking utils", () => {
     expect(() =>
       validateBookingInput({
         startDate: null,
-        endDate: new Date("2025-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-02T00:00:00.000Z"),
         numNights: 1,
         numGuests: 2,
         maxCapacity: 4,
@@ -126,7 +150,7 @@ describe("booking utils", () => {
   it("rejects missing end dates", () => {
     expect(() =>
       validateBookingInput({
-        startDate: new Date("2025-01-02T00:00:00.000Z"),
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
         endDate: null,
         numNights: 1,
         numGuests: 2,
@@ -135,11 +159,40 @@ describe("booking utils", () => {
     ).toThrow("Booking dates are required");
   });
 
+  it("rejects end dates that are before the start date", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-05T00:00:00.000Z"),
+        endDate: new Date("2099-01-03T00:00:00.000Z"),
+        numNights: 2,
+        numGuests: 2,
+        maxCapacity: 4,
+      })
+    ).toThrow("End date must be after start date");
+  });
+
+  it("rejects bookings in the past", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-10T12:00:00.000Z"));
+
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2025-01-09T00:00:00.000Z"),
+        endDate: new Date("2025-01-11T00:00:00.000Z"),
+        numNights: 2,
+        numGuests: 2,
+        maxCapacity: 4,
+      })
+    ).toThrow("Booking date cannot be in the past");
+
+    vi.useRealTimers();
+  });
+
   it("rejects non-positive night counts", () => {
     expect(() =>
       validateBookingInput({
-        startDate: new Date("2025-01-02T00:00:00.000Z"),
-        endDate: new Date("2025-01-02T00:00:00.000Z"),
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-03T00:00:00.000Z"),
         numNights: 0,
         numGuests: 2,
         maxCapacity: 4,
@@ -147,11 +200,23 @@ describe("booking utils", () => {
     ).toThrow("Booking must be at least 1 night");
   });
 
+  it("rejects mismatched night counts", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-05T00:00:00.000Z"),
+        numNights: 2,
+        numGuests: 2,
+        maxCapacity: 4,
+      })
+    ).toThrow("Number of nights does not match date range");
+  });
+
   it("rejects invalid guest counts", () => {
     expect(() =>
       validateBookingInput({
-        startDate: new Date("2025-01-02T00:00:00.000Z"),
-        endDate: new Date("2025-01-03T00:00:00.000Z"),
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-03T00:00:00.000Z"),
         numNights: 1,
         numGuests: 0,
         maxCapacity: 4,
@@ -162,8 +227,8 @@ describe("booking utils", () => {
   it("rejects guests over cabin capacity", () => {
     expect(() =>
       validateBookingInput({
-        startDate: new Date("2025-01-02T00:00:00.000Z"),
-        endDate: new Date("2025-01-03T00:00:00.000Z"),
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-03T00:00:00.000Z"),
         numNights: 1,
         numGuests: 5,
         maxCapacity: 4,
@@ -174,11 +239,23 @@ describe("booking utils", () => {
   it("accepts valid booking input", () => {
     expect(() =>
       validateBookingInput({
-        startDate: new Date("2025-01-02T00:00:00.000Z"),
-        endDate: new Date("2025-01-05T00:00:00.000Z"),
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-05T00:00:00.000Z"),
         numNights: 3,
         numGuests: 2,
         maxCapacity: 4,
+      })
+    ).not.toThrow();
+  });
+
+  it("accepts bookings without a max capacity", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-05T00:00:00.000Z"),
+        numNights: 3,
+        numGuests: 2,
+        maxCapacity: undefined,
       })
     ).not.toThrow();
   });

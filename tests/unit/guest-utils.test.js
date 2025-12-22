@@ -11,6 +11,16 @@ describe("normalizeNationalId", () => {
     expect(normalizeNationalId("  ABC123  ")).toBe("ABC123");
   });
 
+  it("strips non-alphanumeric characters", () => {
+    expect(normalizeNationalId("123-456-789")).toBe("123456789");
+  });
+
+  it("rejects inputs that contain no alphanumeric characters", () => {
+    expect(() => normalizeNationalId("---")).toThrow(
+      "Please provide a valid national ID"
+    );
+  });
+
   it("rejects values shorter than 6 characters", () => {
     expect(() => normalizeNationalId("ABCDE")).toThrow(
       "Please provide a valid national ID"

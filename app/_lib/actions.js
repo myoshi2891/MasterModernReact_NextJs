@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn, signOut } from "./auth";
-import { validateBookingInput } from "./booking";
+import {
+  calculateCabinPrice,
+  calculateNumNights,
+  validateBookingInput,
+} from "./booking";
 import { getBookings } from "./data-service";
 import { normalizeNationalId } from "./guest";
 import { supabaseServer } from "./supabaseServer";
@@ -15,9 +19,6 @@ export async function updateGuest(formData) {
   const nationalIDRaw = normalizeNationalId(formData.get("nationalID"));
   const nationalityField = formData.get("nationality")?.toString() ?? "";
   const [nationality = "", countryFlag = ""] = nationalityField.split("%");
-
-  if (nationalIDRaw && !/^[a-zA-Z0-9]{6,12}$/.test(nationalIDRaw))
-    throw new Error("Please provide a valid national ID");
 
   const updateData = {
     nationality: nationality || null,
@@ -82,26 +83,48 @@ export async function createBooking(bookingData, formData) {
   if (!guestId) throw new Error("You must be logged in");
 
   const numGuests = Number(formData.get("numGuests"));
+  const startDate = bookingData.startDate
+    ? new Date(bookingData.startDate)
+    : null;
+  const endDate = bookingData.endDate ? new Date(bookingData.endDate) : null;
+  const cabinId = bookingData.cabinId;
+
+  const { data: cabin, error: cabinError } = await supabaseServer
+    .from("cabins")
+    .select("maxCapacity, regularPrice, discount")
+    .eq("id", cabinId)
+    .single();
+
+  if (cabinError || !cabin) {
+    throw new Error("Cabin could not be loaded");
+  }
 
   validateBookingInput({
-    startDate: bookingData.startDate,
-    endDate: bookingData.endDate,
+    startDate,
+    endDate,
     numNights: bookingData.numNights,
     numGuests,
-    maxCapacity: bookingData.maxCapacity,
+    maxCapacity: cabin.maxCapacity,
   });
 
+  const numNights = calculateNumNights(startDate, endDate);
+  const cabinPrice = calculateCabinPrice(
+    numNights,
+    cabin.regularPrice,
+    cabin.discount
+  );
+
   const newBooking = {
-    startDate: bookingData.startDate,
-    endDate: bookingData.endDate,
-    numNights: bookingData.numNights,
-    cabinPrice: bookingData.cabinPrice,
-    cabinId: bookingData.cabinId,
+    startDate,
+    endDate,
+    numNights,
+    cabinPrice,
+    cabinId,
     guestId,
     numGuests,
     observations: formData.get("observations").slice(0, 1000),
     extrasPrice: 0,
-    totalPrice: bookingData.cabinPrice,
+    totalPrice: cabinPrice,
     isPaid: false,
     hasBreakfast: false,
     status: "unconfirmed",
@@ -112,7 +135,7 @@ export async function createBooking(bookingData, formData) {
   if (error) throw new Error("Booking could not be created");
 
   revalidatePath("/account/reservations");
-  revalidatePath(`/cabins/${bookingData.cabinId}`);
+  revalidatePath(`/cabins/${cabinId}`);
   redirect("/cabins/thankyou");
 }
 

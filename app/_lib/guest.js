@@ -3,9 +3,15 @@ export function normalizeNationalId(rawValue) {
 
   if (!normalized) return "";
 
-  if (!/^[a-zA-Z0-9]{6,12}$/.test(normalized)) {
+  const sanitized = normalized.replace(/[^a-zA-Z0-9]/g, "");
+
+  if (!sanitized) {
     throw new Error("Please provide a valid national ID");
   }
 
-  return normalized;
+  if (!/^[a-zA-Z0-9]{6,12}$/.test(sanitized)) {
+    throw new Error("Please provide a valid national ID");
+  }
+
+  return sanitized;
 }
