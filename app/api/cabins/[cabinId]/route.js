@@ -9,8 +9,22 @@ export async function GET(request, { params }) {
 			getBookedDatesByCabinId(cabinId),
 		]);
 		return Response.json({ cabin, bookedDates });
-	} catch {
-		return Response.json({ message: "Cabin not found..." }, { status: 404 });
+	} catch (error) {
+		const message = error?.message ?? "";
+		const isNotFound =
+			error?.digest === "NEXT_NOT_FOUND" ||
+			message === "NEXT_NOT_FOUND" ||
+			message.toLowerCase().includes("not found");
+
+		if (isNotFound) {
+			return Response.json({ message: "Cabin not found..." }, { status: 404 });
+		}
+
+		console.error("Error fetching cabin:", error);
+		return Response.json(
+			{ message: "Internal Server Error" },
+			{ status: 500 }
+		);
 	}
 }
 

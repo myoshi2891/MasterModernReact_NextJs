@@ -35,8 +35,10 @@ describe("GET /api/cabins/[cabinId]", () => {
     });
   });
 
-  it("returns a fallback message when lookup fails", async () => {
-    getCabinMock.mockRejectedValue(new Error("boom"));
+  it("returns a 404 when the cabin is not found", async () => {
+    const notFoundError = new Error("NEXT_NOT_FOUND");
+    notFoundError.digest = "NEXT_NOT_FOUND";
+    getCabinMock.mockRejectedValue(notFoundError);
     getBookedDatesMock.mockResolvedValue([]);
 
     const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
@@ -48,5 +50,22 @@ describe("GET /api/cabins/[cabinId]", () => {
 
     expect(response.status).toBe(404);
     expect(body).toEqual({ message: "Cabin not found..." });
+  });
+
+  it("returns a 500 when the lookup fails unexpectedly", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    getCabinMock.mockRejectedValue(new Error("db unavailable"));
+    getBookedDatesMock.mockResolvedValue([]);
+
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
+    const response = await GET(new Request("http://localhost/api/cabins/1"), {
+      params: { cabinId: "1" },
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body).toEqual({ message: "Internal Server Error" });
+    consoleError.mockRestore();
   });
 });
