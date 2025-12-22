@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 const { reservationState, createBookingMock } = vi.hoisted(() => ({
@@ -47,6 +47,10 @@ async function renderForm() {
 describe("ReservationForm", () => {
   beforeEach(() => {
     reservationState.range = { from: undefined, to: undefined };
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   it("prompts for dates before showing the submit button", async () => {

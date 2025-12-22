@@ -12,16 +12,17 @@ export const formatDistanceFromNow = (dateStr) =>
 function ReservationCard({ booking, onDelete }) {
   const {
     id,
-    guestId,
     startDate,
     endDate,
     numNights,
     totalPrice,
     numGuests,
-    status,
     created_at,
     cabins: { name, image },
   } = booking;
+  const startDateValue = new Date(startDate);
+  const endDateValue = new Date(endDate);
+  const createdAtValue = new Date(created_at);
 
   return (
     <div className="flex flex-col border border-primary-800 rounded-lg overflow-hidden bg-primary-950 sm:flex-row">
@@ -40,7 +41,7 @@ function ReservationCard({ booking, onDelete }) {
           <h3 className="text-lg font-semibold sm:text-xl md:text-2xl">
             {numNights} nights in Cabin {name}
           </h3>
-          {isPast(new Date(startDate)) ? (
+          {isPast(startDateValue) ? (
             <span className="bg-yellow-800 text-yellow-200 px-3 py-1 uppercase text-[11px] font-bold flex items-center rounded-sm sm:text-xs">
               past
             </span>
@@ -52,11 +53,11 @@ function ReservationCard({ booking, onDelete }) {
         </div>
 
         <p className="text-sm text-primary-300 leading-relaxed sm:text-base">
-          {format(new Date(startDate), "EEE, MMM dd yyyy")} (
-          {isToday(new Date(startDate))
+          {format(startDateValue, "EEE, MMM dd yyyy")} (
+          {isToday(startDateValue)
             ? "Today"
             : formatDistanceFromNow(startDate)}
-          ) &mdash; {format(new Date(endDate), "EEE, MMM dd yyyy")}
+          ) &mdash; {format(endDateValue, "EEE, MMM dd yyyy")}
         </p>
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-auto text-sm sm:text-base">
@@ -68,12 +69,12 @@ function ReservationCard({ booking, onDelete }) {
             {numGuests} guest{numGuests > 1 && "s"}
           </p>
           <p className="ml-auto text-xs text-primary-400 sm:text-sm">
-            Booked {format(new Date(created_at), "EEE, MMM dd yyyy, p")}
+            Booked {format(createdAtValue, "EEE, MMM dd yyyy, p")}
           </p>
         </div>
       </div>
 
-      {!isPast(new Date(startDate)) ? (
+      {!isPast(startDateValue) ? (
         <div className="flex border-t border-primary-800 sm:border-t-0 sm:border-l sm:w-40">
           <div className="flex w-full divide-x divide-primary-800 sm:flex-col sm:divide-x-0 sm:divide-y">
             <Link

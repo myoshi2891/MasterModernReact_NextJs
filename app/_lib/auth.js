@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { getServerSession } from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 import { createGuest, getGuest } from "./data-service";
 
@@ -10,21 +11,17 @@ async function getOrCreateGuestByEmail(email, name) {
   return await createGuest({ email, fullName: name ?? null });
 }
 
-const authConfig = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
-  // セッションはJWT運用を明示（v5はデフォルトJWTだが明記推奨）
+  // セッションはJWT運用を明示
   session: { strategy: "jwt" },
 
   callbacks: {
-    authorized({ auth }) {
-      return !!auth?.user;
-    },
-
     // ① サインイン時：ゲスト作成を試みる（adminで）
     async signIn({ user }) {
       try {
@@ -72,9 +69,8 @@ const authConfig = {
   pages: { signIn: "/login" },
 };
 
-export const {
-  auth,
-  signIn,
-  signOut,
-  handlers: { GET, POST },
-} = NextAuth(authConfig);
+export const auth = () => getServerSession(authOptions);
+
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

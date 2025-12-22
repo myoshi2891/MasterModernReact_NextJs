@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth, signIn, signOut } from "./auth";
+import { auth } from "./auth";
 import {
   calculateCabinPrice,
   calculateNumNights,
@@ -63,9 +63,13 @@ export async function updateGuest(formData) {
 export async function updateBooking(formData) {
   const bookingId = Number(formData.get("bookingId"));
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   if (!Number.isFinite(numGuests) || numGuests <= 0) {
@@ -75,17 +79,22 @@ export async function updateBooking(formData) {
   const guestBookings = await getBookings(guestId);
   const booking = guestBookings.find((item) => item.id === bookingId);
 
-  if (!booking)
+  if (!booking) {
     throw new Error("You are not allowed to update this booking.");
+  }
 
   const maxCapacity = booking?.cabins?.maxCapacity;
   if (Number.isFinite(maxCapacity) && numGuests > maxCapacity) {
     throw new Error("Number of guests exceeds cabin capacity");
   }
 
+  const observationsValue = formData.get("observations");
+  const observations =
+    typeof observationsValue === "string" ? observationsValue : "";
+
   const updateData = {
     numGuests,
-    observations: formData.get("observations").slice(0, 1000),
+    observations: observations.slice(0, 1000),
   };
 
   const { error } = await supabaseServer
@@ -93,7 +102,9 @@ export async function updateBooking(formData) {
     .update(updateData)
     .eq("id", bookingId);
 
-  if (error) throw new Error("Booking could not be updated");
+  if (error) {
+    throw new Error("Booking could not be updated");
+  }
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
 
@@ -121,9 +132,13 @@ export async function updateBooking(formData) {
  */
 export async function createBooking(bookingData, formData) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   const startDate = bookingData.startDate
@@ -158,6 +173,9 @@ export async function createBooking(bookingData, formData) {
     cabin.regularPrice,
     cabin.discount
   );
+  const observationsValue = formData.get("observations");
+  const observations =
+    typeof observationsValue === "string" ? observationsValue : "";
 
   const newBooking = {
     startDate,
@@ -167,7 +185,7 @@ export async function createBooking(bookingData, formData) {
     cabinId,
     guestId,
     numGuests,
-    observations: formData.get("observations").slice(0, 1000),
+    observations: observations.slice(0, 1000),
     extrasPrice: 0,
     totalPrice: cabinPrice,
     isPaid: false,
@@ -195,6 +213,11 @@ export async function createBooking(bookingData, formData) {
  * @throws {Error} If the deletion operation fails.
  */
 export async function deleteBooking(bookingId) {
+  const numericBookingId = Number(bookingId);
+  if (!Number.isFinite(numericBookingId)) {
+    throw new Error("Invalid booking ID");
+  }
+
   const session = await auth();
   if (!session) {
     throw new Error("You must be logged in");
@@ -208,29 +231,18 @@ export async function deleteBooking(bookingId) {
   const guestBookings = await getBookings(guestId);
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 
-  if (!guestBookingIds.includes(bookingId)) {
+  if (!guestBookingIds.includes(numericBookingId)) {
     throw new Error("You are not allowed to delete this booking.");
   }
 
   const { error } = await supabaseServer
     .from("bookings")
     .delete()
-    .eq("id", bookingId);
+    .eq("id", numericBookingId);
 
   if (error) {
     throw new Error("Booking could not be deleted");
   }
 
   revalidatePath("/account/reservations");
-}
-
-export async function signInAction() {
-  await signIn("google", { redirectTo: "/account" });
-}
-
-/**
- * Signs the current user out and redirects to the site root ("/").
- */
-export async function signOutAction() {
-  await signOut({ redirectTo: "/" });
 }

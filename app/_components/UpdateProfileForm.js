@@ -6,7 +6,6 @@ import { updateGuest } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 
 function UpdateProfileForm({ children, guest }) {
-  const [count, setCount] = useState();
   const [error, setError] = useState("");
 
   const { fullName, email, nationality, nationalID, countryFlag } = guest;
@@ -61,8 +60,9 @@ function UpdateProfileForm({ children, guest }) {
             <Image
               src={countryFlag}
               alt="Country flag"
-              name="countryFlag"
-              className="size-5 rounded-sm"
+              width={20}
+              height={20}
+              className="rounded-sm"
             />
           ) : (
             <span className="text-sm text-primary-200">No flag selected</span>

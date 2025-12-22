@@ -24,11 +24,12 @@ function NavigationMenu({ session }) {
         className="flex items-center justify-center rounded-md border border-primary-700 p-2 text-primary-200 transition-colors hover:border-accent-400 hover:text-accent-400 md:hidden"
         aria-expanded={isOpen}
         aria-label="Toggle navigation"
+        aria-controls="mobile-navigation-menu"
       >
         {isOpen ? (
-          <XMarkIcon className="size-3" />
+          <XMarkIcon className="size-5" />
         ) : (
-          <Bars3Icon className="size-3" />
+          <Bars3Icon className="size-5" />
         )}
       </button>
 
@@ -76,7 +77,10 @@ function NavigationMenu({ session }) {
       </nav>
 
       {isOpen ? (
-        <div className="absolute left-0 top-12 z-20 w-72 rounded-md border border-primary-800 bg-primary-950 p-2 shadow-lg md:hidden opacity-80">
+        <div
+          id="mobile-navigation-menu"
+          className="absolute left-0 top-12 z-20 w-72 rounded-md border border-primary-800 bg-primary-950 p-2 shadow-lg md:hidden opacity-80"
+        >
           <nav>
             <ul className="flex flex-col gap-3 items-center text-base">
               <li>

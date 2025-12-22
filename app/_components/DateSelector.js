@@ -116,6 +116,7 @@ function DateSelector({ settings, cabin, bookedDates }) {
 
         {range.from || range.to ? (
           <button
+            type="button"
             className={`border border-primary-800 py-2 px-4 text-xs font-semibold uppercase tracking-wide transition-colors duration-150 hover:bg-primary-900/80 sm:text-sm ${
               isSingleMonth
                 ? "self-stretch text-center sm:self-auto sm:ml-auto sm:w-auto"

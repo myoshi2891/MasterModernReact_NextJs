@@ -149,7 +149,7 @@ graph LR
     subgraph "3. アカウント管理"
         AccountPages[app/account/]
         AccountComponents[UpdateProfileForm.js<br/>ReservationList.js]
-        AccountActions["updateGuest()<br/>deleteBooking()<br/>signInAction()"]
+        AccountActions["updateGuest()<br/>deleteBooking()"]
     end
     
     CabinPages --> CabinComponents
@@ -188,7 +188,7 @@ graph LR
 
 ロールベースのアクセス制御を持つ認証済みユーザー機能を提供します：
 
-- **認証**: `actions.js`の`signInAction()`と`signOutAction()`がGoogle OAuthフローを管理
+- **認証**: `SignInButton.js`/`SignOutButton.js`が`next-auth/react`の`signIn`/`signOut`を呼び出し
 - **プロフィール管理**: `app/account/profile/page.js`と`UpdateProfileForm.js`でゲストデータ更新
 - **予約リスト**: `app/account/reservations/page.js`が`ReservationList.js`経由でユーザー予約を表示
 - **編集/削除**: 認可チェック付きの`updateBooking()`と`deleteBooking()`サーバーアクション
@@ -344,12 +344,12 @@ the-wild-oasis-website/
 
 - **プロバイダー**: NextAuthを通じて`app/_lib/auth.js`で設定
 - **目的**: ユーザー認証とプロフィールデータ取得
-- **フロー**: `signInAction()`と`signOutAction()`サーバーアクションで管理
+- **フロー**: `SignInButton.js`/`SignOutButton.js`のクライアント呼び出しで管理
 
-#### NextAuth 5
+#### NextAuth 4
 
 - **設定**: `app/_lib/auth.js`で定義
-- **セッション管理**: ルート保護のため`middleware.js`のミドルウェア
+- **セッション管理**: ルート保護のため`middleware.js`の`withAuth`ミドルウェア
 - **コールバック**: ユーザーとセッション処理用のカスタムコールバック
 
 #### restcountries.com API
@@ -411,7 +411,8 @@ sequenceDiagram
 sequenceDiagram
     participant U as ユーザー
     participant LP as app/login/page.js
-    participant SA as actions.js<br/>signInAction()
+    participant UI as SignInButton.js
+    participant NA as next-auth/react
     participant Auth as auth.js<br/>NextAuth
     participant Google as Google OAuth
     participant MW as middleware.js
@@ -419,8 +420,9 @@ sequenceDiagram
     participant SB as Supabase
     
     U->>LP: "Googleでサインイン"クリック
-    LP->>SA: signInAction()
-    SA->>Auth: signIn('google')
+    LP->>UI: SignInButton表示
+    UI->>NA: signIn("google")
+    NA->>Auth: /api/auth/signin
     Auth->>Google: OAuth要求
     Google-->>Auth: ユーザー同意
     Auth->>Auth: callbacks.signIn()
@@ -432,11 +434,11 @@ sequenceDiagram
     SB-->>DS: guestデータ
     DS-->>Auth: guest
     Auth->>Auth: callbacks.session()
-    Auth-->>SA: session with guestId
-    SA-->>LP: redirect('/')
+    Auth-->>NA: session with guestId
+    NA-->>LP: redirect('/')
     
     U->>MW: /account/* にアクセス
-    MW->>Auth: auth()
+    MW->>Auth: withAuth()
     Auth-->>MW: session
     alt 認証済み
         MW-->>U: ページ許可
@@ -533,7 +535,7 @@ The Wild Oasisは、包括的なキャビン予約体験を提供する最新の
 
 - **Next.js App Router**: 最適なパフォーマンスのためにサーバーコンポーネントを活用
 - **Supabase統合**: リアルタイム機能付きPostgreSQLデータベース
-- **NextAuth 5**: Google OAuthによる安全な認証
+- **NextAuth 4**: Google OAuthによる安全な認証
 - **サーバーアクション**: 自動キャッシュ無効化を伴う型安全なミューテーション
 - **Context API**: 予約フローのクライアントサイド状態管理
 - **Tailwind CSS**: 迅速な開発のためのユーティリティファーストスタイリング
