@@ -15,10 +15,10 @@ afterAll(() => server.close());
 
 vi.mock("next/image", () => ({
   default: (props) => {
-    const { fill, fetchPriority, priority, ...rest } = props ?? {};
+    const { fill, fetchPriority, priority, alt = "", ...rest } = props ?? {};
     return createElement("img", {
       ...rest,
-      alt: rest?.alt ?? "",
+      alt,
     });
   },
 }));

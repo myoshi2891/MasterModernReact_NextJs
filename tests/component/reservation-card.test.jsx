@@ -32,7 +32,9 @@ describe("ReservationCard", () => {
 
     expect(screen.getByText(/past/i)).toBeInTheDocument();
     expect(screen.queryByText(/upcoming/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/edit/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /^edit$/i })
+    ).not.toBeInTheDocument();
   });
 
   it("shows upcoming status and actions for future bookings", () => {
@@ -48,7 +50,7 @@ describe("ReservationCard", () => {
     render(<ReservationCard booking={upcomingBooking} onDelete={vi.fn()} />);
 
     expect(screen.getByText(/upcoming/i)).toBeInTheDocument();
-    expect(screen.getByText(/edit/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^edit$/i })).toBeInTheDocument();
     expect(screen.getByText(/delete/i)).toBeInTheDocument();
   });
 });
