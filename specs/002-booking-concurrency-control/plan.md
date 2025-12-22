@@ -23,74 +23,29 @@
 - UI は既存のエラーバナー/メッセージで十分
 - 文言例: 「選択した日程はすでに予約されています。別の日程を選択してください。」
 
-## データ移行
-- 既存データが排他制約に違反していないか事前確認
-- もし重複が存在する場合は、手動で status を `canceled` にするなどの救済策が必要
+## 実装前の確認
+1. `startDate`/`endDate` の型確認（`timestamptz` or `date`）
+2. `status` の実値確認とキャンセル値の確定
+3. 既存データの重複/逆転検出の実行
 
-## 事前検査と移行手順
-1. 重複予約検出SQLを実行
-2. 異常データの修正（取消 or 日付修正）
-3. `btree_gist` 拡張の有効化
-4. チェック制約の追加
-5. 排他制約の追加
-6. トリガー作成
-7. ロールバック手順を事前に用意
+## データ移行
+1. 事前検査SQLで重複/逆転を洗い出し
+2. **自動クリーンアップスクリプト**で整理（手動運用は避ける）
+3. dry-run で影響範囲を確認
+4. `btree_gist` 拡張の有効化
+5. チェック制約・排他制約・トリガーの適用
+6. ロールバック手順を事前に用意
 
 ## 実装詳細（DB）
-### 排他制約
-```
-create extension if not exists btree_gist;
-
-alter table bookings
-  add constraint bookings_no_overlap
-  exclude using gist (
-    cabinId with =,
-    tstzrange(startDate, endDate, '[)') with &&
-  )
-  where (status <> 'canceled');
-```
-
-### チェック制約
-```
-alter table bookings
-  add constraint bookings_date_order check (startDate < endDate);
-
-alter table bookings
-  add constraint bookings_num_guests check (numGuests >= 1);
-```
-
-### キャパシティトリガー
-```
-create or replace function check_booking_capacity()
-returns trigger as $$
-declare max_cap int;
-begin
-  select maxCapacity into max_cap from cabins where id = new.cabinId;
-  if max_cap is null then
-    raise exception 'Cabin not found';
-  end if;
-  if new.numGuests > max_cap then
-    raise exception 'Number of guests exceeds cabin capacity';
-  end if;
-  return new;
-end;
-$$ language plpgsql;
-
-create trigger bookings_capacity_check
-before insert or update on bookings
-for each row execute function check_booking_capacity();
-```
-
-### idempotency key（任意）
-```
-alter table bookings add column clientRequestId uuid;
-create unique index bookings_request_id_unique on bookings (clientRequestId);
-```
+- SQL 定義は `specs/002-booking-concurrency-control/spec.md` の **DB設計**を参照
+- `startDate`/`endDate` の型に応じて `tstzrange` or `daterange` を選択
+- トリガーは `P0001` + `CAPACITY_EXCEEDED` などのコードを使用
 
 ## エラーマッピング
 - `23P01` → 409 Conflict（予約日程が重複）
 - `23514` → 400 Bad Request（日付順序/人数不正）
 - `23505` → 409 Conflict（二重送信）
+- `P0001` → 400/404（CAPACITY_EXCEEDED / CABIN_NOT_FOUND）
 - 想定外エラーは 500 とし、内部ログで原因を追跡
 
 ## テスト計画（実装時）
@@ -105,6 +60,8 @@ create unique index bookings_request_id_unique on bookings (clientRequestId);
 ## 監視 / 監査
 - 409 を集計し、ピーク時の競合率を測定
 - 予約失敗時の `cabinId` と期間を匿名化して記録
+- 409率 > 5%: 先読みチェックの追加を検討
+- 409率 > 20%: システム異常の可能性として調査
 - 重大障害時に制約を一時無効化する手順を用意
 
 ## ロールバック手順（想定）
@@ -121,6 +78,8 @@ create unique index bookings_request_id_unique on bookings (clientRequestId);
 2. ローカル/ステージングで並列予約テスト
 3. Production 適用（短時間メンテナンス推奨）
 
-## 監視 / 可観測性
-- 409 エラーの件数をログ/メトリクス化
-- 大量に発生する場合は UI で先読みチェックの追加を検討
+## 見積
+- 設計: 1 日
+- 実装: 1.5 日
+- 検証・移行: 1〜1.5 日
+- 合計: 3〜4 日（バッファ込み）
