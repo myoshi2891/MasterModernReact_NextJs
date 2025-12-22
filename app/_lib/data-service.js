@@ -66,6 +66,12 @@ export async function getGuest(email) {
   return data;
 }
 
+/**
+ * Retrieve a single booking by its id, including selected cabin details.
+ * @param {string|number} id - The booking's unique identifier.
+ * @returns {Object} The booking record with nested `cabins` object containing `name`, `maxCapacity`, and `image`.
+ * @throws {Error} If the booking query fails ("Booking could not get loaded") or if no booking is found ("Booking not found").
+ */
 export async function getBooking(id) {
   const { data, error } = await supabaseServer
     .from("bookings")
