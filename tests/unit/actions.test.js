@@ -4,6 +4,9 @@ const {
   authMock,
   getBookingsMock,
   supabaseFromMock,
+  cabinSelectMock,
+  cabinEqMock,
+  cabinSingleMock,
   insertMock,
   updateMock,
   updateEqMock,
@@ -12,21 +15,36 @@ const {
   revalidatePathMock,
   redirectMock,
 } = vi.hoisted(() => {
+  const cabinSingleMock = vi.fn().mockResolvedValue({
+    data: { maxCapacity: 4, regularPrice: 200, discount: 50 },
+    error: null,
+  });
+  const cabinEqMock = vi.fn(() => ({ single: cabinSingleMock }));
+  const cabinSelectMock = vi.fn(() => ({ eq: cabinEqMock }));
   const insertMock = vi.fn().mockResolvedValue({ error: null });
   const updateEqMock = vi.fn().mockResolvedValue({ error: null });
   const updateMock = vi.fn(() => ({ eq: updateEqMock }));
   const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
   const deleteMock = vi.fn(() => ({ eq: deleteEqMock }));
-  const supabaseFromMock = vi.fn(() => ({
-    insert: insertMock,
-    update: updateMock,
-    delete: deleteMock,
-  }));
+  const supabaseFromMock = vi.fn((table) => {
+    if (table === "cabins") {
+      return { select: cabinSelectMock };
+    }
+
+    return {
+      insert: insertMock,
+      update: updateMock,
+      delete: deleteMock,
+    };
+  });
 
   return {
     authMock: vi.fn(),
     getBookingsMock: vi.fn(),
     supabaseFromMock,
+    cabinSelectMock,
+    cabinEqMock,
+    cabinSingleMock,
     insertMock,
     updateMock,
     updateEqMock,
@@ -60,8 +78,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 const baseBookingData = {
-  startDate: new Date("2025-02-10T00:00:00.000Z"),
-  endDate: new Date("2025-02-12T00:00:00.000Z"),
+  startDate: new Date("2099-02-10T00:00:00.000Z"),
+  endDate: new Date("2099-02-12T00:00:00.000Z"),
   numNights: 2,
   cabinPrice: 300,
   cabinId: 7,
@@ -94,15 +112,27 @@ describe("booking actions", () => {
     getBookingsMock.mockResolvedValue([
       { id: 1, cabins: { maxCapacity: 4 } },
     ]);
+    cabinSingleMock.mockResolvedValue({
+      data: { maxCapacity: 4, regularPrice: 200, discount: 50 },
+      error: null,
+    });
+    cabinEqMock.mockReturnValue({ single: cabinSingleMock });
+    cabinSelectMock.mockReturnValue({ eq: cabinEqMock });
     insertMock.mockResolvedValue({ error: null });
     updateEqMock.mockResolvedValue({ error: null });
     deleteEqMock.mockResolvedValue({ error: null });
     updateMock.mockReturnValue({ eq: updateEqMock });
     deleteMock.mockReturnValue({ eq: deleteEqMock });
-    supabaseFromMock.mockReturnValue({
-      insert: insertMock,
-      update: updateMock,
-      delete: deleteMock,
+    supabaseFromMock.mockImplementation((table) => {
+      if (table === "cabins") {
+        return { select: cabinSelectMock };
+      }
+
+      return {
+        insert: insertMock,
+        update: updateMock,
+        delete: deleteMock,
+      };
     });
   });
 
@@ -131,22 +161,25 @@ describe("booking actions", () => {
   });
 
   it("rejects createBooking when guest count exceeds capacity", async () => {
-    const bookingData = { ...baseBookingData, maxCapacity: 2 };
+    cabinSingleMock.mockResolvedValue({
+      data: { maxCapacity: 2, regularPrice: 200, discount: 50 },
+      error: null,
+    });
 
     const { createBooking } = await import("../../app/_lib/actions");
 
     await expect(
-      createBooking(bookingData, makeCreateFormData({ numGuests: "3" }))
+      createBooking(baseBookingData, makeCreateFormData({ numGuests: "3" }))
     ).rejects.toThrow("Number of guests exceeds cabin capacity");
 
-    expect(supabaseFromMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
   });
 
   it("rejects createBooking when night count is invalid", async () => {
     const bookingData = {
       ...baseBookingData,
       numNights: 0,
-      endDate: baseBookingData.startDate,
+      endDate: new Date("2099-02-11T00:00:00.000Z"),
     };
 
     const { createBooking } = await import("../../app/_lib/actions");
@@ -155,7 +188,19 @@ describe("booking actions", () => {
       createBooking(bookingData, makeCreateFormData())
     ).rejects.toThrow("Booking must be at least 1 night");
 
-    expect(supabaseFromMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects createBooking when night count does not match the date range", async () => {
+    const bookingData = { ...baseBookingData, numNights: 5 };
+
+    const { createBooking } = await import("../../app/_lib/actions");
+
+    await expect(
+      createBooking(bookingData, makeCreateFormData())
+    ).rejects.toThrow("Number of nights does not match date range");
+
+    expect(insertMock).not.toHaveBeenCalled();
   });
 
   it("creates a booking and redirects for valid input", async () => {
@@ -163,6 +208,11 @@ describe("booking actions", () => {
 
     await createBooking(baseBookingData, makeCreateFormData());
 
+    expect(supabaseFromMock).toHaveBeenCalledWith("cabins");
+    expect(cabinSelectMock).toHaveBeenCalledWith(
+      "maxCapacity, regularPrice, discount"
+    );
+    expect(cabinEqMock).toHaveBeenCalledWith("id", 7);
     expect(supabaseFromMock).toHaveBeenCalledWith("bookings");
     expect(insertMock).toHaveBeenCalledTimes(1);
     expect(insertMock.mock.calls[0][0][0]).toMatchObject({
@@ -175,6 +225,18 @@ describe("booking actions", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/account/reservations");
     expect(revalidatePathMock).toHaveBeenCalledWith("/cabins/7");
     expect(redirectMock).toHaveBeenCalledWith("/cabins/thankyou");
+  });
+
+  it("uses server-side pricing instead of client values", async () => {
+    const bookingData = { ...baseBookingData, cabinPrice: 0 };
+    const { createBooking } = await import("../../app/_lib/actions");
+
+    await createBooking(bookingData, makeCreateFormData());
+
+    expect(insertMock.mock.calls[0][0][0]).toMatchObject({
+      cabinPrice: 300,
+      totalPrice: 300,
+    });
   });
 
   it("allows duplicate booking submissions (risk)", async () => {
