@@ -10,7 +10,9 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"prod": "next build && next start"
+		"prod": "next build && next start",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"@heroicons/react": "^2.1.5",
