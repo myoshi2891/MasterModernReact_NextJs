@@ -5,9 +5,11 @@
 // 	return NextResponse.redirect(new URL("/about", request.url));
 // }
 
-import { auth } from "@/app/_lib/auth";
+import { withAuth } from "next-auth/middleware";
 
-export const middleware = auth;
+export default withAuth({
+	pages: { signIn: "/login" },
+});
 
 export const config = {
 	matcher: ["/account"],

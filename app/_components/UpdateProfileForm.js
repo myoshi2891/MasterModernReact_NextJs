@@ -5,8 +5,15 @@ import { useState } from "react";
 import { updateGuest } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 
+/**
+ * Render a profile update form with read-only full name and email, an editable national ID with client-side validation, and an optional country flag.
+ *
+ * @param {{children?: import('react').ReactNode, guest: {fullName: string, email: string, nationality?: string, nationalID?: string, countryFlag?: string}}} props
+ * @param {import('react').ReactNode} [props.children] - Optional elements rendered inside the nationality section.
+ * @param {{fullName: string, email: string, nationality?: string, nationalID?: string, countryFlag?: string}} props.guest - Guest data used to populate the form fields.
+ * @returns {import('react').ReactElement} A React element representing the profile update form.
+ */
 function UpdateProfileForm({ children, guest }) {
-  const [count, setCount] = useState();
   const [error, setError] = useState("");
 
   const { fullName, email, nationality, nationalID, countryFlag } = guest;
@@ -61,8 +68,9 @@ function UpdateProfileForm({ children, guest }) {
             <Image
               src={countryFlag}
               alt="Country flag"
-              name="countryFlag"
-              className="size-5 rounded-sm"
+              width={20}
+              height={20}
+              className="rounded-sm"
             />
           ) : (
             <span className="text-sm text-primary-200">No flag selected</span>

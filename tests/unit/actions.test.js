@@ -57,8 +57,6 @@ const {
 
 vi.mock("../../app/_lib/auth", () => ({
   auth: authMock,
-  signIn: vi.fn(),
-  signOut: vi.fn(),
 }));
 
 vi.mock("../../app/_lib/data-service", () => ({
@@ -86,9 +84,15 @@ const baseBookingData = {
   maxCapacity: 4,
 };
 
-const makeFormData = (values) => ({
-  get: (key) => values[key],
-});
+const makeFormData = (values) => {
+  const formData = new FormData();
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined) {
+      formData.set(key, String(value));
+    }
+  });
+  return formData;
+};
 
 const makeCreateFormData = (overrides = {}) =>
   makeFormData({

@@ -3,9 +3,14 @@ import Link from "next/link";
 
 import bg from "@/public/bg.png";
 
+/**
+ * Render the landing page hero: full-bleed background image with centered heading and a CTA link to /cabins.
+ *
+ * @returns {JSX.Element} The React element tree for the page's hero section.
+ */
 export default function Page() {
   return (
-    <main className="relative min-h-[100vh]">
+    <main className="relative min-h-screen">
       <Image
         src={bg}
         fill
@@ -15,7 +20,7 @@ export default function Page() {
         alt="Mountains and forests with two cabins"
       />
 
-      <div className="relative z-10 text-center flex flex-col items-center justify-center min-h-[100vh]">
+      <div className="relative z-10 text-center flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-4xl sm:text-6xl md:text-8xl text-primary-50 mb-10 tracking-tight font-normal">
           Welcome to paradise.
         </h1>

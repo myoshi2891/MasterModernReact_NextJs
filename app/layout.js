@@ -1,5 +1,9 @@
 import localFont from "next/font/local";
 
+import "@/app/_styles/globals.css";
+import Header from "./_components/Header";
+import { ReservationProvider } from "./_components/ReservationContext";
+
 const josefin = localFont({
   src: [
     {
@@ -15,10 +19,6 @@ const josefin = localFont({
   ],
   display: "swap",
 });
-
-import "@/app/_styles/globals.css";
-import Header from "./_components/Header";
-import { ReservationProvider } from "./_components/ReservationContext";
 
 export const metadata = {
   title: {

@@ -11,6 +11,14 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useReservation } from "./ReservationContext";
 
+/**
+ * Renders a responsive date-range selector and booking summary for a cabin, enforcing min/max nights, disabling booked dates, and showing per-night and total pricing.
+ * @param {Object} props - Component properties.
+ * @param {{minBookingLength: number, maxBookingLength: number}} props.settings - Booking constraints: minimum and maximum number of nights allowed.
+ * @param {{regularPrice: number, discount: number}} props.cabin - Cabin pricing: regular per-night price and any flat discount applied per night.
+ * @param {Date[]} props.bookedDates - Array of dates that are unavailable for booking; these dates are disabled in the picker.
+ * @returns {JSX.Element} The date picker UI with pricing summary and a Clear control when a range is active.
+ */
 function DateSelector({ settings, cabin, bookedDates }) {
   const { range, setRange, resetRange } = useReservation();
 
@@ -116,6 +124,7 @@ function DateSelector({ settings, cabin, bookedDates }) {
 
         {range.from || range.to ? (
           <button
+            type="button"
             className={`border border-primary-800 py-2 px-4 text-xs font-semibold uppercase tracking-wide transition-colors duration-150 hover:bg-primary-900/80 sm:text-sm ${
               isSingleMonth
                 ? "self-stretch text-center sm:self-auto sm:ml-auto sm:w-auto"

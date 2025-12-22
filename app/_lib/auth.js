@@ -1,8 +1,14 @@
 import NextAuth from "next-auth";
+import { getServerSession } from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 import { createGuest, getGuest } from "./data-service";
 
-// 補助: ゲストを取得 or 作成
+/**
+ * Fetches a guest by email and creates one if none exists.
+ * @param {string} email - The guest's email address to look up or create.
+ * @param {string|null|undefined} name - Optional full name for a new guest; if omitted, the guest's `fullName` will be set to `null`.
+ * @returns {Object} The guest record for the given email, either existing or newly created.
+ */
 async function getOrCreateGuestByEmail(email, name) {
   const existing = await getGuest(email); // publicクライアントでOK（SELECT）
   if (existing) return existing;
@@ -10,21 +16,17 @@ async function getOrCreateGuestByEmail(email, name) {
   return await createGuest({ email, fullName: name ?? null });
 }
 
-const authConfig = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
-  // セッションはJWT運用を明示（v5はデフォルトJWTだが明記推奨）
+  // セッションはJWT運用を明示
   session: { strategy: "jwt" },
 
   callbacks: {
-    authorized({ auth }) {
-      return !!auth?.user;
-    },
-
     // ① サインイン時：ゲスト作成を試みる（adminで）
     async signIn({ user }) {
       try {
@@ -72,9 +74,8 @@ const authConfig = {
   pages: { signIn: "/login" },
 };
 
-export const {
-  auth,
-  signIn,
-  signOut,
-  handlers: { GET, POST },
-} = NextAuth(authConfig);
+export const auth = () => getServerSession(authOptions);
+
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

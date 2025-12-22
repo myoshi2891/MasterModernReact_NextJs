@@ -29,11 +29,14 @@
 ### 1.1 `pg_dump`（Direct 接続 + IPv4 固定 + SSL）
 
 ```bash
+# 事前にDBパスワードを環境変数へ設定
+export SUPABASE_DB_PASSWORD="your_password"
+
 # IPv4を取得（macOS）
 IPV4=$(dig +short A db.<PROJECT_REF>.supabase.co | head -n1)
 
 # Custom形式（推奨: 部分復元や検証が容易）
-pg_dump   --dbname="postgresql://postgres:<PASSWORD>@db.<PROJECT_REF>.supabase.co:5432/postgres?sslmode=require&hostaddr=${IPV4}"   -F c --no-owner --no-acl -v   -f ./backups/supabase_$(date +%Y%m%d_%H%M).dump
+pg_dump   --dbname="postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.<PROJECT_REF>.supabase.co:5432/postgres?sslmode=require&hostaddr=${IPV4}"   -F c --no-owner --no-acl -v   -f ./backups/supabase_$(date +%Y%m%d_%H%M).dump
 
 # 検証（壊れていないか一覧だけ見る）
 pg_restore -l ./backups/supabase_YYYYMMDD_HHMM.dump | head
@@ -72,13 +75,13 @@ supabase db dump --data-only --use-copy -f supabase/data.sql --linked
 
 ```bash
 IPV4=$(dig +short A db.<PROJECT_REF>.supabase.co | head -n1)
-pg_dump   --dbname="postgresql://postgres:<PASSWORD>@db.<PROJECT_REF>.supabase.co:5432/postgres?sslmode=require&hostaddr=${IPV4}"   -F c --no-owner --no-acl -v -f ./backup.dump
+pg_dump   --dbname="postgresql://postgres:${SUPABASE_DB_PASSWORD}@db.<PROJECT_REF>.supabase.co:5432/postgres?sslmode=require&hostaddr=${IPV4}"   -F c --no-owner --no-acl -v -f ./backup.dump
 ```
 
 ### **Session Pooler(5432/6543) 経由**
 
 ```bash
-pg_dump   --dbname="postgresql://postgres.<PROJECT_REF>:<PASSWORD>@aws-0-<REGION>.pooler.supabase.com:6543/postgres?sslmode=require"   -F c --no-owner --no-acl -v -f ./backup_pooler.dump
+pg_dump   --dbname="postgresql://postgres.<PROJECT_REF>:${SUPABASE_DB_PASSWORD}@aws-0-<REGION>.pooler.supabase.com:6543/postgres?sslmode=require"   -F c --no-owner --no-acl -v -f ./backup_pooler.dump
 ```
 
 ### **疎通確認**
@@ -274,7 +277,7 @@ find . -maxdepth 1 -type f -name '*.dump' -size 0 -print0 | xargs -0 -I{} mv -v 
 ### **Pooler での接続例**
 
 ```bash
-psql "postgresql://postgres.<PROJECT_REF>:<PASSWORD>@aws-0-<REGION>.pooler.supabase.com:6543/postgres?sslmode=require" -c "select 1;"
+psql "postgresql://postgres.<PROJECT_REF>:${SUPABASE_DB_PASSWORD}@aws-0-<REGION>.pooler.supabase.com:6543/postgres?sslmode=require" -c "select 1;"
 ```
 
 ---

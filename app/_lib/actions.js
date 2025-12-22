@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { auth, signIn, signOut } from "./auth";
+import { auth } from "./auth";
 import {
   calculateCabinPrice,
   calculateNumNights,
@@ -51,9 +51,11 @@ export async function updateGuest(formData) {
 }
 
 /**
- * Update an existing booking's guest count and observations for the authenticated guest.
+ * Update the authenticated guest's booking with a new guest count and observations.
  *
- * @param {FormData} formData - Form data containing `bookingId`, `numGuests`, and `observations`.
+ * Updates the booking record, triggers page revalidation for the edit page, and redirects to the reservations list.
+ *
+ * @param {FormData} formData - Form data containing `bookingId`, `numGuests`, and optional `observations`.
  * @throws {Error} If the user is not authenticated or has no associated guestId.
  * @throws {Error} If `numGuests` is not a finite integer greater than or equal to 1.
  * @throws {Error} If the booking does not belong to the authenticated guest.
@@ -63,9 +65,13 @@ export async function updateGuest(formData) {
 export async function updateBooking(formData) {
   const bookingId = Number(formData.get("bookingId"));
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   if (!Number.isFinite(numGuests) || numGuests <= 0) {
@@ -75,17 +81,22 @@ export async function updateBooking(formData) {
   const guestBookings = await getBookings(guestId);
   const booking = guestBookings.find((item) => item.id === bookingId);
 
-  if (!booking)
+  if (!booking) {
     throw new Error("You are not allowed to update this booking.");
+  }
 
   const maxCapacity = booking?.cabins?.maxCapacity;
   if (Number.isFinite(maxCapacity) && numGuests > maxCapacity) {
     throw new Error("Number of guests exceeds cabin capacity");
   }
 
+  const observationsValue = formData.get("observations");
+  const observations =
+    typeof observationsValue === "string" ? observationsValue : "";
+
   const updateData = {
     numGuests,
-    observations: formData.get("observations").slice(0, 1000),
+    observations: observations.slice(0, 1000),
   };
 
   const { error } = await supabaseServer
@@ -93,7 +104,9 @@ export async function updateBooking(formData) {
     .update(updateData)
     .eq("id", bookingId);
 
-  if (error) throw new Error("Booking could not be updated");
+  if (error) {
+    throw new Error("Booking could not be updated");
+  }
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
 
@@ -101,11 +114,10 @@ export async function updateBooking(formData) {
 }
 
 /**
- * Create a booking for the authenticated guest using the provided booking values and form inputs.
+ * Create a new unconfirmed booking for the authenticated guest using provided booking values and form inputs.
  *
- * Validates the booking dates, nights, and guest count against the cabin's capacity, constructs and inserts
- * a new booking record (with default flags and status "unconfirmed"), triggers revalidation for reservations and
- * the booked cabin, and redirects the user to the booking thank-you page.
+ * Validates the requested dates, nights, and guest count against the cabin's constraints, inserts a booking record
+ * with default flags and pricing, then revalidates relevant pages and redirects to the booking thank-you page.
  *
  * @param {Object} bookingData - Booking-related values for the requested stay.
  * @param {string|Date|null} bookingData.startDate - Requested start date.
@@ -121,9 +133,13 @@ export async function updateBooking(formData) {
  */
 export async function createBooking(bookingData, formData) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   const startDate = bookingData.startDate
@@ -158,6 +174,9 @@ export async function createBooking(bookingData, formData) {
     cabin.regularPrice,
     cabin.discount
   );
+  const observationsValue = formData.get("observations");
+  const observations =
+    typeof observationsValue === "string" ? observationsValue : "";
 
   const newBooking = {
     startDate,
@@ -167,7 +186,7 @@ export async function createBooking(bookingData, formData) {
     cabinId,
     guestId,
     numGuests,
-    observations: formData.get("observations").slice(0, 1000),
+    observations: observations.slice(0, 1000),
     extrasPrice: 0,
     totalPrice: cabinPrice,
     isPaid: false,
@@ -195,6 +214,11 @@ export async function createBooking(bookingData, formData) {
  * @throws {Error} If the deletion operation fails.
  */
 export async function deleteBooking(bookingId) {
+  const numericBookingId = Number(bookingId);
+  if (!Number.isFinite(numericBookingId)) {
+    throw new Error("Invalid booking ID");
+  }
+
   const session = await auth();
   if (!session) {
     throw new Error("You must be logged in");
@@ -208,29 +232,18 @@ export async function deleteBooking(bookingId) {
   const guestBookings = await getBookings(guestId);
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 
-  if (!guestBookingIds.includes(bookingId)) {
+  if (!guestBookingIds.includes(numericBookingId)) {
     throw new Error("You are not allowed to delete this booking.");
   }
 
   const { error } = await supabaseServer
     .from("bookings")
     .delete()
-    .eq("id", bookingId);
+    .eq("id", numericBookingId);
 
   if (error) {
     throw new Error("Booking could not be deleted");
   }
 
   revalidatePath("/account/reservations");
-}
-
-export async function signInAction() {
-  await signIn("google", { redirectTo: "/account" });
-}
-
-/**
- * Signs the current user out and redirects to the site root ("/").
- */
-export async function signOutAction() {
-  await signOut({ redirectTo: "/" });
 }
