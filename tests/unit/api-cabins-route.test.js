@@ -5,7 +5,7 @@ const { getCabinMock, getBookedDatesMock } = vi.hoisted(() => ({
   getBookedDatesMock: vi.fn(),
 }));
 
-vi.mock("../app/_lib/data-service", () => ({
+vi.mock("../../app/_lib/data-service", () => ({
   getCabin: getCabinMock,
   getBookedDatesByCabinId: getBookedDatesMock,
 }));
@@ -20,7 +20,7 @@ describe("GET /api/cabins/[cabinId]", () => {
     getCabinMock.mockResolvedValue({ id: 1, name: "Test Cabin" });
     getBookedDatesMock.mockResolvedValue([date]);
 
-    const { GET } = await import("../app/api/cabins/[cabinId]/route.js");
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
     const response = await GET(new Request("http://localhost/api/cabins/1"), {
       params: { cabinId: "1" },
     });
@@ -39,7 +39,7 @@ describe("GET /api/cabins/[cabinId]", () => {
     getCabinMock.mockRejectedValue(new Error("boom"));
     getBookedDatesMock.mockResolvedValue([]);
 
-    const { GET } = await import("../app/api/cabins/[cabinId]/route.js");
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
     const response = await GET(new Request("http://localhost/api/cabins/1"), {
       params: { cabinId: "1" },
     });
