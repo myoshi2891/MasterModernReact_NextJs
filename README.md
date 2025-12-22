@@ -56,9 +56,9 @@ The Wild Oasisは、ゲストが高級キャビンを閲覧し、空室状況を
 
 | カテゴリ | 技術 | バージョン | 目的 |
 |---------|------|-----------|------|
-| フレームワーク | next | 14.2.32 | App Router、Server Components、ISR |
+| フレームワーク | next | 14.2.35 | App Router、Server Components、ISR |
 | UIライブラリ | react | ^18 | SSRサポート付きコンポーネントベースUI |
-| 認証 | next-auth | ^5.0.0-beta.23 | OAuth統合とセッション管理 |
+| 認証 | next-auth | 4.24.13 | OAuth統合とセッション管理 |
 | データベース | @supabase/supabase-js | ^2.56.0 | リアルタイム機能付きPostgreSQLデータベース |
 | スタイリング | tailwindcss | ^3.4.1 | ユーティリティファーストCSSフレームワーク |
 | アイコン | @heroicons/react | ^2.1.5 | Reactアイコンライブラリ |

@@ -36,7 +36,7 @@
 - 主要ページとルート
 - 予約作成・編集・削除のサーバーアクション
 - Supabase とのデータアクセスと RLS 前提
-- NextAuth v5 認証フロー
+- NextAuth v4 認証フロー
 - API ルート `/api/cabins/[cabinId]`
 
 ## 3. テスト対象外

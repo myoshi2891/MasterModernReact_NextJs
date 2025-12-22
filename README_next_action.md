@@ -1,4 +1,4 @@
-Awesome—let’s wire **Codex** to your repo and get value fast (review, tests, agent-y automation, safe concurrency). I skimmed your repo and docs and tailored everything below to **MasterModernReact_NextJs** (Next 14 App Router, Next-Auth v5 beta, Supabase, Tailwind; Node `>=20.19 <21`; Playwright/Vitest/@testing-library/react already in dev deps). ([GitHub][1])
+Awesome—let’s wire **Codex** to your repo and get value fast (review, tests, agent-y automation, safe concurrency). I skimmed your repo and docs and tailored everything below to **MasterModernReact_NextJs** (Next 14 App Router, NextAuth v4, Supabase, Tailwind; Node `>=20.19 <21`; Playwright/Vitest/@testing-library/react already in dev deps). ([GitHub][1])
 
 ---
 
@@ -43,7 +43,7 @@ From the repo root:
 ```bash
 # 1) Summarize the codebase & surface hotspots first
 codex "Explain this Next.js 14 app (App Router). Identify risk hotspots:
-- NextAuth v5 beta config, CSRF/session handling
+- NextAuth v4 config, CSRF/session handling
 - Supabase client usage/RLS assumptions/server actions
 - Data fetching performance (SSR/ISR/cache tags)
 - Image optimization & next.config.mjs domains"
@@ -66,7 +66,7 @@ Codex reads the repo and produces docs/patches without you copy-pasting files. K
 codex "/review app/**/*.js app/**/*.tsx:
 - Enforce our standards from .eslintrc.json
 - Flag N+1 queries or redundant Supabase roundtrips
-- Validate NextAuth v5 config & middleware auth guards
+- Validate NextAuth v4 config & middleware auth guards
 - Propose minimal diffs as patch hunks"
 ```
 
@@ -125,7 +125,7 @@ codex "Create Playwright specs for cabins > booking > account:
 # 4) Security & data correctness passes (high ROI)
 
 ```bash
-codex "Audit NextAuth v5 beta config:
+codex "Audit NextAuth v4 config:
 - Session strategy, CSRF, callback URLs, trustHost, cookies, secure flag
 - Add regression tests for auth routes and middleware"
 ```
@@ -206,7 +206,7 @@ If/when you want more, move to the **Agents SDK** + **MCP** (Git/FS tools only),
 
 ```text
 [Review: security/perf]
-Review this diff for The Wild Oasis (Next 14, NextAuth v5 beta, Supabase):
+Review this diff for The Wild Oasis (Next 14, NextAuth v4, Supabase):
 - Flag auth/session/CSRF issues; propose minimal fixes
 - Eliminate N+1 or redundant fetches; show single-query alternatives
 - Explain each fix, add tests that fail-before / pass-after
