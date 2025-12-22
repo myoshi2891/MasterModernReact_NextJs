@@ -1,5 +1,15 @@
 import { getBookedDatesByCabinId, getCabin } from "@/app/_lib/data-service";
 
+/**
+ * Handle GET requests that fetch a cabin and its booked dates by cabinId.
+ *
+ * @param {Request} request - Incoming HTTP request.
+ * @param {{ params: { cabinId: string } }} context - Route context with `params.cabinId`.
+ * @returns {Response} A JSON response:
+ *  - success: `{ cabin, bookedDates }`
+ *  - not found (404): `{ message: "Cabin not found..." }`
+ *  - server error (500): `{ message: "Internal Server Error" }`
+ */
 export async function GET(request, { params }) {
 	const { cabinId } = params;
 
