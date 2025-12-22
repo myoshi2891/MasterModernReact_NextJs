@@ -1,6 +1,9 @@
 "use client";
 
-import { differenceInDays } from "date-fns";
+import {
+	calculateCabinPrice,
+	calculateNumNights,
+} from "@/app/_lib/booking";
 import { useReservation } from "./ReservationContext";
 import { createBooking } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
@@ -14,8 +17,8 @@ function ReservationForm({ cabin, user }) {
 	const startDate = range.from;
 	const endDate = range.to;
 
-	const numNights = differenceInDays(endDate, startDate);
-	const cabinPrice = numNights * (regularPrice - discount);
+	const numNights = calculateNumNights(startDate, endDate);
+	const cabinPrice = calculateCabinPrice(numNights, regularPrice, discount);
 
 	const bookingData = {
 		startDate,
@@ -23,6 +26,7 @@ function ReservationForm({ cabin, user }) {
 		numNights,
 		cabinPrice,
 		cabinId: id,
+		maxCapacity,
 	};
 
 	const createBookingWithData = createBooking.bind(null, bookingData);

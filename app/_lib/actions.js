@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth, signIn, signOut } from "./auth";
+import { validateBookingInput } from "./booking";
 import { getBookings } from "./data-service";
+import { normalizeNationalId } from "./guest";
 import { supabaseServer } from "./supabaseServer";
 
 export async function updateGuest(formData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
-  const nationalIDRaw = formData.get("nationalID")?.toString().trim() ?? "";
+  const nationalIDRaw = normalizeNationalId(formData.get("nationalID"));
   const nationalityField = formData.get("nationality")?.toString() ?? "";
   const [nationality = "", countryFlag = ""] = nationalityField.split("%");
 
@@ -66,10 +68,24 @@ export async function createBooking(bookingData, formData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
+  const numGuests = Number(formData.get("numGuests"));
+
+  validateBookingInput({
+    startDate: bookingData.startDate,
+    endDate: bookingData.endDate,
+    numNights: bookingData.numNights,
+    numGuests,
+    maxCapacity: bookingData.maxCapacity,
+  });
+
   const newBooking = {
-    ...bookingData,
+    startDate: bookingData.startDate,
+    endDate: bookingData.endDate,
+    numNights: bookingData.numNights,
+    cabinPrice: bookingData.cabinPrice,
+    cabinId: bookingData.cabinId,
     guestId: session.user.guestId,
-    numGuests: Number(formData.get("numGuests")),
+    numGuests,
     observations: formData.get("observations").slice(0, 1000),
     extrasPrice: 0,
     totalPrice: bookingData.cabinPrice,
