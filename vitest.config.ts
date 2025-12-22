@@ -11,14 +11,29 @@ export default defineConfig({
     loader: "jsx",
   },
   test: {
-    environment: "node",
-    environmentMatchGlobs: [["tests/component/**", "jsdom"]],
     setupFiles: ["./tests/setup.ts"],
-    include: ["tests/unit/**/*.test.*", "tests/component/**/*.test.*"],
     exclude: ["tests/e2e/**"],
     clearMocks: true,
     restoreMocks: true,
     mockReset: true,
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          environment: "node",
+          include: ["tests/unit/**/*.test.*"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "component",
+          environment: "jsdom",
+          include: ["tests/component/**/*.test.*"],
+        },
+      },
+    ],
   },
   resolve: {
     alias: {
