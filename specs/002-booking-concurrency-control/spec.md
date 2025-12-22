@@ -23,13 +23,33 @@
 - 現状は **service-role** で DB にアクセスしており RLS をバイパスする
 - 日付レンジは **[startDate, endDate)**（チェックアウト日は空ける）
 
+## 実装前の確認事項（必須）
+### startDate/endDate の型確認
+```
+select column_name, data_type
+from information_schema.columns
+where table_name = 'bookings'
+  and column_name in ('startDate', 'endDate');
+```
+- `timestamptz` の場合: `tstzrange(startDate, endDate, '[)')`
+- `date` の場合: `daterange(startDate, endDate, '[)')`
+
+### status の実値確認
+```
+select distinct status
+from bookings
+order by status;
+```
+- 実値に合わせて「キャンセル扱いの値」を確定する
+- 必要なら `status` のチェック制約/ENUM を導入する
+
 ## 用語 / データモデル
 - `bookings`: 予約レコード
   - `cabinId` (FK)
   - `guestId` (FK)
   - `startDate`, `endDate`（日付またはタイムスタンプ）
   - `numGuests`
-  - `status`: `unconfirmed`, `checked-in`, `checked-out`, `canceled` を想定
+  - `status`: 実データ確認後に確定（例: `unconfirmed`, `checked-in`, `checked-out`, `canceled`）
 - `cabins`: `maxCapacity`, `regularPrice`, `discount`
 
 ## 現状の問題
@@ -72,6 +92,7 @@
 ```
 create extension if not exists btree_gist;
 
+-- timestamptz の場合
 alter table bookings
   add constraint bookings_no_overlap
   exclude using gist (
@@ -79,9 +100,18 @@ alter table bookings
     tstzrange(startDate, endDate, '[)') with &&
   )
   where (status <> 'canceled');
+
+-- date の場合
+alter table bookings
+  add constraint bookings_no_overlap
+  exclude using gist (
+    cabinId with =,
+    daterange(startDate, endDate, '[)') with &&
+  )
+  where (status <> 'canceled');
 ```
 - `[)` により、チェックアウト日と次のチェックイン日が同日でも許容
-- `tstzrange` は `timestamptz` 前提。`date` 型の場合は `daterange` に置換
+- 日付型に応じて `tstzrange` か `daterange` を選択
 - 競合エラーコード: `23P01`（exclusion violation）
 
 ### 2. チェック制約（基本整合性）
@@ -94,6 +124,15 @@ alter table bookings
 ```
 - エラーコード: `23514`（check violation）
 
+### 2.5 status チェック（任意）
+```
+alter table bookings
+  add constraint bookings_status_check
+  check (status in ('unconfirmed', 'checked-in', 'checked-out', 'canceled'));
+```
+- 実データの確認後に有効化する
+- エラーコード: `23514`（check violation）
+
 ### 3. キャパシティチェック（トリガー）
 ```
 create or replace function check_booking_capacity()
@@ -102,10 +141,10 @@ declare max_cap int;
 begin
   select maxCapacity into max_cap from cabins where id = new.cabinId;
   if max_cap is null then
-    raise exception 'Cabin not found';
+    raise exception using errcode = 'P0001', message = 'CABIN_NOT_FOUND';
   end if;
   if new.numGuests > max_cap then
-    raise exception 'Number of guests exceeds cabin capacity';
+    raise exception using errcode = 'P0001', message = 'CAPACITY_EXCEEDED';
   end if;
   return new;
 end;
@@ -120,10 +159,16 @@ for each row execute function check_booking_capacity();
 ### 4. idempotency key（任意）
 ```
 alter table bookings add column clientRequestId uuid;
-create unique index bookings_request_id_unique on bookings (clientRequestId);
+create unique index bookings_request_id_unique
+  on bookings (clientRequestId)
+  where clientRequestId is not null;
 ```
 - 二重送信は `23505`（unique violation）で検出可能
 - 必要なら `(guestId, clientRequestId)` の複合 unique も選択肢
+- 生成元は **クライアント**（例: `crypto.randomUUID()`）とし、同一予約試行中は値を保持する
+- server action は `clientRequestId` を必須パラメータとして受け取る設計が望ましい
+- 予約完了または日付変更時に新しい `clientRequestId` を再生成する
+- UUIDの衝突は現実的に無視できるため、TTLは必須ではない
 
 ## アプリ側のエラーマッピング
 | SQLSTATE | 原因 | HTTP | 返却メッセージ例 |
@@ -131,6 +176,8 @@ create unique index bookings_request_id_unique on bookings (clientRequestId);
 | 23P01 | 予約期間の重複 | 409 | 選択日程は既に予約されています |
 | 23514 | 日付順序/人数不正 | 400 | 入力内容に誤りがあります |
 | 23505 | clientRequestId 重複 | 409 | 既に処理済みのリクエストです |
+| P0001 | CAPACITY_EXCEEDED | 400 | 定員を超えています |
+| P0001 | CABIN_NOT_FOUND | 404 | キャビンが見つかりません |
 
 ## RLS（認可）の方針
 - **service-role では RLS は無効**。重複予約対策は DB 制約で担保する。
@@ -146,6 +193,7 @@ using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int =
 
 ## エラーハンドリング指針
 - Supabase error の `code` を判定
+- `code = 'P0001'` の場合は `message` を判定して CAPACITY_EXCEEDED / CABIN_NOT_FOUND を切り分ける
 - PII を含む詳細はログに残さない
 - クライアントにはユーザー向けメッセージのみ返す
 
@@ -156,6 +204,11 @@ using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int =
 4. insert を実行し、DB制約により競合/不正値を検出
 5. DBエラーコードを HTTP に変換し返却
 
+## パフォーマンス考慮
+- GiST index は書き込み時に追加オーバーヘッドが発生する
+- 目安: 予約件数 × 約100〜200バイトのインデックス容量（要計測）
+- INSERT/UPDATE の遅延は数ms程度の増加が想定されるため、ステージングでベンチマークを実施する
+
 ## 受入基準
 - 同一キャビン・同一期間の予約は DB で拒否される
 - 競合時のレスポンスは 409 で返る
@@ -164,9 +217,10 @@ using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int =
 - 同一リクエスト ID の再送が重複予約にならない（導入時）
 
 ## 移行戦略
-1. 既存予約の重複チェック
-2. 問題があれば `status = 'canceled'` などで整理
-3. 排他制約・チェック制約・トリガーを順次適用
+1. 既存予約の重複チェック（事前検査SQL）
+2. 重複がある場合は**自動クリーンアップスクリプト**で整理（手動運用は避ける）
+3. dry-run を実施して影響範囲を確認
+4. 排他制約・チェック制約・トリガーを順次適用
 
 ## 事前検査SQL（例）
 ### 重複予約の検出
@@ -181,6 +235,7 @@ join bookings b2
 where b1.status <> 'canceled'
   and b2.status <> 'canceled';
 ```
+- `date` 型の場合は `daterange` に置換する
 
 ### 日付の逆転検出
 ```
@@ -188,6 +243,27 @@ select id, cabinId, startDate, endDate
 from bookings
 where startDate >= endDate;
 ```
+
+## 事前クリーンアップSQL（例）
+```
+-- 重複予約のうち、後から作成された方をキャンセル
+with conflicts as (
+  select b2.id
+  from bookings b1
+  join bookings b2
+    on b1.cabinId = b2.cabinId
+   and b1.id < b2.id
+   and tstzrange(b1.startDate, b1.endDate, '[)') &&
+       tstzrange(b2.startDate, b2.endDate, '[)')
+  where b1.status <> 'canceled'
+    and b2.status <> 'canceled'
+)
+update bookings
+set status = 'canceled'
+where id in (select id from conflicts);
+```
+- `date` 型の場合は `daterange` に置換する
+- どちらをキャンセルするかのルールは業務要件に合わせて調整する
 
 ## ロールバック
 - 排他制約・チェック制約・トリガーの DROP
