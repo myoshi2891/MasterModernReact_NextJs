@@ -20,17 +20,22 @@ export async function GET(request, { params }) {
 		]);
 		return Response.json({ cabin, bookedDates });
 	} catch (error) {
-		const message = error?.message ?? "";
+		const message = typeof error?.message === "string" ? error.message : "";
 		const isNotFound =
 			error?.digest === "NEXT_NOT_FOUND" ||
 			message === "NEXT_NOT_FOUND" ||
-			message.toLowerCase().includes("not found");
+			message === "Cabin not found" ||
+			message === "Cabin not found...";
 
 		if (isNotFound) {
 			return Response.json({ message: "Cabin not found..." }, { status: 404 });
 		}
 
-		console.error("Error fetching cabin:", error);
+		if (process.env.NODE_ENV === "production") {
+			console.error("Error fetching cabin:", message || "Unknown error");
+		} else {
+			console.error("Error fetching cabin:", error);
+		}
 		return Response.json(
 			{ message: "Internal Server Error" },
 			{ status: 500 }
