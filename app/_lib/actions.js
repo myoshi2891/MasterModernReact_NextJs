@@ -51,9 +51,11 @@ export async function updateGuest(formData) {
 }
 
 /**
- * Update an existing booking's guest count and observations for the authenticated guest.
+ * Update the authenticated guest's booking with a new guest count and observations.
  *
- * @param {FormData} formData - Form data containing `bookingId`, `numGuests`, and `observations`.
+ * Updates the booking record, triggers page revalidation for the edit page, and redirects to the reservations list.
+ *
+ * @param {FormData} formData - Form data containing `bookingId`, `numGuests`, and optional `observations`.
  * @throws {Error} If the user is not authenticated or has no associated guestId.
  * @throws {Error} If `numGuests` is not a finite integer greater than or equal to 1.
  * @throws {Error} If the booking does not belong to the authenticated guest.
@@ -112,11 +114,10 @@ export async function updateBooking(formData) {
 }
 
 /**
- * Create a booking for the authenticated guest using the provided booking values and form inputs.
+ * Create a new unconfirmed booking for the authenticated guest using provided booking values and form inputs.
  *
- * Validates the booking dates, nights, and guest count against the cabin's capacity, constructs and inserts
- * a new booking record (with default flags and status "unconfirmed"), triggers revalidation for reservations and
- * the booked cabin, and redirects the user to the booking thank-you page.
+ * Validates the requested dates, nights, and guest count against the cabin's constraints, inserts a booking record
+ * with default flags and pricing, then revalidates relevant pages and redirects to the booking thank-you page.
  *
  * @param {Object} bookingData - Booking-related values for the requested stay.
  * @param {string|Date|null} bookingData.startDate - Requested start date.

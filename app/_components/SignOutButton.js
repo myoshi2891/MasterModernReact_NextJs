@@ -3,6 +3,13 @@
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
 import { signOut } from "next-auth/react";
 
+/**
+ * Renders a sign-out button for ending the current session.
+ *
+ * The button calls `signOut({ callbackUrl: '/' })` when clicked and displays an icon with the label "Sign out".
+ * Styled for full-width layout and hover states.
+ * @returns {JSX.Element} A button element that signs the user out and redirects to the root path.
+ */
 function SignOutButton() {
 	return (
 		<button
