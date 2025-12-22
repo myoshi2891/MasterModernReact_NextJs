@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 vi.mock("../../app/_lib/actions", () => ({
@@ -35,6 +35,10 @@ async function renderForm(overrides = {}) {
 }
 
 describe("UpdateProfileForm", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
   it("connects labels to inputs and disables profile fields", async () => {
     await renderForm();
 

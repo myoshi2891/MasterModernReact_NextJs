@@ -6,15 +6,15 @@ const { authMock, getBookingsMock } = vi.hoisted(() => ({
   getBookingsMock: vi.fn(),
 }));
 
-vi.mock("@/app/_lib/auth", () => ({
+vi.mock("../../app/_lib/auth", () => ({
   auth: authMock,
 }));
 
-vi.mock("@/app/_lib/data-service", () => ({
+vi.mock("../../app/_lib/data-service", () => ({
   getBookings: getBookingsMock,
 }));
 
-vi.mock("@/app/_components/ReservationList", () => ({
+vi.mock("../../app/_components/ReservationList", () => ({
   default: () => <div>Reservation list</div>,
 }));
 
