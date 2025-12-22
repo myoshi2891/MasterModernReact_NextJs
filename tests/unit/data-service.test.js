@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "../msw/server";
 
@@ -27,6 +27,10 @@ vi.mock("next/navigation", () => ({
 describe("data-service", () => {
   beforeEach(() => {
     vi.resetModules();
+  });
+
+  afterEach(() => {
+    server.resetHandlers();
   });
 
   it("returns cabins ordered by name", async () => {
