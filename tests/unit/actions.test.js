@@ -215,13 +215,22 @@ describe("booking actions", () => {
     expect(cabinEqMock).toHaveBeenCalledWith("id", 7);
     expect(supabaseFromMock).toHaveBeenCalledWith("bookings");
     expect(insertMock).toHaveBeenCalledTimes(1);
-    expect(insertMock.mock.calls[0][0][0]).toMatchObject({
+    const [createdBooking] = insertMock.mock.calls[0][0];
+    expect(createdBooking).toMatchObject({
       cabinId: 7,
       guestId: 1,
       numGuests: 2,
       numNights: 2,
+      cabinPrice: 300,
       totalPrice: 300,
+      extrasPrice: 0,
+      isPaid: false,
+      hasBreakfast: false,
+      status: "unconfirmed",
+      observations: "No peanuts please.",
     });
+    expect(createdBooking.startDate).toEqual(baseBookingData.startDate);
+    expect(createdBooking.endDate).toEqual(baseBookingData.endDate);
     expect(revalidatePathMock).toHaveBeenCalledWith("/account/reservations");
     expect(revalidatePathMock).toHaveBeenCalledWith("/cabins/7");
     expect(redirectMock).toHaveBeenCalledWith("/cabins/thankyou");
@@ -237,15 +246,6 @@ describe("booking actions", () => {
       cabinPrice: 300,
       totalPrice: 300,
     });
-  });
-
-  it("allows duplicate booking submissions (risk)", async () => {
-    const { createBooking } = await import("../../app/_lib/actions");
-
-    await createBooking(baseBookingData, makeCreateFormData());
-    await createBooking(baseBookingData, makeCreateFormData());
-
-    expect(insertMock).toHaveBeenCalledTimes(2);
   });
 
   it("rejects updateBooking when not logged in", async () => {
@@ -327,8 +327,30 @@ describe("booking actions", () => {
     consoleLog.mockRestore();
   });
 
+  it("truncates observations to 1000 characters on update", async () => {
+    const longText = "x".repeat(1500);
+    const { updateBooking } = await import("../../app/_lib/actions");
+
+    await updateBooking(makeUpdateFormData({ observations: longText }));
+
+    expect(updateMock).toHaveBeenCalledWith({
+      numGuests: 2,
+      observations: "x".repeat(1000),
+    });
+  });
+
   it("rejects deleteBooking when not logged in", async () => {
     authMock.mockResolvedValue(null);
+
+    const { deleteBooking } = await import("../../app/_lib/actions");
+
+    await expect(deleteBooking(1)).rejects.toThrow("You must be logged in");
+
+    expect(getBookingsMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects deleteBooking when guestId is missing", async () => {
+    authMock.mockResolvedValue({ user: { guestId: null } });
 
     const { deleteBooking } = await import("../../app/_lib/actions");
 

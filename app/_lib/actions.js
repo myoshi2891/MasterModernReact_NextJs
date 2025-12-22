@@ -24,7 +24,9 @@ import { supabaseServer } from "./supabaseServer";
  */
 export async function updateGuest(formData) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
 
   const nationalIDRaw = normalizeNationalId(formData.get("nationalID"));
   const nationalityField = formData.get("nationality")?.toString() ?? "";
@@ -41,7 +43,9 @@ export async function updateGuest(formData) {
     .update(updateData)
     .eq("id", session.user.guestId);
 
-  if (error) throw new Error("Guest could not be updated");
+  if (error) {
+    throw new Error("Guest could not be updated");
+  }
 
   revalidatePath("/account/profile");
 }
@@ -59,9 +63,13 @@ export async function updateGuest(formData) {
 export async function updateBooking(formData) {
   const bookingId = Number(formData.get("bookingId"));
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   if (!Number.isFinite(numGuests) || numGuests <= 0) {
@@ -71,8 +79,9 @@ export async function updateBooking(formData) {
   const guestBookings = await getBookings(guestId);
   const booking = guestBookings.find((item) => item.id === bookingId);
 
-  if (!booking)
+  if (!booking) {
     throw new Error("You are not allowed to update this booking.");
+  }
 
   const maxCapacity = booking?.cabins?.maxCapacity;
   if (Number.isFinite(maxCapacity) && numGuests > maxCapacity) {
@@ -89,7 +98,9 @@ export async function updateBooking(formData) {
     .update(updateData)
     .eq("id", bookingId);
 
-  if (error) throw new Error("Booking could not be updated");
+  if (error) {
+    throw new Error("Booking could not be updated");
+  }
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
 
@@ -117,9 +128,13 @@ export async function updateBooking(formData) {
  */
 export async function createBooking(bookingData, formData) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const numGuests = Number(formData.get("numGuests"));
   const startDate = bookingData.startDate
@@ -144,6 +159,8 @@ export async function createBooking(bookingData, formData) {
     numNights: bookingData.numNights,
     numGuests,
     maxCapacity: cabin.maxCapacity,
+    regularPrice: cabin.regularPrice,
+    discount: cabin.discount,
   });
 
   const numNights = calculateNumNights(startDate, endDate);
@@ -171,7 +188,9 @@ export async function createBooking(bookingData, formData) {
 
   const { error } = await supabaseServer.from("bookings").insert([newBooking]);
 
-  if (error) throw new Error("Booking could not be created");
+  if (error) {
+    throw new Error("Booking could not be created");
+  }
 
   revalidatePath("/account/reservations");
   revalidatePath(`/cabins/${cabinId}`);
@@ -188,23 +207,30 @@ export async function createBooking(bookingData, formData) {
  */
 export async function deleteBooking(bookingId) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in");
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
 
   const guestId = session.user?.guestId;
-  if (!guestId) throw new Error("You must be logged in");
+  if (!guestId) {
+    throw new Error("You must be logged in");
+  }
 
   const guestBookings = await getBookings(guestId);
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 
-  if (!guestBookingIds.includes(bookingId))
+  if (!guestBookingIds.includes(bookingId)) {
     throw new Error("You are not allowed to delete this booking.");
+  }
 
   const { error } = await supabaseServer
     .from("bookings")
     .delete()
     .eq("id", bookingId);
 
-  if (error) throw new Error("Booking could not be deleted");
+  if (error) {
+    throw new Error("Booking could not be deleted");
+  }
 
   revalidatePath("/account/reservations");
 }

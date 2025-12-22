@@ -58,14 +58,6 @@ describe("booking utils", () => {
     expect(calculateCabinPrice(2, 150, 0)).toBe(300);
   });
 
-  it("calculates cabin price with a negative discount", () => {
-    expect(calculateCabinPrice(2, 150, -20)).toBe(340);
-  });
-
-  it("calculates cabin price when discount exceeds regular price", () => {
-    expect(calculateCabinPrice(1, 100, 150)).toBe(-50);
-  });
-
   it("returns false when the range is incomplete", () => {
     const range = { from: new Date("2025-01-01T00:00:00.000Z") };
     const bookedDates = [new Date("2025-01-02T00:00:00.000Z")];
@@ -234,6 +226,34 @@ describe("booking utils", () => {
         maxCapacity: 4,
       })
     ).toThrow("Number of guests exceeds cabin capacity");
+  });
+
+  it("rejects negative discounts when pricing is provided", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-05T00:00:00.000Z"),
+        numNights: 3,
+        numGuests: 2,
+        maxCapacity: 4,
+        regularPrice: 200,
+        discount: -10,
+      })
+    ).toThrow("Discount must be a non-negative number");
+  });
+
+  it("rejects discounts greater than the regular price", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-05T00:00:00.000Z"),
+        numNights: 3,
+        numGuests: 2,
+        maxCapacity: 4,
+        regularPrice: 100,
+        discount: 150,
+      })
+    ).toThrow("Discount cannot exceed regular price");
   });
 
   it("accepts valid booking input", () => {
