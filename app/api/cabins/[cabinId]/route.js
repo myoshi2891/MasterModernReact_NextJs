@@ -21,9 +21,7 @@ export async function GET(request, { params }) {
 		const message = typeof error?.message === "string" ? error.message : "";
 		const isNotFound =
 			error?.digest === "NEXT_NOT_FOUND" ||
-			message === "NEXT_NOT_FOUND" ||
-			message === "Cabin not found" ||
-			message === "Cabin not found...";
+			message === "NEXT_NOT_FOUND";
 
 		if (isNotFound) {
 			return Response.json({ message: "Cabin not found..." }, { status: 404 });
