@@ -33,8 +33,9 @@ function UpdateProfileForm({ children, guest }) {
       className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col"
     >
       <div className="space-y-2">
-        <label>Full name</label>
+        <label htmlFor="fullName">Full name</label>
         <input
+          id="fullName"
           disabled
           defaultValue={fullName}
           name="fullName"
@@ -43,8 +44,9 @@ function UpdateProfileForm({ children, guest }) {
       </div>
 
       <div className="space-y-2">
-        <label>Email address</label>
+        <label htmlFor="email">Email address</label>
         <input
+          id="email"
           disabled
           defaultValue={email}
           name="email"
@@ -72,6 +74,7 @@ function UpdateProfileForm({ children, guest }) {
       <div className="space-y-2">
         <label htmlFor="nationalID">National ID number</label>
         <input
+          id="nationalID"
           name="nationalID"
           defaultValue={nationalID ?? ""}
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
