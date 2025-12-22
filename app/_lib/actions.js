@@ -63,13 +63,9 @@ export async function updateGuest(formData) {
 export async function updateBooking(formData) {
   const bookingId = Number(formData.get("bookingId"));
   const session = await auth();
-  if (!session) {
-    throw new Error("You must be logged in");
-  }
+  if (!session) throw new Error("You must be logged in");
   const guestId = session.user?.guestId;
-  if (!guestId) {
-    throw new Error("You must be logged in");
-  }
+  if (!guestId) throw new Error("You must be logged in");
 
   const numGuests = Number(formData.get("numGuests"));
   if (!Number.isFinite(numGuests) || numGuests <= 0) {
@@ -79,9 +75,8 @@ export async function updateBooking(formData) {
   const guestBookings = await getBookings(guestId);
   const booking = guestBookings.find((item) => item.id === bookingId);
 
-  if (!booking) {
+  if (!booking)
     throw new Error("You are not allowed to update this booking.");
-  }
 
   const maxCapacity = booking?.cabins?.maxCapacity;
   if (Number.isFinite(maxCapacity) && numGuests > maxCapacity) {
@@ -98,9 +93,7 @@ export async function updateBooking(formData) {
     .update(updateData)
     .eq("id", bookingId);
 
-  if (error) {
-    throw new Error("Booking could not be updated");
-  }
+  if (error) throw new Error("Booking could not be updated");
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
 
@@ -128,13 +121,9 @@ export async function updateBooking(formData) {
  */
 export async function createBooking(bookingData, formData) {
   const session = await auth();
-  if (!session) {
-    throw new Error("You must be logged in");
-  }
+  if (!session) throw new Error("You must be logged in");
   const guestId = session.user?.guestId;
-  if (!guestId) {
-    throw new Error("You must be logged in");
-  }
+  if (!guestId) throw new Error("You must be logged in");
 
   const numGuests = Number(formData.get("numGuests"));
   const startDate = bookingData.startDate

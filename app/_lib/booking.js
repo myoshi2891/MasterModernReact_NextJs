@@ -53,14 +53,12 @@ export function isDateDisabled(date, bookedDates) {
 /**
  * Validate booking input fields and throw an Error when any validation rule fails.
  *
- * @param {{startDate: string|Date|null, endDate: string|Date|null, numNights: number, numGuests: number|string, maxCapacity?: number|string|null, regularPrice?: number|string|null, discount?: number|string|null}} params
+ * @param {{startDate: string|Date|null, endDate: string|Date|null, numNights: number, numGuests: number|string, maxCapacity?: number|string|null}} params
  * @param {string|Date|null} params.startDate - Booking start date; must be a valid date not in the past.
  * @param {string|Date|null} params.endDate - Booking end date; must be a valid date after `startDate`.
  * @param {number} params.numNights - Declared number of nights; must equal the calendar-day difference between `endDate` and `startDate` and be at least 1.
  * @param {number|string} params.numGuests - Number of guests; must be at least 1 (string values will be coerced to numbers).
  * @param {number|string|null} [params.maxCapacity] - Optional cabin capacity; if provided and numeric, `numGuests` must not exceed it.
- * @param {number|string|null} [params.regularPrice] - Optional regular price; if provided and numeric, must be a non-negative number.
- * @param {number|string|null} [params.discount] - Optional per-night discount; if provided and numeric, must be between 0 and `regularPrice`.
  *
  * @throws {Error} When dates are missing or invalid: "Booking dates are required".
  * @throws {Error} When end date is not after start date: "End date must be after start date".
@@ -69,9 +67,6 @@ export function isDateDisabled(date, bookedDates) {
  * @throws {Error} When `numNights` does not match the date range: "Number of nights does not match date range".
  * @throws {Error} When `numGuests` is not a positive finite number: "Number of guests must be at least 1".
  * @throws {Error} When `maxCapacity` is numeric and `numGuests` exceeds it: "Number of guests exceeds cabin capacity".
- * @throws {Error} When `regularPrice` is numeric and negative: "Regular price must be a non-negative number".
- * @throws {Error} When `discount` is numeric and negative: "Discount must be a non-negative number".
- * @throws {Error} When `discount` exceeds `regularPrice`: "Discount cannot exceed regular price".
  */
 export function validateBookingInput({
   startDate,
@@ -79,8 +74,6 @@ export function validateBookingInput({
   numNights,
   numGuests,
   maxCapacity,
-  regularPrice,
-  discount,
 }) {
   const parsedStart = startDate ? new Date(startDate) : null;
   const parsedEnd = endDate ? new Date(endDate) : null;
@@ -120,31 +113,5 @@ export function validateBookingInput({
   const capacity = Number(maxCapacity);
   if (Number.isFinite(capacity) && guests > capacity) {
     throw new Error("Number of guests exceeds cabin capacity");
-  }
-
-  const price = Number(regularPrice);
-  if (
-    regularPrice !== null &&
-    regularPrice !== undefined &&
-    (!Number.isFinite(price) || price < 0)
-  ) {
-    throw new Error("Regular price must be a non-negative number");
-  }
-
-  const discountValue = Number(discount);
-  if (
-    discount !== null &&
-    discount !== undefined &&
-    (!Number.isFinite(discountValue) || discountValue < 0)
-  ) {
-    throw new Error("Discount must be a non-negative number");
-  }
-
-  if (
-    Number.isFinite(price) &&
-    Number.isFinite(discountValue) &&
-    discountValue > price
-  ) {
-    throw new Error("Discount cannot exceed regular price");
   }
 }

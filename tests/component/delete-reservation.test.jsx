@@ -2,6 +2,10 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import DeleteReservation from "../../app/_components/DeleteReservation";
 
+vi.mock("../../app/_lib/actions", () => ({
+  deleteReservation: vi.fn(),
+}));
+
 describe("DeleteReservation", () => {
   afterEach(() => {
     vi.restoreAllMocks();
