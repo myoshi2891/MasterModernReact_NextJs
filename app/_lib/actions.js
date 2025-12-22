@@ -37,18 +37,29 @@ export async function updateGuest(formData) {
 
 export async function updateBooking(formData) {
   const bookingId = Number(formData.get("bookingId"));
-  console.log(formData);
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
+  const guestId = session.user?.guestId;
+  if (!guestId) throw new Error("You must be logged in");
 
-  const guestBookings = await getBookings(session.user.guestId);
-  const guestBookingIds = guestBookings.map((booking) => booking.id);
+  const numGuests = Number(formData.get("numGuests"));
+  if (!Number.isFinite(numGuests) || numGuests <= 0) {
+    throw new Error("Number of guests must be at least 1");
+  }
 
-  if (!guestBookingIds.includes(bookingId))
+  const guestBookings = await getBookings(guestId);
+  const booking = guestBookings.find((item) => item.id === bookingId);
+
+  if (!booking)
     throw new Error("You are not allowed to update this booking.");
 
+  const maxCapacity = booking?.cabins?.maxCapacity;
+  if (Number.isFinite(maxCapacity) && numGuests > maxCapacity) {
+    throw new Error("Number of guests exceeds cabin capacity");
+  }
+
   const updateData = {
-    numGuests: Number(formData.get("numGuests")),
+    numGuests,
     observations: formData.get("observations").slice(0, 1000),
   };
 
@@ -67,6 +78,8 @@ export async function updateBooking(formData) {
 export async function createBooking(bookingData, formData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
+  const guestId = session.user?.guestId;
+  if (!guestId) throw new Error("You must be logged in");
 
   const numGuests = Number(formData.get("numGuests"));
 
@@ -84,7 +97,7 @@ export async function createBooking(bookingData, formData) {
     numNights: bookingData.numNights,
     cabinPrice: bookingData.cabinPrice,
     cabinId: bookingData.cabinId,
-    guestId: session.user.guestId,
+    guestId,
     numGuests,
     observations: formData.get("observations").slice(0, 1000),
     extrasPrice: 0,
@@ -107,7 +120,10 @@ export async function deleteBooking(bookingId) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
 
-  const guestBookings = await getBookings(session.user.guestId);
+  const guestId = session.user?.guestId;
+  if (!guestId) throw new Error("You must be logged in");
+
+  const guestBookings = await getBookings(guestId);
   const guestBookingIds = guestBookings.map((booking) => booking.id);
 
   if (!guestBookingIds.includes(bookingId))
