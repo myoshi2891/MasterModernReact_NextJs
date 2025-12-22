@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { http, HttpResponse } from "msw";
+import { server } from "../msw/server";
 
 const { supabaseBrowserMock, supabaseServerMock, notFoundMock } = vi.hoisted(
   () => ({
@@ -10,11 +12,11 @@ const { supabaseBrowserMock, supabaseServerMock, notFoundMock } = vi.hoisted(
   })
 );
 
-vi.mock("../app/_lib/supabaseBrowser", () => ({
+vi.mock("../../app/_lib/supabaseBrowser", () => ({
   supabaseBrowser: supabaseBrowserMock,
 }));
 
-vi.mock("../app/_lib/supabaseServer", () => ({
+vi.mock("../../app/_lib/supabaseServer", () => ({
   supabaseServer: supabaseServerMock,
 }));
 
@@ -33,7 +35,7 @@ describe("data-service", () => {
     const select = vi.fn().mockReturnValue({ order });
     supabaseBrowserMock.from.mockReturnValue({ select });
 
-    const { getCabins } = await import("../app/_lib/data-service");
+    const { getCabins } = await import("../../app/_lib/data-service");
     const result = await getCabins();
 
     expect(supabaseBrowserMock.from).toHaveBeenCalledWith("cabins");
@@ -52,7 +54,7 @@ describe("data-service", () => {
     const select = vi.fn().mockReturnValue({ order });
     supabaseBrowserMock.from.mockReturnValue({ select });
 
-    const { getCabins } = await import("../app/_lib/data-service");
+    const { getCabins } = await import("../../app/_lib/data-service");
 
     await expect(getCabins()).rejects.toThrow("Cabins could not be loaded");
     consoleError.mockRestore();
@@ -67,7 +69,7 @@ describe("data-service", () => {
     const select = vi.fn().mockReturnValue({ eq });
     supabaseBrowserMock.from.mockReturnValue({ select });
 
-    const { getCabin } = await import("../app/_lib/data-service");
+    const { getCabin } = await import("../../app/_lib/data-service");
 
     await expect(getCabin(42)).rejects.toThrow("NEXT_NOT_FOUND");
     expect(notFoundMock).toHaveBeenCalled();
@@ -90,7 +92,9 @@ describe("data-service", () => {
     const select = vi.fn().mockReturnValue({ eq });
     supabaseBrowserMock.from.mockReturnValue({ select });
 
-    const { getBookedDatesByCabinId } = await import("../app/_lib/data-service");
+    const { getBookedDatesByCabinId } = await import(
+      "../../app/_lib/data-service"
+    );
     const result = await getBookedDatesByCabinId(7);
 
     expect(supabaseBrowserMock.from).toHaveBeenCalledWith("bookings");
@@ -106,42 +110,24 @@ describe("data-service", () => {
   });
 
   it("maps and filters countries from the API", async () => {
-    const originalFetch = globalThis.fetch;
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [
-        {
-          name: { common: "Japan" },
-          flags: { svg: "jp.svg" },
-        },
-        {
-          name: { common: "" },
-          flags: { png: "empty.png" },
-        },
-      ],
-    });
-    globalThis.fetch = fetchMock;
-
-    const { getCountries } = await import("../app/_lib/data-service");
+    const { getCountries } = await import("../../app/_lib/data-service");
     const countries = await getCountries();
 
-    expect(fetchMock).toHaveBeenCalled();
     expect(countries).toEqual([{ name: "Japan", flag: "jp.svg" }]);
-
-    globalThis.fetch = originalFetch;
   });
 
   it("throws when the countries API request fails", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    const originalFetch = globalThis.fetch;
-    const fetchMock = vi.fn().mockResolvedValue({ ok: false });
-    globalThis.fetch = fetchMock;
+    server.use(
+      http.get("https://restcountries.com/v3.1/all", () => {
+        return new HttpResponse(null, { status: 500 });
+      })
+    );
 
-    const { getCountries } = await import("../app/_lib/data-service");
+    const { getCountries } = await import("../../app/_lib/data-service");
 
     await expect(getCountries()).rejects.toThrow("Could not fetch countries");
 
-    globalThis.fetch = originalFetch;
     consoleError.mockRestore();
   });
 });
