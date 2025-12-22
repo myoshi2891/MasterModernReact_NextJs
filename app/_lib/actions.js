@@ -12,6 +12,16 @@ import { getBookings } from "./data-service";
 import { normalizeNationalId } from "./guest";
 import { supabaseServer } from "./supabaseServer";
 
+/**
+ * Update the authenticated guest's nationality, country flag, and national ID from submitted form data.
+ *
+ * Parses the `nationality` field (expected format "nationality%countryFlag") and normalizes the `nationalID`;
+ * empty values are stored as `null`. After a successful update the account profile page is revalidated.
+ *
+ * @param {FormData} formData - Form data with keys `nationality` and `nationalID`.
+ * @throws {Error} If the user is not authenticated.
+ * @throws {Error} If the guest record could not be updated.
+ */
 export async function updateGuest(formData) {
   const session = await auth();
   if (!session) throw new Error("You must be logged in");
@@ -87,20 +97,23 @@ export async function updateBooking(formData) {
 }
 
 /**
- * Create a new booking record for the authenticated guest using supplied booking and form data.
+ * Create a booking for the authenticated guest using the provided booking values and form inputs.
  *
- * Validates booking input (dates, nights, guest count against cabin capacity), truncates observations to 1000 characters,
- * inserts a booking with default flags (unpaid, no breakfast) and status "unconfirmed", triggers path revalidation for
- * reservations and the booked cabin, and redirects the user to the booking thank-you page.
+ * Validates the booking dates, nights, and guest count against the cabin's capacity, constructs and inserts
+ * a new booking record (with default flags and status "unconfirmed"), triggers revalidation for reservations and
+ * the booked cabin, and redirects the user to the booking thank-you page.
  *
- * @param {Object} bookingData - Booking-related values derived from the selected cabin and requested stay.
- * @param {string} bookingData.startDate - Booking start date (ISO string or date-like).
- * @param {string} bookingData.endDate - Booking end date (ISO string or date-like).
- * @param {number} bookingData.numNights - Number of nights for the booking.
- * @param {number} bookingData.cabinPrice - Price for the cabin used as the booking base price.
+ * @param {Object} bookingData - Booking-related values for the requested stay.
+ * @param {string|Date|null} bookingData.startDate - Requested start date.
+ * @param {string|Date|null} bookingData.endDate - Requested end date.
+ * @param {number} bookingData.numNights - Number of nights for the requested stay.
  * @param {string|number} bookingData.cabinId - Identifier of the cabin being booked.
- * @param {number} bookingData.maxCapacity - Cabin maximum guest capacity used for validation.
- * @param {FormData} formData - Form data submitted by the user; must include `numGuests` and may include `observations`.
+ * @param {FormData} formData - Submitted form data; must include `numGuests` and may include `observations`.
+ *
+ * @throws {Error} When the user is not authenticated.
+ * @throws {Error} When the cabin could not be loaded.
+ * @throws {Error} When booking input validation fails (invalid dates, nights, or guest count).
+ * @throws {Error} When the booking record could not be created.
  */
 export async function createBooking(bookingData, formData) {
   const session = await auth();
@@ -166,12 +179,11 @@ export async function createBooking(bookingData, formData) {
 }
 
 /**
- * Delete a booking owned by the currently authenticated guest and revalidate the reservations page.
+ * Remove a booking owned by the currently authenticated guest and revalidate the reservations page.
  *
  * @param {string} bookingId - ID of the booking to delete.
- * @throws {Error} If the user is not authenticated.
- * @throws {Error} If the authenticated user has no associated guestId.
- * @throws {Error} If the bookingId does not belong to the authenticated guest.
+ * @throws {Error} If the user is not authenticated or has no associated guestId.
+ * @throws {Error} If the specified bookingId is not owned by the authenticated guest.
  * @throws {Error} If the deletion operation fails.
  */
 export async function deleteBooking(bookingId) {
@@ -201,6 +213,9 @@ export async function signInAction() {
   await signIn("google", { redirectTo: "/account" });
 }
 
+/**
+ * Signs the current user out and redirects to the site root ("/").
+ */
 export async function signOutAction() {
   await signOut({ redirectTo: "/" });
 }
