@@ -4,6 +4,9 @@ import { getCabins } from "../_lib/data-service";
 
 async function CabinList({ filter }) {
 	// noStore();
+	if (process.env.SKIP_SSG === "true") {
+		return null;
+	}
 	const cabins = await getCabins();
 
 	if (!cabins.length) return null;

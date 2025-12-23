@@ -9,11 +9,17 @@ import { Suspense } from "react";
 // };
 
 export async function generateMetadata({ params }) {
+  if (process.env.SKIP_SSG === "true") {
+    return { title: "Cabin" };
+  }
   const { name } = await getCabin(params.cabinId);
   return { title: `Cabin ${name}` };
 }
 
 export async function generateStaticParams() {
+  if (process.env.SKIP_SSG === "true") {
+    return [];
+  }
   const cabins = await getCabins();
   const ids = cabins.map((cabin) => ({ cabinId: String(cabin.id) }));
 
