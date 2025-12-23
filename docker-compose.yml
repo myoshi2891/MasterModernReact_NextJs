@@ -35,7 +35,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/initdb/00_create_roles.sql:/docker-entrypoint-initdb.d/00_create_roles.sql:ro
       - ./docker/initdb/01_create_supabase_admin.sh:/docker-entrypoint-initdb.d/01_create_supabase_admin.sh:ro
-      - ./docker/initdb/05_set_timezone.sql:/docker-entrypoint-initdb.d/05_set_timezone.sql:ro
+      - ./docker/initdb/05_set_timezone.sh:/docker-entrypoint-initdb.d/05_set_timezone.sh:ro
       - ./docker/initdb/10_apply_migrations.sh:/docker-entrypoint-initdb.d/10_apply_migrations.sh:ro
       - ./supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
       - ./docker/postgres-healthcheck.sh:/usr/local/bin/postgres-healthcheck.sh:ro
