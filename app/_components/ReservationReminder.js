@@ -4,6 +4,12 @@ import { XMarkIcon } from "@heroicons/react/24/solid";
 import { format } from "date-fns";
 import { useReservation } from "./ReservationContext";
 
+/**
+ * Display a dismissible banner showing the selected reservation date range when both start and end dates are set.
+ *
+ * Renders a fixed, styled reminder with the formatted `range.from` and `range.to` dates and a close button that clears the range.
+ * @returns {JSX.Element|null} The reminder banner element, or `null` when either `range.from` or `range.to` is missing.
+ */
 function ReservationReminder() {
 	const { range, resetRange } = useReservation();
 	if (!range.from || !range.to) return null;

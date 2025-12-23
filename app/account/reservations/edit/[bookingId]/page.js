@@ -2,6 +2,13 @@ import SubmitButton from "@/app/_components/SubmitButton";
 import { updateBooking } from "@/app/_lib/actions";
 import { getBooking } from "@/app/_lib/data-service";
 
+/**
+ * Render an edit reservation page for the booking identified by `params.bookingId`.
+ *
+ * @param {{ params: { bookingId: string } }} props - Route props containing the booking identifier.
+ * @returns {JSX.Element} The JSX for the edit reservation form populated with the booking's values or sensible defaults.
+ * @throws {Error} If loading the booking data fails.
+ */
 export default async function Page({ params }) {
   const { bookingId } = params;
   let booking;

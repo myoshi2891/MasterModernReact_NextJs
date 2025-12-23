@@ -2,6 +2,15 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+/**
+ * Render a cabin-capacity filter UI that updates the URL's "capacity" query parameter without scrolling.
+ *
+ * The component reads the current "capacity" search parameter (defaults to "all") and renders four buttons
+ * ("All cabins", "2—3 guests", "4—7 guests", "8—12 guests"). Clicking a button sets the "capacity" query
+ * parameter to the corresponding value and replaces the current route without causing a page scroll.
+ *
+ * @returns {JSX.Element} The filter UI element.
+ */
 function Filter() {
 	const searchParams = useSearchParams();
 	const router = useRouter();

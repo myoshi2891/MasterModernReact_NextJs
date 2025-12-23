@@ -148,6 +148,11 @@ export async function getBookedDatesByCabinId(cabinId) {
   return bookedDates;
 }
 
+/**
+ * Retrieve the single settings record from the database.
+ * @returns {Object} The settings record from the "settings" table.
+ * @throws {Error} Throws an error with message "Settings could not be loaded" if the database query fails.
+ */
 export async function getSettings() {
   const { data, error } = await supabaseServer
     .from("settings")
@@ -188,12 +193,21 @@ const getCountriesCached = unstable_cache(
   { revalidate: 60 * 60 * 24 }
 );
 
+/**
+ * Return a list of countries with a display name and flag URL.
+ * @returns {Promise<Array<{name: string, flag: string}>>} An array of country objects where `name` is the country's common name and `flag` is a URL to the country's flag (SVG or PNG).
+ */
 export async function getCountries() {
   return getCountriesCached();
 }
 
 /////////////
-// CREATE
+/**
+ * Creates a new guest record in the database.
+ * @param {Object} newGuest - Guest data to insert; should contain the fields accepted by the `guests` table.
+ * @returns {Object} The created guest record as returned by the database.
+ * @throws {Error} When the insert fails; the thrown error's message will be "Guest could not be created" and it preserves the original database error `code`.
+ */
 
 export async function createGuest(newGuest) {
   const { data, error } = await supabaseServer

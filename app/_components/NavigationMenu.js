@@ -6,14 +6,13 @@ import Link from "next/link";
 import { useState } from "react";
 
 /**
- * Renders the site navigation with responsive desktop links and a toggleable mobile menu.
+ * Render a responsive site navigation with desktop links and a toggleable mobile menu.
  *
- * Displays horizontal navigation on medium and larger screens and an accessible, toggleable
- * mobile panel on small screens. Shows an account link with avatar when `session.user.image`
- * is present; otherwise shows a "Guest area" link. The mobile toggle button exposes
- * `aria-expanded` and `aria-controls="mobile-navigation-menu"` to link to the mobile panel.
+ * Shows horizontal navigation on medium and larger screens and an accessible collapsible
+ * mobile panel on small screens. Displays an account link that shows the user's name and
+ * avatar when `session.user.image` is present; otherwise shows a "Guest area" link.
  *
- * @param {{ user?: { name?: string, image?: string } }} session - Session object; when `user.image` is provided the component shows the user's avatar and name.
+ * @param {{ user?: { name?: string, image?: string } }} session - Session object; when `user.image` is provided the component displays the user's avatar and name linking to `/account`.
  * @returns {JSX.Element} The navigation menu component.
  */
 function NavigationMenu({ session }) {
