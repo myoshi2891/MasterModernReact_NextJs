@@ -36,4 +36,20 @@ describe("Reservations page", () => {
       screen.getByRole("link", { name: /luxury cabins/i })
     ).toHaveAttribute("href", "/cabins");
   });
+
+  it("renders the reservation list when bookings exist", async () => {
+    authMock.mockResolvedValue({ user: { guestId: 123 } });
+    getBookingsMock.mockResolvedValue([{ id: 1 }]);
+
+    const { default: ReservationsPage } = await import(
+      "../../app/account/reservations/page"
+    );
+    const ui = await ReservationsPage();
+    render(ui);
+
+    expect(screen.getByText(/reservation list/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/you have no reservations yet/i)
+    ).not.toBeInTheDocument();
+  });
 });

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Common Docker and Docker Compose aliases.
 # Source this file from your shell profile, e.g.:
 #   source "$(pwd)/scripts/docker-aliases.sh"

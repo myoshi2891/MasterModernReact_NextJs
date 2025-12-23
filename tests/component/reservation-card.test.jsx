@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import ReservationCard from "../../app/_components/ReservationCard";
 
 vi.mock("../../app/_components/DeleteReservation", () => ({
-  default: () => <button>Delete</button>,
+  default: () => <button type="button">Delete</button>,
 }));
 
 const baseBooking = {
