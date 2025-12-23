@@ -25,21 +25,25 @@
 
 ## 実装前の確認事項（必須）
 ### startDate/endDate の型確認
+
 ```
 select column_name, data_type
 from information_schema.columns
 where table_name = 'bookings'
   and column_name in ('startDate', 'endDate');
 ```
+
 - `timestamptz` の場合: `tstzrange(startDate, endDate, '[)')`
 - `date` の場合: `daterange(startDate, endDate, '[)')`
 
 ### status の実値確認
+
 ```
 select distinct status
 from bookings
 order by status;
 ```
+
 - 実値に合わせて「キャンセル扱いの値」を確定する
 - 必要なら `status` のチェック制約/ENUM を導入する
 
@@ -89,6 +93,7 @@ order by status;
 
 ## DB設計（詳細）
 ### 1. 排他制約（重複予約防止）
+
 ```
 create extension if not exists btree_gist;
 
@@ -110,11 +115,13 @@ alter table bookings
   )
   where (status <> 'canceled');
 ```
+
 - `[)` により、チェックアウト日と次のチェックイン日が同日でも許容
 - 日付型に応じて `tstzrange` か `daterange` を選択
 - 競合エラーコード: `23P01`（exclusion violation）
 
 ### 2. チェック制約（基本整合性）
+
 ```
 alter table bookings
   add constraint bookings_date_order check (startDate < endDate);
@@ -122,18 +129,22 @@ alter table bookings
 alter table bookings
   add constraint bookings_num_guests check (numGuests >= 1);
 ```
+
 - エラーコード: `23514`（check violation）
 
 ### 2.5 status チェック（任意）
+
 ```
 alter table bookings
   add constraint bookings_status_check
   check (status in ('unconfirmed', 'checked-in', 'checked-out', 'canceled'));
 ```
+
 - 実データの確認後に有効化する
 - エラーコード: `23514`（check violation）
 
 ### 3. キャパシティチェック（トリガー）
+
 ```
 create or replace function check_booking_capacity()
 returns trigger as $$
@@ -154,15 +165,18 @@ create trigger bookings_capacity_check
 before insert or update on bookings
 for each row execute function check_booking_capacity();
 ```
+
 - `update` で人数変更を許可する場合も防御できる
 
 ### 4. idempotency key（任意）
+
 ```
 alter table bookings add column clientRequestId uuid;
 create unique index bookings_request_id_unique
   on bookings (clientRequestId)
   where clientRequestId is not null;
 ```
+
 - 二重送信は `23505`（unique violation）で検出可能
 - 必要なら `(guestId, clientRequestId)` の複合 unique も選択肢
 - 生成元は **クライアント**（例: `crypto.randomUUID()`）とし、同一予約試行中は値を保持する
@@ -185,11 +199,13 @@ create unique index bookings_request_id_unique
 - NextAuth v4 の JWT に `guestId` を埋め込み
   - Supabaseに渡すトークンに custom claims を含める
   - policy 例:
+
 ```
 create policy "bookings_select_own"
 on bookings for select
 using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int = guestId);
 ```
+
 
 ## エラーハンドリング指針
 - Supabase error の `code` を判定
@@ -224,6 +240,7 @@ using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int =
 
 ## 事前検査SQL（例）
 ### 重複予約の検出
+
 ```
 select b1.id as booking1, b2.id as booking2, b1.cabinId
 from bookings b1
@@ -235,16 +252,20 @@ join bookings b2
 where b1.status <> 'canceled'
   and b2.status <> 'canceled';
 ```
+
 - `date` 型の場合は `daterange` に置換する
 
 ### 日付の逆転検出
+
 ```
 select id, cabinId, startDate, endDate
 from bookings
 where startDate >= endDate;
 ```
 
+
 ## 事前クリーンアップSQL（例）
+
 ```
 -- 重複予約のうち、後から作成された方をキャンセル
 with conflicts as (
@@ -262,6 +283,7 @@ update bookings
 set status = 'canceled'
 where id in (select id from conflicts);
 ```
+
 - `date` 型の場合は `daterange` に置換する
 - どちらをキャンセルするかのルールは業務要件に合わせて調整する
 

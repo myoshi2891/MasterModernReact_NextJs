@@ -4,10 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import DeleteReservation from "./DeleteReservation";
 
-export const formatDistanceFromNow = (dateStr) =>
-  formatDistance(parseISO(dateStr), new Date(), {
-    addSuffix: true,
-  }).replace("about ", "");
+export const formatDistanceFromNow = (dateInput) =>
+  formatDistance(
+    dateInput instanceof Date ? dateInput : parseISO(dateInput),
+    new Date(),
+    {
+      addSuffix: true,
+    },
+  ).replace("about ", "");
 
 /**
  * Render a reservation card for a cabin booking that displays dates, status, pricing, guest count, booking date, and edit/delete actions.
@@ -73,7 +77,7 @@ function ReservationCard({ booking, onDelete }) {
           {format(startDateValue, "EEE, MMM dd yyyy")} (
           {isToday(startDateValue)
             ? "Today"
-            : formatDistanceFromNow(startDate)}
+            : formatDistanceFromNow(startDateValue)}
           ) &mdash; {format(endDateValue, "EEE, MMM dd yyyy")}
         </p>
 
