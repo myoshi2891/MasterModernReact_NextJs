@@ -8,7 +8,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 | 完了 | dd56f85 | 2025-12-22 | fix: address review feedback and update auth deps | Next.js 14.2.35 / NextAuth 4.24.13 へ更新、認証/テスト/ドキュメント整理 |
 | 完了 | b8a43e9 | 2025-12-21 | Added Kilo Code/Spec Kit scaffolding (rules, workflows, constitution, templates, sample spec) plus a short usage README, and refactored the root-level spec plans for clearer structure while leaving application code untouched and only appending minimal cache ignores to .gitignore. | |
 | 完了 | ce3c6ef | 2025-12-21 | Next.js 14 App Router のJSコードベースを、挙動を変えずに段階的にTypeScriptへ移行&npm→Bun移行の計画 | |
-| 完了 | a84a143 | 2025-12-21 | Merge branch 'main' of github.com:myoshi2891/MasterModernReact_NextJs | |
+| 完了 | a84a143 | 2025-12-21 | Merge branch 'main' of GitHub.com:myoshi2891/MasterModernReact_NextJs | |
 | 完了 | f883897 | 2025-11-18 | Merge pull request #15 from myoshi2891/dependabot/npm_and_yarn/js-yaml-4.1.1 | |
 | 完了 | b95dea4 | 2025-11-16 | Bump js-yaml from 4.1.0 to 4.1.1 | |
 
@@ -74,6 +74,20 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - `npm run test:component`
 - 結果:
   - 全テスト成功（既存の `form action` 警告は継続）
+
+#### 5. 予約バリデーション/テスト追加（完了: 2025-12-22）
+
+- 対象ファイル:
+  - `tests/unit/actions.test.js`
+  - `app/_lib/booking.js`
+  - `app/_lib/actions.js`
+  - `tests/unit/booking-utils.test.js`
+- 変更内容:
+  - 重複予約テストを削除し、deleteBooking の `guestId=null` ケースを追加
+  - observations の文字数トリミング検証を追加
+  - `validateBookingInput` に `regularPrice`/`discount` の検証を追加
+  - `createBooking` に `regularPrice`/`discount` を渡すよう更新
+  - 割引境界値テストを調整
 
 ### 2025-12-21 変更内容まとめ（詳細）
 

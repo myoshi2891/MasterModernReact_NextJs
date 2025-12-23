@@ -32,6 +32,8 @@ codex                     # TUI sign-in (ChatGPT Plus/Pro/Team/Edu/Enterprise)
 export OPENAI_API_KEY="sk-..."   # if you prefer API key
 ```
 
+> Security note: avoid exporting secrets directly in the shell (they can land in history/logs). Prefer a `.env` file or a secrets manager, never commit `.env`, and clear shell history if you previously exported a key.
+
 > Why this matters here: your repo pins Node 20.19 and includes testing libs we’ll target (Vitest, Playwright). ([GitHub][1])
 
 ---

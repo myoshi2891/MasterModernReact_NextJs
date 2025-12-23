@@ -1,7 +1,7 @@
 # The Wild Oasis - 概要ドキュメント
 
-[![GitHub Stars](https://img.shields.io/github/stars/myoshi2891/MasterModernReact_NextJs?style=flat-square)](https://github.com/myoshi2891/Algorithm-DataStructures-Math-SQL/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/myoshi2891/MasterModernReact_NextJs?style=flat-square)](https://github.com/myoshi2891/Algorithm-DataStructures-Math-SQL/network/members)
+[![GitHub Stars](https://img.shields.io/github/stars/myoshi2891/MasterModernReact_NextJs?style=flat-square)](https://github.com/myoshi2891/MasterModernReact_NextJs/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/myoshi2891/MasterModernReact_NextJs?style=flat-square)](https://github.com/myoshi2891/MasterModernReact_NextJs/network/members)
 ![Languages](https://img.shields.io/badge/Languages-TypeScript%20|%20JavaScript-blue?style=flat-square)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/myoshi2891/MasterModernReact_NextJs)
 
@@ -287,7 +287,7 @@ the-wild-oasis-website/
 ├── middleware.js                    # ルート保護ミドルウェア
 ├── public/                          # 静的アセット
 ├── package.json                     # 依存関係とスクリプト
-├── next.config.js                   # Next.js設定
+├── next.config.mjs                  # Next.js設定
 ├── tailwind.config.js               # Tailwind CSS設定
 ├── jsconfig.json                    # JavaScriptコンパイラオプション
 └── .eslintrc.json                   # ESLint設定
@@ -354,7 +354,7 @@ the-wild-oasis-website/
 
 #### restcountries.com API
 
-- **エンドポイント**: `https://restcountries.com/v2/all`
+- **エンドポイント**: `https://restcountries.com/v3.1/all?fields=name,flags`
 - **目的**: プロフィール管理用の国データ取得
 - **実装**: `data-service.js`の`getCountries()`関数で呼び出し
 
@@ -395,15 +395,36 @@ sequenceDiagram
     U->>RF: フォーム送信
     RF->>SA: createBooking(bookingData)
     SA->>SA: auth()でセッション取得
-    SA->>DL: createBooking(newBooking)
-    DL->>SB: INSERT into bookings
-    SB-->>DL: booking.id
-    DL-->>SA: success
-    SA->>SA: revalidatePath('/cabins/[id]')
-    SA->>SA: revalidatePath('/account/reservations')
-    SA-->>RF: redirect('/cabins/thankyou')
-    RF-->>U: サンキューページ表示
+    SA->>SA: validateBookingInput()
+    alt バリデーション失敗
+        SA-->>RF: エラー(詳細)を返す
+        RF-->>U: フォームにエラーメッセージ表示
+    else OK
+        SA->>DL: createBooking(newBooking)
+        DL->>SB: INSERT into bookings
+        alt 重複予約/競合
+            SB-->>DL: error (conflict)
+            DL-->>SA: error
+            SA-->>RF: 予約不可メッセージ
+        else Supabaseエラー
+            SB-->>DL: error
+            DL-->>SA: error
+            SA-->>RF: 予約失敗メッセージ
+        else 成功
+            SB-->>DL: booking.id
+            DL-->>SA: success
+            SA->>SA: revalidatePath('/cabins/[id]')
+            SA->>SA: revalidatePath('/account/reservations')
+            SA-->>RF: redirect('/cabins/thankyou')
+            RF-->>U: サンキューページ表示
+        end
+    end
 ```
+
+**エラーハンドリング（予約フロー）**
+- バリデーション失敗時はDBアクセスせず、フォームへエラーを返す
+- 重複予約はユーザーに予約不可メッセージを返し、サーバーログへ記録
+- Supabaseエラー時は失敗メッセージを返し、現時点では自動リトライなし
 
 ### コード参照を用いた認証フロー
 
@@ -425,14 +446,25 @@ sequenceDiagram
     NA->>Auth: /api/auth/signin
     Auth->>Google: OAuth要求
     Google-->>Auth: ユーザー同意
-    Auth->>Auth: callbacks.signIn()
-    Auth->>DS: getGuest(email)
+    Auth->>Auth: callbacks.jwt()
+    Auth->>DS: getOrCreateGuestByEmail(email)
     DS->>SB: SELECT from guests
     alt ゲストが存在しない
         DS->>SB: INSERT new guest
+        alt 作成失敗/競合
+            SB-->>DS: error
+            DS-->>Auth: error
+        else 作成成功
+            SB-->>DS: guest
+        end
+    else 既存ゲスト
+        SB-->>DS: guest
     end
-    SB-->>DS: guestデータ
-    DS-->>Auth: guest
+    alt ゲスト取得/作成に失敗
+        Auth->>Auth: guestId = null
+    else 成功
+        Auth->>Auth: guestId = guest.id
+    end
     Auth->>Auth: callbacks.session()
     Auth-->>NA: session with guestId
     NA-->>LP: redirect('/')
@@ -446,6 +478,10 @@ sequenceDiagram
         MW-->>U: /login にリダイレクト
     end
 ```
+
+**エラーハンドリング（認証フロー）**
+- ゲスト取得/作成に失敗した場合は `guestId=null` として継続し、サーバーログへ記録
+- Supabase側の失敗は自動リトライせず、必要に応じて後続の再試行/再ログインで回復
 
 ## パフォーマンス最適化
 
@@ -528,6 +564,36 @@ npm run prod
 
 - **Node.js**: >=20.19.0 <21
 - 必要な環境変数（**Project Setup & Configuration**を参照）
+
+### Project Setup & Configuration
+
+#### 環境変数
+
+`.env.example` をコピーして `.env` を作成し、値を設定します（`.env` はコミットしない）。
+
+```bash
+# Supabase (browser/client)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_KEY=
+
+# Supabase (server)
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# NextAuth (Google OAuth)
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=
+
+# Optional
+PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000
+TZ=Asia/Tokyo
+```
+
+取得元の目安:
+- Supabase: Project Settings → API から URL と keys を取得
+- Google OAuth: Google Cloud Console で OAuth クライアントを作成
 
 ## まとめ
 
