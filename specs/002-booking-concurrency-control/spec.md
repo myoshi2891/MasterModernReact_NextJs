@@ -23,6 +23,12 @@
 - 現状は **service-role** で DB にアクセスしており RLS をバイパスする
 - 日付レンジは **[startDate, endDate)**（チェックアウト日は空ける）
 
+## CI/SSG 対応
+- CI ワークフローは main/dev への push/PR のみに限定する
+- CI の build では `SKIP_SSG=true` を設定し、外部フェッチを伴う SSG を回避する
+- `SKIP_SSG=true` 時はページ/メタデータ/静的パラメータ生成でガードし、外部データ取得を行わない
+- スモークテストは `/api/health` をリトライ + タイムアウト付きで確認し、失敗時は `server.log` を出力する
+
 ## 実装前の確認事項（必須）
 ### startDate/endDate の型確認
 
