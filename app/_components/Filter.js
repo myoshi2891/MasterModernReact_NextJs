@@ -8,6 +8,14 @@ function Filter() {
 	const pathname = usePathname();
 
 	const activeFilter = searchParams.get("capacity") ?? "all";
+	const wrapperClasses = [
+		"flex w-full flex-col gap-2 rounded-2xl border border-primary-800",
+		"bg-primary-950/40 p-2 mb-2",
+		"sm:w-auto sm:flex-row sm:gap-0 sm:overflow-hidden",
+		"sm:rounded-full sm:bg-transparent sm:p-0",
+		"sm:[&_button:not(:first-child)]:border-l",
+		"sm:[&_button:not(:first-child)]:border-primary-800",
+	].join(" ");
 
 	function handleFilter(filter) {
 		const params = new URLSearchParams(searchParams);
@@ -16,7 +24,7 @@ function Filter() {
 	}
 
 	return (
-		<div className="flex w-full flex-col gap-2 rounded-2xl border border-primary-800 bg-primary-950/40 p-2 mb-2 sm:w-auto sm:flex-row sm:gap-0 sm:overflow-hidden sm:rounded-full sm:bg-transparent sm:p-0 sm:[&_button:not(:first-child)]:border-l sm:[&_button:not(:first-child)]:border-primary-800">
+		<div className={wrapperClasses}>
 			<Button
 				filter="all"
 				handleFilter={handleFilter}

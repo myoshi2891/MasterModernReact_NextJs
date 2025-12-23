@@ -70,8 +70,8 @@ function NavigationMenu({ session }) {
                   src={session.user.image}
                   alt={session.user.name}
                   referrerPolicy="no-referrer"
-                  width={12}
-                  height={12}
+                  width={32}
+                  height={32}
                 />
               </Link>
             ) : (
@@ -106,8 +106,8 @@ function NavigationMenu({ session }) {
                       src={session.user.image}
                       alt={session.user.name}
                       referrerPolicy="no-referrer"
-                      width={16}
-                      height={16}
+                      width={32}
+                      height={32}
                     />
                   </Link>
                 ) : (

@@ -43,8 +43,8 @@ function ReservationForm({ cabin, user }) {
 						className="size-9 rounded-full object-cover"
 						src={user.image}
 						alt={user.name}
-						width={20}
-						height={20}
+						width={36}
+						height={36}
 					/>
 					<p className="font-medium text-primary-100">{user.name}</p>
 				</div>

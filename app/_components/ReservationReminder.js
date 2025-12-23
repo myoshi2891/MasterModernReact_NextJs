@@ -18,6 +18,7 @@ function ReservationReminder() {
 					{format(new Date(range.to), "MMM dd yyyy")}
 				</p>
 				<button
+					type="button"
 					className="rounded-full p-1 transition-colors duration-150 hover:bg-accent-600"
 					onClick={resetRange}
 				>
