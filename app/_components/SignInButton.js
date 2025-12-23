@@ -18,8 +18,8 @@ function SignInButton() {
       <Image
         src="https://authjs.dev/img/providers/google.svg"
         alt="Google logo"
-        height="24"
-        width="24"
+        height={24}
+        width={24}
       />
       <span>Continue with Google</span>
     </button>

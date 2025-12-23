@@ -2,8 +2,14 @@ import TextExpander from "@/app/_components/TextExpander";
 import { EyeSlashIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 
+/**
+ * Render a cabin card showing the cabin image, title, expandable description, and key features.
+ *
+ * @param {{name: string, maxCapacity: number, regularPrice?: number, discount?: number, image: string, description: string}} cabin - Cabin data used to populate the card.
+ * @returns {JSX.Element} The JSX element representing the cabin card.
+ */
 function Cabin({ cabin }) {
-  const { id, name, maxCapacity, regularPrice, discount, image, description } =
+  const { name, maxCapacity, regularPrice, discount, image, description } =
     cabin;
 
   return (
@@ -21,7 +27,7 @@ function Cabin({ cabin }) {
       </div>
 
       <div className="lg:pl-10 z-10">
-        <h3 className="mb-5 bg-primary-950 px-4 py-2 text-4xl font-black text-accent-100 sm:text-5xl md:text-6xl lg:-translate-x-32 lg:px-6 lg:pb-1 lg:text-7xl">
+        <h3 className="mb-5 bg-primary-950 px-4 py-2 text-4xl font-black text-accent-100 sm:text-5xl md:text-6xl lg:-translate-x-8 lg:px-6 lg:pb-1 lg:text-7xl xl:translate-x-0">
           Cabin {name}
         </h3>
 

@@ -182,7 +182,7 @@ create unique index bookings_request_id_unique
 ## RLS（認可）の方針
 - **service-role では RLS は無効**。重複予約対策は DB 制約で担保する。
 - 将来的に RLS を有効化する場合:
-  - NextAuth の JWT に `guestId` を埋め込み
+- NextAuth v4 の JWT に `guestId` を埋め込み
   - Supabaseに渡すトークンに custom claims を含める
   - policy 例:
 ```

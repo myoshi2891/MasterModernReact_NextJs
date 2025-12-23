@@ -2,12 +2,29 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+/**
+ * Render a cabin-capacity filter UI that updates the URL's "capacity" query parameter without scrolling.
+ *
+ * The component reads the current "capacity" search parameter (defaults to "all") and renders four buttons
+ * ("All cabins", "2—3 guests", "4—7 guests", "8—12 guests"). Clicking a button sets the "capacity" query
+ * parameter to the corresponding value and replaces the current route without causing a page scroll.
+ *
+ * @returns {JSX.Element} The filter UI element.
+ */
 function Filter() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const pathname = usePathname();
 
 	const activeFilter = searchParams.get("capacity") ?? "all";
+	const wrapperClasses = [
+		"flex w-full flex-col gap-2 rounded-2xl border border-primary-800",
+		"bg-primary-950/40 p-2 mb-2",
+		"sm:w-auto sm:flex-row sm:gap-0 sm:overflow-hidden",
+		"sm:rounded-full sm:bg-transparent sm:p-0",
+		"sm:[&_button:not(:first-child)]:border-l",
+		"sm:[&_button:not(:first-child)]:border-primary-800",
+	].join(" ");
 
 	function handleFilter(filter) {
 		const params = new URLSearchParams(searchParams);
@@ -16,7 +33,7 @@ function Filter() {
 	}
 
 	return (
-		<div className="flex w-full flex-col gap-2 rounded-2xl border border-primary-800 bg-primary-950/40 p-2 mb-2 sm:w-auto sm:flex-row sm:gap-0 sm:overflow-hidden sm:rounded-full sm:bg-transparent sm:p-0 sm:[&_button:not(:first-child)]:border-l sm:[&_button:not(:first-child)]:border-primary-800">
+		<div className={wrapperClasses}>
 			<Button
 				filter="all"
 				handleFilter={handleFilter}

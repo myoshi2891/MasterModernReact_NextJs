@@ -1,5 +1,6 @@
 import { eachDayOfInterval } from "date-fns";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { supabaseBrowser } from "./supabaseBrowser";
 import { supabaseServer } from "./supabaseServer";
 
@@ -147,6 +148,11 @@ export async function getBookedDatesByCabinId(cabinId) {
   return bookedDates;
 }
 
+/**
+ * Retrieve the single settings record from the database.
+ * @returns {Object} The settings record from the "settings" table.
+ * @throws {Error} Throws an error with message "Settings could not be loaded" if the database query fails.
+ */
 export async function getSettings() {
   const { data, error } = await supabaseServer
     .from("settings")
@@ -161,30 +167,47 @@ export async function getSettings() {
   return data;
 }
 
+const getCountriesCached = unstable_cache(
+  async () => {
+    try {
+      const res = await fetch(
+        "https://restcountries.com/v3.1/all?fields=name,flags"
+      );
+
+      if (!res.ok) throw new Error("Failed to load countries");
+
+      const countries = await res.json();
+
+      return countries
+        .map((country) => ({
+          name: country?.name?.common ?? "",
+          flag: country?.flags?.svg ?? country?.flags?.png ?? "",
+        }))
+        .filter((country) => country.name);
+    } catch (error) {
+      console.error(error);
+      throw new Error("Could not fetch countries");
+    }
+  },
+  ["countries"],
+  { revalidate: 60 * 60 * 24 }
+);
+
+/**
+ * Return a list of countries with a display name and flag URL.
+ * @returns {Promise<Array<{name: string, flag: string}>>} An array of country objects where `name` is the country's common name and `flag` is a URL to the country's flag (SVG or PNG).
+ */
 export async function getCountries() {
-  try {
-    const res = await fetch(
-      "https://restcountries.com/v3.1/all?fields=name,flags"
-    );
-
-    if (!res.ok) throw new Error("Failed to load countries");
-
-    const countries = await res.json();
-
-    return countries
-      .map((country) => ({
-        name: country?.name?.common ?? "",
-        flag: country?.flags?.svg ?? country?.flags?.png ?? "",
-      }))
-      .filter((country) => country.name);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Could not fetch countries");
-  }
+  return getCountriesCached();
 }
 
 /////////////
-// CREATE
+/**
+ * Creates a new guest record in the database.
+ * @param {Object} newGuest - Guest data to insert; should contain the fields accepted by the `guests` table.
+ * @returns {Object} The created guest record as returned by the database.
+ * @throws {Error} When the insert fails; the thrown error's message will be "Guest could not be created" and it preserves the original database error `code`.
+ */
 
 export async function createGuest(newGuest) {
   const { data, error } = await supabaseServer
@@ -195,7 +218,9 @@ export async function createGuest(newGuest) {
 
   if (error) {
     console.error(error);
-    throw new Error("Guest could not be created");
+    const wrappedError = new Error("Guest could not be created");
+    wrappedError.code = error.code;
+    throw wrappedError;
   }
 
   return data;

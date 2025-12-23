@@ -11,15 +11,12 @@ describe("TextExpander", () => {
     render(<TextExpander>{longText}</TextExpander>);
 
     const showMoreButton = screen.getByRole("button", { name: /show more/i });
-    const wrapper = showMoreButton.closest("span");
-
-    expect(wrapper).not.toBeNull();
-    expect(wrapper.textContent).toContain("...");
+    expect(screen.getByText(/\.\.\./)).toBeInTheDocument();
 
     fireEvent.click(showMoreButton);
 
     const showLessButton = screen.getByRole("button", { name: /show less/i });
     expect(showLessButton).toBeInTheDocument();
-    expect(showLessButton.closest("span").textContent).toContain("word44");
+    expect(screen.getByText(/word44/)).toBeInTheDocument();
   });
 });

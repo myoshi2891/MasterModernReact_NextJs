@@ -16,6 +16,7 @@ test-results
 .next
 out
 build
+dist
 
 # Logs and diagnostics
 npm-debug.log*
@@ -33,14 +34,3 @@ supabase/.temp
 # Documentation assets (not needed in runtime image)
 README*.md
 docs
-
-node_modules
-npm-debug.log
-.git
-.gitignore
-.env
-.env.local
-.DS_Store
-dist
-build
-coverage

@@ -9,6 +9,16 @@ import { createBooking } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
 import Image from "next/image";
 
+/**
+ * Render a reservation form for a cabin that displays the logged-in user and collects guest count and observations.
+ *
+ * The form prepares booking data (dates, number of nights, calculated cabin price, cabin id, and capacity),
+ * submits that data when the form is posted, and resets the selected date range after successful submission.
+ *
+ * @param {{ maxCapacity: number, regularPrice: number, discount: number, id: string|number }} cabin - Cabin data used to determine capacity and calculate price.
+ * @param {{ name: string, image: string }} user - Logged-in user info displayed in the form header.
+ * @returns {JSX.Element} A reservation UI element including user info, guest selector, observations textarea, and submit controls.
+ */
 function ReservationForm({ cabin, user }) {
 	// CHANGE
 	const { range, resetRange } = useReservation();
@@ -43,8 +53,8 @@ function ReservationForm({ cabin, user }) {
 						className="size-9 rounded-full object-cover"
 						src={user.image}
 						alt={user.name}
-						width={20}
-						height={20}
+						width={36}
+						height={36}
 					/>
 					<p className="font-medium text-primary-100">{user.name}</p>
 				</div>

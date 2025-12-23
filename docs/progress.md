@@ -5,15 +5,89 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | dd56f85 | 2025-12-22 | fix: address review feedback and update auth deps | Next.js 14.2.35 / NextAuth 4.24.13 へ更新、認証/テスト/ドキュメント整理 |
 | 完了 | b8a43e9 | 2025-12-21 | Added Kilo Code/Spec Kit scaffolding (rules, workflows, constitution, templates, sample spec) plus a short usage README, and refactored the root-level spec plans for clearer structure while leaving application code untouched and only appending minimal cache ignores to .gitignore. | |
 | 完了 | ce3c6ef | 2025-12-21 | Next.js 14 App Router のJSコードベースを、挙動を変えずに段階的にTypeScriptへ移行&npm→Bun移行の計画 | |
-| 完了 | a84a143 | 2025-12-21 | Merge branch 'main' of github.com:myoshi2891/MasterModernReact_NextJs | |
+| 完了 | a84a143 | 2025-12-21 | Merge branch 'main' of GitHub.com:myoshi2891/MasterModernReact_NextJs | |
 | 完了 | f883897 | 2025-11-18 | Merge pull request #15 from myoshi2891/dependabot/npm_and_yarn/js-yaml-4.1.1 | |
 | 完了 | b95dea4 | 2025-11-16 | Bump js-yaml from 4.1.0 to 4.1.1 | |
 
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-22 変更内容まとめ（詳細）
+
+#### 概要
+
+- レビュー指摘のUI/入力/アクセシビリティ対応を反映
+- Next.js 14.2.35 と NextAuth 4.24.13（安定版）へ更新
+- 認証フローを `next-auth/react` に統一し、サーバーアクション依存を解消
+- 仕様書/テスト計画/運用ドキュメントを現状に合わせて更新
+- ユニット/コンポーネントテストを実行して合格確認
+
+#### 1. 認証基盤の安定版移行
+
+- 対象ファイル:
+  - `package.json`, `package-lock.json`
+  - `app/_lib/auth.js`
+  - `middleware.js`
+  - `app/_components/SignInButton.js`
+  - `app/_components/SignOutButton.js`
+- 変更内容:
+  - `next` を 14.2.35 に更新
+  - `next-auth` を 4.24.13 に更新（v5 beta から安定版へ移行）
+  - `getServerSession` + `withAuth` に統一
+  - `signIn`/`signOut` を `next-auth/react` のクライアント呼び出しへ移行
+
+#### 2. UI/入力の安全性・可読性改善
+
+- 対象ファイル:
+  - `app/_components/DateSelector.js`
+  - `app/_components/NavigationMenu.js`
+  - `app/_components/ReservationCard.js`
+  - `app/_components/UpdateProfileForm.js`
+  - `app/_lib/actions.js`
+  - `app/_lib/booking.js`
+- 変更内容:
+  - `<button>` に `type="button"` を明示
+  - モバイルメニューに `aria-controls` を追加
+  - 未使用変数の削除、日付の再パース回数を削減
+  - observations の null ガード、bookingId の型整合性確保
+  - `isDateDisabled` で `bookedDates` が null の場合も安全に動作
+
+#### 3. 仕様書・運用ドキュメントの更新
+
+- 対象ファイル:
+  - `README.md`
+  - `README_next_action.md`
+  - `TEST_PLAN.md`
+  - `specs/002-booking-concurrency-control/spec.md`
+- 変更内容:
+  - NextAuth バージョンの更新（v5→v4）に整合
+  - テスト対象・ドキュメント記述の整合性を修正
+
+#### 4. テスト実行
+
+- 実行コマンド:
+  - `npm run test:unit`
+  - `npm run test:component`
+- 結果:
+  - 全テスト成功（既存の `form action` 警告は継続）
+
+#### 5. 予約バリデーション/テスト追加（完了: 2025-12-22）
+
+- 対象ファイル:
+  - `tests/unit/actions.test.js`
+  - `app/_lib/booking.js`
+  - `app/_lib/actions.js`
+  - `tests/unit/booking-utils.test.js`
+- 変更内容:
+  - 重複予約テストを削除し、deleteBooking の `guestId=null` ケースを追加
+  - observations の文字数トリミング検証を追加
+  - `validateBookingInput` に `regularPrice`/`discount` の検証を追加
+  - `createBooking` に `regularPrice`/`discount` を渡すよう更新
+  - 割引境界値テストを調整
 
 ### 2025-12-21 変更内容まとめ（詳細）
 
