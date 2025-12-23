@@ -49,7 +49,7 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 - [ ] Resolve strict errors with explicit null handling, narrowings, and small type guards
 - [ ] Disable `allowJs`, ensure no JS remains under `app/`/`app/_lib`/`app/_components`, and keep config JS files outside TS `include`
 - [ ] Run lint/build/typecheck and fix any remaining type or build issues
-- [ ] Config files policy: keep `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.js`, `playwright.config.ts`, and `vitest.config.ts` as-is unless TS conversion provides clear value
+- [ ] Config files policy: keep `next.config.mjs`, `postcss.config.mjs`, `tailwind.config.js`, `playwright.config.ts`, and `vitest.config.mts` as-is unless TS conversion provides clear value
 - [ ] Env typing: add an env schema (zod/envsafe) or `env.d.ts`, and validate required vars at runtime in CI/production
 - [ ] Third-party types: audit missing typings, install `@types/*` where available, and add local `declare module` stubs as needed
 

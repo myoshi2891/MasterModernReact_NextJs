@@ -5,7 +5,7 @@
 ## 概要
 
 - Supabase/PostgreSQL 17.6.1 (`supabase/postgres:17.6.1.011`)
-- Next.js 14 (Node.js 20.19.0 / CI は 20/21/22 を検証)
+- Next.js 14 (Node.js 20.19.0 / CI は 20/22 を検証)
 - `docker/initdb` ディレクトリで初期化スクリプトとマイグレーションを適用
 - `.dockerignore` により Docker コンテキストを軽量化
 - `scripts/docker-aliases.sh` でよく使う Docker コマンドのエイリアスを提供
