@@ -20,7 +20,6 @@ jobs:
       AUTH_GOOGLE_SECRET: test
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: test-secret
-      SKIP_SSG: "true"
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     steps:
       - name: Checkout
@@ -39,6 +38,8 @@ jobs:
       - name: Component tests
         run: npm run test:component
       - name: Build
+        env:
+          SKIP_SSG: "true"
         run: npm run build
       - name: Smoke test
         run: |
