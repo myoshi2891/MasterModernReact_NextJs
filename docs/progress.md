@@ -5,6 +5,10 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | c3d87e0 | 2025-12-23 | Limit SKIP_SSG to build step in CI | テスト時のCabinList空描画を回避 |
+| 完了 | 536a8cd | 2025-12-23 | Remove legacy vitest config | vitest.config.ts を削除 |
+| 完了 | 25057e5 | 2025-12-23 | Fix CI by switching to JSX and ESM config | app配下JSXを`.jsx`へ統一、`vitest.config.mts`導入 |
+| 完了 | 7543ebe | 2025-12-23 | Add CI matrix and update Node docs | CIはNode 20/22を検証、ドキュメント整合 |
 | 完了 | dd56f85 | 2025-12-22 | fix: address review feedback and update auth deps | Next.js 14.2.35 / NextAuth 4.24.13 へ更新、認証/テスト/ドキュメント整理 |
 | 完了 | b8a43e9 | 2025-12-21 | Added Kilo Code/Spec Kit scaffolding (rules, workflows, constitution, templates, sample spec) plus a short usage README, and refactored the root-level spec plans for clearer structure while leaving application code untouched and only appending minimal cache ignores to .gitignore. | |
 | 完了 | ce3c6ef | 2025-12-21 | Next.js 14 App Router のJSコードベースを、挙動を変えずに段階的にTypeScriptへ移行&npm→Bun移行の計画 | |
@@ -15,6 +19,41 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-23 変更内容まとめ（詳細）
+
+#### 概要
+
+- CIの安定化（Node 20/22、ビルド時のみSSGスキップ、スモークテスト追加）
+- JSXファイル拡張子の統一とVitest設定のESM化
+- サンプル仕様書のパス整合と進捗ログ更新
+
+#### 1. CI安定化とNodeマトリクス調整
+
+- 対象ファイル:
+  - `.github/workflows/ci.yml`
+- 変更内容:
+  - Node 20/22 マトリクスで検証（21は対象外）
+  - `next build` のみ `SKIP_SSG=true` を付与
+  - `/api/health` を叩くスモークテストを追加
+
+#### 2. JSX/テスト設定の整合
+
+- 対象ファイル:
+  - `app/**/*.jsx`
+  - `vitest.config.mts`
+- 変更内容:
+  - JSXを含む `.js` を `.jsx` へ統一
+  - Vitest設定を `.mts` 化してESMロードエラーを解消
+
+#### 3. 仕様書/進捗ログの更新
+
+- 対象ファイル:
+  - `specs/001-sample-feature/plan.md`
+  - `docs/progress.md`
+- 変更内容:
+  - サンプルの参照パスを `.jsx` に整合
+  - 2025-12-23 の進捗を追記
 
 ### 2025-12-22 変更内容まとめ（詳細）
 
