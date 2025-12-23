@@ -7,6 +7,16 @@ export const metadata = {
 	title: "Update profile",
 };
 
+/**
+ * Render the guest profile update page prefilled with session and guest data.
+ *
+ * Retrieves the current session, loads or creates a guest record for the session email,
+ * prepares a guest object by merging stored guest fields with session fallbacks,
+ * and resolves a country flag if a nationality exists but the flag is missing.
+ *
+ * @throws {Error} If session or session.user.email is missing.
+ * @returns {JSX.Element} A JSX element containing the update profile UI with an UpdateProfileForm populated by the prepared guest data.
+ */
 export default async function Page() {
 	const session = await auth();
 
