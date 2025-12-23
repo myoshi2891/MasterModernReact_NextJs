@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.x, 21.x, 22.x]
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_KEY: test
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_SERVICE_ROLE_KEY: test
+      AUTH_GOOGLE_ID: test
+      AUTH_GOOGLE_SECRET: test
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: test-secret
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Component tests
+        run: npm run test:component
+      - name: Build
+        run: npm run build
+      - name: Smoke test
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 &
+          server_pid=$!
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:3000/api/health > /dev/null; then
+              echo "Health check ok"
+              kill $server_pid
+              wait $server_pid || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Health check failed"
+          kill $server_pid
+          wait $server_pid || true
+          exit 1

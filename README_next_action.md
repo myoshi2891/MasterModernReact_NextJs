@@ -1,4 +1,4 @@
-Awesome—let’s wire **Codex** to your repo and get value fast (review, tests, agent-y automation, safe concurrency). I skimmed your repo and docs and tailored everything below to **MasterModernReact_NextJs** (Next 14 App Router, NextAuth v4, Supabase, Tailwind; Node `>=20.19 <21`; Playwright/Vitest/@testing-library/react already in dev deps). ([GitHub][1])
+Awesome—let’s wire **Codex** to your repo and get value fast (review, tests, agent-y automation, safe concurrency). I skimmed your repo and docs and tailored everything below to **MasterModernReact_NextJs** (Next 14 App Router, NextAuth v4, Supabase, Tailwind; Node `>=20` with CI on 20/21/22; Playwright/Vitest/@testing-library/react already in dev deps). ([GitHub][1])
 
 ---
 
@@ -11,7 +11,7 @@ cd MasterModernReact_NextJs
 
 # Node per repo constraint
 # use corepack/pnpm or nvm; repo ships package-lock.json so npm is fine:
-nvm use 20.19 || nvm install 20.19 && nvm use 20.19
+nvm use 20 || nvm install 20 && nvm use 20
 
 npm ci   # (or: npm i)
 ```
@@ -34,7 +34,7 @@ export OPENAI_API_KEY="sk-..."   # if you prefer API key
 
 > Security note: avoid exporting secrets directly in the shell (they can land in history/logs). Prefer a `.env` file or a secrets manager, never commit `.env`, and clear shell history if you previously exported a key.
 
-> Why this matters here: your repo pins Node 20.19 and includes testing libs we’ll target (Vitest, Playwright). ([GitHub][1])
+> Why this matters here: your repo supports Node 20+ and CI checks 20/21/22 alongside testing libs we’ll target (Vitest, Playwright). ([GitHub][1])
 
 ---
 

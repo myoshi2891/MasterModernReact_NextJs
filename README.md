@@ -77,7 +77,7 @@ The Wild Oasisは、ゲストが高級キャビンを閲覧し、空室状況を
 
 ### Node.js環境
 
-アプリケーションは`engines`設定で指定されている通り、**Node.js バージョン >=20.19.0 <21**が必要です。
+アプリケーションは`engines`設定で指定されている通り、**Node.js バージョン >=20**が必要です（CI は 20/21/22 を検証）。
 
 ## アーキテクチャ概要
 
@@ -562,7 +562,7 @@ npm run prod
 
 ### 環境要件
 
-- **Node.js**: >=20.19.0 <21
+- **Node.js**: >=20 (CI: 20/21/22)
 - 必要な環境変数（**Project Setup & Configuration**を参照）
 
 ### Project Setup & Configuration
