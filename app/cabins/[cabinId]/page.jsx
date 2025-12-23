@@ -6,20 +6,47 @@ import { Suspense } from "react";
 
 // export const metadata = {
 // 	title: "Cabin",
-// };
+/**
+ * Produce page metadata for a cabin route.
+ *
+ * When `SKIP_SSG` equals `"true"` the title is `"Cabin"`; otherwise the title is `"Cabin <name>"` where `<name>` is the fetched cabin name for the provided `cabinId`.
+ * @param {{ params: { cabinId: string } }} context - Route context containing `params.cabinId`.
+ * @returns {{ title: string }} `title` is `"Cabin"` when `SKIP_SSG === "true"`, otherwise `"Cabin <name>"` with the cabin's name.
+ */
 
 export async function generateMetadata({ params }) {
+  if (process.env.SKIP_SSG === "true") {
+    return { title: "Cabin" };
+  }
   const { name } = await getCabin(params.cabinId);
   return { title: `Cabin ${name}` };
 }
 
+/**
+ * Provides route parameters for static pre-rendering of cabin pages.
+ *
+ * When SKIP_SSG is set to "true", returns an empty array. Otherwise, fetches all
+ * cabins and returns an array of objects each containing `cabinId` as a string.
+ *
+ * @returns {Array<{cabinId: string}>} An array of param objects for pre-rendering; empty if SKIP_SSG === "true".
+ */
 export async function generateStaticParams() {
+  if (process.env.SKIP_SSG === "true") {
+    return [];
+  }
   const cabins = await getCabins();
   const ids = cabins.map((cabin) => ({ cabinId: String(cabin.id) }));
 
   return ids;
 }
 
+/**
+ * Render the cabin details and reservation UI for the cabin specified by `params.cabinId`.
+ *
+ * @param {{ params: { cabinId: string } }} props - Route props object.
+ * @param {string} props.params.cabinId - The identifier of the cabin to fetch and display.
+ * @returns {JSX.Element} A React element containing the cabin details and a reservation section.
+ */
 export default async function Page({ params }) {
   const cabin = await getCabin(params.cabinId);
 
