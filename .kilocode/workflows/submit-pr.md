@@ -12,7 +12,16 @@
 - 仕様リンク（`specs/NNN-...`）
 
 ## 3. テスト
-- TODO: プロジェクトに合わせた実行コマンドを記載
+```bash
+# ユニットテスト
+npm run test:unit
+
+# コンポーネントテスト
+npm run test:component
+
+# E2Eテスト
+npm run test:e2e
+```
 - 実行結果（成功/失敗/未実施理由）を明記
 
 ## 4. チェックリスト
