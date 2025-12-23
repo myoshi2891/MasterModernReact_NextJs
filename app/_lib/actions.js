@@ -12,6 +12,11 @@ import { getBookings } from "./data-service";
 import { normalizeNationalId } from "./guest";
 import { supabaseServer } from "./supabaseServer";
 
+function normalizeObservations(value) {
+  const observations = typeof value === "string" ? value : "";
+  return observations.slice(0, 1000);
+}
+
 /**
  * Update the authenticated guest's nationality, country flag, and national ID from submitted form data.
  *
@@ -90,13 +95,11 @@ export async function updateBooking(formData) {
     throw new Error("Number of guests exceeds cabin capacity");
   }
 
-  const observationsValue = formData.get("observations");
-  const observations =
-    typeof observationsValue === "string" ? observationsValue : "";
+  const observations = normalizeObservations(formData.get("observations"));
 
   const updateData = {
     numGuests,
-    observations: observations.slice(0, 1000),
+    observations,
   };
 
   const { error } = await supabaseServer
@@ -174,9 +177,7 @@ export async function createBooking(bookingData, formData) {
     cabin.regularPrice,
     cabin.discount
   );
-  const observationsValue = formData.get("observations");
-  const observations =
-    typeof observationsValue === "string" ? observationsValue : "";
+  const observations = normalizeObservations(formData.get("observations"));
 
   const newBooking = {
     startDate,
@@ -186,7 +187,7 @@ export async function createBooking(bookingData, formData) {
     cabinId,
     guestId,
     numGuests,
-    observations: observations.slice(0, 1000),
+    observations,
     extrasPrice: 0,
     totalPrice: cabinPrice,
     isPaid: false,

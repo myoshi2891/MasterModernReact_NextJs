@@ -12,7 +12,11 @@ import { useState } from "react";
  * mobile panel on small screens. Displays an account link that shows the user's name and
  * avatar when `session.user.image` is present; otherwise shows a "Guest area" link.
  *
- * @param {{ user?: { name?: string, image?: string } }} session - Session object; when `user.image` is provided the component displays the user's avatar and name linking to `/account`.
+ * @param {object} props - Component props.
+ * @param {object} [props.session] - Session object; when `user.image` is provided the component displays the user's avatar and name linking to `/account`.
+ * @param {object} [props.session.user] - User object from the session.
+ * @param {string} [props.session.user.name] - User's display name.
+ * @param {string} [props.session.user.image] - User's avatar image URL.
  * @returns {JSX.Element} The navigation menu component.
  */
 function NavigationMenu({ session }) {
