@@ -9,9 +9,9 @@ import { Suspense } from "react";
 /**
  * Produce page metadata for a cabin route.
  *
- * Returns an object with a `title` property: when the `SKIP_SSG` environment variable equals `"true"`, the title is `"Cabin"`; otherwise the title is `"Cabin <name>"` where `<name>` is the fetched cabin name for the provided `cabinId`.
+ * When `SKIP_SSG` equals `"true"` the title is `"Cabin"`; otherwise the title is `"Cabin <name>"` where `<name>` is the fetched cabin name for the provided `cabinId`.
  * @param {{ params: { cabinId: string } }} context - Route context containing `params.cabinId`.
- * @returns {{ title: string }} An object with the page `title`.
+ * @returns {{ title: string }} `title` is `"Cabin"` when `SKIP_SSG === "true"`, otherwise `"Cabin <name>"` with the cabin's name.
  */
 
 export async function generateMetadata({ params }) {
@@ -40,6 +40,13 @@ export async function generateStaticParams() {
   return ids;
 }
 
+/**
+ * Render the cabin details and reservation UI for the cabin specified by `params.cabinId`.
+ *
+ * @param {{ params: { cabinId: string } }} props - Route props object.
+ * @param {string} props.params.cabinId - The identifier of the cabin to fetch and display.
+ * @returns {JSX.Element} A React element containing the cabin details and a reservation section.
+ */
 export default async function Page({ params }) {
   const cabin = await getCabin(params.cabinId);
 
