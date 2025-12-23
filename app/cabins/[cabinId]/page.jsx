@@ -48,6 +48,9 @@ export async function generateStaticParams() {
  * @returns {JSX.Element} A React element containing the cabin details and a reservation section.
  */
 export default async function Page({ params }) {
+  if (process.env.SKIP_SSG === "true") {
+    return <div>Cabin details unavailable in build mode.</div>;
+  }
   const cabin = await getCabin(params.cabinId);
 
   return (
