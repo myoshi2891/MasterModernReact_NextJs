@@ -8,12 +8,9 @@ export default async function Page({ params }) {
 
   try {
     booking = await getBooking(bookingId);
-    if (!booking) {
-      throw new Error("Booking not found");
-    }
   } catch (error) {
     console.error(`Failed to load booking ${bookingId}:`, error);
-    throw new Error(`予約データの取得に失敗しました。予約ID: ${bookingId}`);
+    throw new Error(`Failed to load booking. Booking ID: ${bookingId}`);
   }
 
   // nullセーフな値の取得

@@ -13,7 +13,15 @@ async function getOrCreateGuestByEmail(email, name) {
   const existing = await getGuest(email); // publicクライアントでOK（SELECT）
   if (existing) return existing;
   // 作成は service-role（createGuest内でadminクライアント使用）
-  return await createGuest({ email, fullName: name ?? null });
+  try {
+    return await createGuest({ email, fullName: name ?? null });
+  } catch (error) {
+    if (error?.code === "23505") {
+      const createdByAnotherRequest = await getGuest(email);
+      if (createdByAnotherRequest) return createdByAnotherRequest;
+    }
+    throw error;
+  }
 }
 
 export const authOptions = {
@@ -27,18 +35,9 @@ export const authOptions = {
   session: { strategy: "jwt" },
 
   callbacks: {
-    // ① サインイン時：ゲスト作成を試みる（adminで）
-    async signIn({ user }) {
-      try {
-        if (user?.email) {
-          await getOrCreateGuestByEmail(user.email, user.name);
-        }
-        return true;
-      } catch (e) {
-        console.error("[auth][signIn] create/get guest failed", e);
-        // 失敗しても false を返すと AccessDenied になる
-        return false;
-      }
+    // ① サインイン時：ここでは認証のみ
+    async signIn() {
+      return true;
     },
 
     // ② JWT：ここで一度だけDBに触れて guestId をトークンへ

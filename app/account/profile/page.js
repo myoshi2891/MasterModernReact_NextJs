@@ -23,10 +23,6 @@ export default async function Page() {
 		});
 	}
 
-	if (!guest) {
-		throw new Error("Guest profile could not be loaded");
-	}
-
 	const preparedGuest = {
 		...guest,
 		fullName: guest.fullName ?? session.user.name ?? "",

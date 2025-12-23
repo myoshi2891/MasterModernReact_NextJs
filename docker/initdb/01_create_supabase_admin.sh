@@ -8,26 +8,19 @@ if [ -z "$ADMIN_PASSWORD" ]; then
   exit 1
 fi
 
-psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
-  --set=admin_password="$ADMIN_PASSWORD" <<'SQL'
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'supabase_admin') THEN
-    EXECUTE format(
-      'CREATE ROLE supabase_admin LOGIN SUPERUSER PASSWORD %L',
-      :'admin_password'
-    );
-    RAISE NOTICE 'Created role supabase_admin with superuser privileges';
-    RETURN;
-  END IF;
+role_exists=$(psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -tAc \
+  "SELECT 1 FROM pg_roles WHERE rolname = 'supabase_admin';")
 
-  EXECUTE format(
-    'ALTER ROLE supabase_admin WITH PASSWORD %L',
-    :'admin_password'
-  );
-  RAISE NOTICE 'Updated password for existing supabase_admin role';
-END
-$$;
-SQL
+if [ "$role_exists" = "1" ]; then
+  psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+    --set=admin_password="$ADMIN_PASSWORD" \
+    -c "ALTER ROLE supabase_admin WITH PASSWORD :'admin_password';"
+  echo "Updated password for existing supabase_admin role" >&2
+else
+  psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+    --set=admin_password="$ADMIN_PASSWORD" \
+    -c "CREATE ROLE supabase_admin LOGIN SUPERUSER PASSWORD :'admin_password';"
+  echo "Created role supabase_admin with superuser privileges" >&2
+fi
 
 echo "[supabase-admin] Database role setup completed successfully" >&2
