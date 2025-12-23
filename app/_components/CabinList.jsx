@@ -2,6 +2,20 @@
 import CabinCard from "@/app/_components/CabinCard";
 import { getCabins } from "../_lib/data-service";
 
+/**
+ * Render a responsive grid of CabinCard components filtered by cabin size.
+ *
+ * If process.env.SKIP_SSG === "true", the component returns `null` without fetching data.
+ * Also returns `null` when no cabins are available.
+ *
+ * @param {{filter: 'all'|'small'|'medium'|'large'}} props - Component props.
+ * @param {'all'|'small'|'medium'|'large'} props.filter - Filter to select cabins:
+ *   - "all": include every cabin
+ *   - "small": maxCapacity <= 3
+ *   - "medium": maxCapacity between 4 and 7 inclusive
+ *   - "large": maxCapacity >= 8
+ * @returns {JSX.Element|null} A div containing the filtered CabinCard elements, or `null`.
+ */
 async function CabinList({ filter }) {
 	// noStore();
 	if (process.env.SKIP_SSG === "true") {
