@@ -7,7 +7,7 @@
 - 例: 既存の server action から最新の検索条件を取得
 
 ## 変更範囲
-- 例: `app/account/page.js`
+- 例: `app/account/page.jsx`
 - 例: `app/_lib/data-service.js`
 
 ## データ
