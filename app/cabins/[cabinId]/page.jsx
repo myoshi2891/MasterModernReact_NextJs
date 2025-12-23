@@ -6,7 +6,13 @@ import { Suspense } from "react";
 
 // export const metadata = {
 // 	title: "Cabin",
-// };
+/**
+ * Produce page metadata for a cabin route.
+ *
+ * Returns an object with a `title` property: when the `SKIP_SSG` environment variable equals `"true"`, the title is `"Cabin"`; otherwise the title is `"Cabin <name>"` where `<name>` is the fetched cabin name for the provided `cabinId`.
+ * @param {{ params: { cabinId: string } }} context - Route context containing `params.cabinId`.
+ * @returns {{ title: string }} An object with the page `title`.
+ */
 
 export async function generateMetadata({ params }) {
   if (process.env.SKIP_SSG === "true") {
@@ -16,6 +22,14 @@ export async function generateMetadata({ params }) {
   return { title: `Cabin ${name}` };
 }
 
+/**
+ * Provides route parameters for static pre-rendering of cabin pages.
+ *
+ * When SKIP_SSG is set to "true", returns an empty array. Otherwise, fetches all
+ * cabins and returns an array of objects each containing `cabinId` as a string.
+ *
+ * @returns {Array<{cabinId: string}>} An array of param objects for pre-rendering; empty if SKIP_SSG === "true".
+ */
 export async function generateStaticParams() {
   if (process.env.SKIP_SSG === "true") {
     return [];
