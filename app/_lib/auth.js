@@ -17,8 +17,12 @@ async function getOrCreateGuestByEmail(email, name) {
     return await createGuest({ email, fullName: name ?? null });
   } catch (error) {
     if (error?.code === "23505") {
-      const createdByAnotherRequest = await getGuest(email);
-      if (createdByAnotherRequest) return createdByAnotherRequest;
+      try {
+        const createdByAnotherRequest = await getGuest(email);
+        if (createdByAnotherRequest) return createdByAnotherRequest;
+      } catch (retryError) {
+        throw retryError;
+      }
     }
     throw error;
   }

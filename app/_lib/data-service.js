@@ -1,6 +1,6 @@
 import { eachDayOfInterval } from "date-fns";
+import { cache } from "react";
 import { notFound } from "next/navigation";
-import { unstable_cache } from "next/cache";
 import { supabaseBrowser } from "./supabaseBrowser";
 import { supabaseServer } from "./supabaseServer";
 
@@ -167,31 +167,30 @@ export async function getSettings() {
   return data;
 }
 
-const getCountriesCached = unstable_cache(
-  async () => {
-    try {
-      const res = await fetch(
-        "https://restcountries.com/v3.1/all?fields=name,flags"
-      );
+const cacheFn = typeof cache === "function" ? cache : (fn) => fn;
 
-      if (!res.ok) throw new Error("Failed to load countries");
+const getCountriesCached = cacheFn(async () => {
+  try {
+    const res = await fetch(
+      "https://restcountries.com/v3.1/all?fields=name,flags",
+      { next: { revalidate: 60 * 60 * 24 } }
+    );
 
-      const countries = await res.json();
+    if (!res.ok) throw new Error("Failed to load countries");
 
-      return countries
-        .map((country) => ({
-          name: country?.name?.common ?? "",
-          flag: country?.flags?.svg ?? country?.flags?.png ?? "",
-        }))
-        .filter((country) => country.name);
-    } catch (error) {
-      console.error(error);
-      throw new Error("Could not fetch countries");
-    }
-  },
-  ["countries"],
-  { revalidate: 60 * 60 * 24 }
-);
+    const countries = await res.json();
+
+    return countries
+      .map((country) => ({
+        name: country?.name?.common ?? "",
+        flag: country?.flags?.svg ?? country?.flags?.png ?? "",
+      }))
+      .filter((country) => country.name);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Could not fetch countries");
+  }
+});
 
 /**
  * Return a list of countries with a display name and flag URL.
