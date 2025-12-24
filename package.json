@@ -2,6 +2,9 @@
 	"name": "the-wild-oasis-website",
 	"version": "0.2.0",
 	"private": true,
+	"overrides": {
+		"glob": "10.5.0"
+	},
 	"engines": {
 		"node": ">=20"
 	},
