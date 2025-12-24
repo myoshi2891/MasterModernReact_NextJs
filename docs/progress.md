@@ -5,6 +5,10 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | 90756b1 | 2025-12-24 | security: fix glob CLI command injection vulnerability (CVE) | npm overridesでglob 10.5.0に強制アップグレード |
+| 完了 | b086aae | 2025-12-24 | CodeRabbit レビューの3つの指摘に対応 | UI/入力改善 |
+| 完了 | 27b184c | 2025-12-24 | Claude Code メモリバンク構築 | CLAUDE.md, .specify/memory/ |
+| 完了 | 5e95733 | 2025-12-24 | ci: harden smoke test and guard SSG | スモークテスト強化 |
 | 完了 | c3d87e0 | 2025-12-23 | Limit SKIP_SSG to build step in CI | テスト時のCabinList空描画を回避 |
 | 完了 | 536a8cd | 2025-12-23 | Remove legacy vitest config | vitest.config.ts を削除 |
 | 完了 | 25057e5 | 2025-12-23 | Fix CI by switching to JSX and ESM config | app配下JSXを`.jsx`へ統一、`vitest.config.mts`導入 |
@@ -19,6 +23,60 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-24 変更内容まとめ（詳細）
+
+#### 概要
+
+- glob 脆弱性（CVE）対応：npm overrides で 10.5.0 に強制アップグレード
+- Claude Code メモリバンク構築（CLAUDE.md, .specify/memory/）
+- コードレビュー実施と対応計画の策定
+- 仕様書ステータスの明確化
+
+#### 1. セキュリティ対応（CVE）
+
+- 対象ファイル:
+  - `package.json`
+  - `package-lock.json`
+- 変更内容:
+  - glob 10.3.10 のコマンドインジェクション脆弱性に対応
+  - npm overrides を使用して glob を 10.5.0 に強制アップグレード
+  - 影響範囲: glob CLI のみ（ライブラリ API は安全）
+  - 対象依存: eslint-config-next, tailwindcss の推移的依存
+
+#### 2. Claude Code メモリバンク構築
+
+- 対象ファイル:
+  - `CLAUDE.md`（新規）
+  - `.specify/memory/architecture.md`（新規）
+  - `.specify/memory/constitution.md`（拡充）
+  - `.specify/memory/tech-stack.md`（新規）
+  - `.kilocode/rules/02-claude-code-guidelines.md`（新規）
+- 変更内容:
+  - プロジェクト概要、ディレクトリ構造、主要機能を CLAUDE.md に集約
+  - アーキテクチャ設計、技術スタック、品質基準を .specify/memory/ に整理
+  - Claude Code 向けガイドラインを追加
+
+#### 3. コードレビュー実施
+
+- 対象: Commit 141a1a6 以降の全改修
+- 作成ファイル:
+  - `docs/review-action-plan.md`（新規）
+  - `docs/review-prompts.md`（新規）
+- 主な指摘事項:
+  - Critical: specs/002 の DB 制約が未実装（仕様書と実装の乖離）
+  - High: SQLSTATE → HTTP マッピングが未実装
+  - High: CI に E2E テストが未追加
+  - Medium: booking.js 末尾改行なし
+- 対応計画: Phase 1〜6 に分割し、別セッションでも実行可能なプロンプト集を作成
+
+#### 4. 仕様書ステータスの明確化
+
+- 対象ファイル:
+  - `specs/index.md`
+- 変更内容:
+  - 002 のステータスを「策定済み」→「設計完了・実装未着手」に更新
+  - 仕様書と実装状況の乖離を明示化
 
 ### 2025-12-23 変更内容まとめ（詳細）
 
