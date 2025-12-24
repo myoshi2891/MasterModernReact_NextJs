@@ -89,6 +89,75 @@
 - 多言語対応
 - プッシュ通知
 
+## CI/SSG 実装詳細
+
+### SKIP_SSG 環境変数
+
+**設定場所**: `.github/workflows/ci.yml` の Build ステップ
+
+```yaml
+- name: Build
+  env:
+    SKIP_SSG: "true"
+  run: npm run build
+```
+
+**スコープ**:
+- `generateStaticParams()`: 空配列を返却 (静的生成をスキップ)
+- `generateMetadata()`: デフォルトタイトル "Cabin" を返却
+- `Page` コンポーネント: **ガード不要** (ランタイムで動的レンダリング)
+
+**注意**: ビルド時のみ `SKIP_SSG=true` を設定。本番ランタイムでは未設定。
+
+### パラメータガードの実装例
+
+```javascript
+// app/cabins/[cabinId]/page.jsx
+export async function generateStaticParams() {
+  if (process.env.SKIP_SSG === "true") {
+    return []; // ビルド時は空配列
+  }
+  const cabins = await getCabins();
+  return cabins.map((cabin) => ({ cabinId: String(cabin.id) }));
+}
+```
+
+### ヘルスチェック スモークテスト
+
+**エンドポイント**: `GET /api/health`
+
+**レスポンス**:
+```json
+{ "status": "ok" }
+```
+
+**CIでの実行**:
+```bash
+npm run start -- --hostname 127.0.0.1 --port 3000 > server.log 2>&1 &
+```
+
+| 項目 | 値 |
+|------|-----|
+| 最大リトライ | 20回 |
+| リトライ間隔 | 1秒 |
+| 接続タイムアウト | 2秒 |
+| リクエストタイムアウト | 5秒 |
+| 成功条件 | HTTP 2xx + curl終了コード0 |
+
+**失敗時の動作**:
+1. `server.log` の内容を標準出力に表示
+2. サーバープロセスを終了
+3. 終了コード 1 で CI を失敗
+
+### 既存パイプラインとの関係
+
+```
+Checkout → npm ci → Lint → Unit Tests → Component Tests → Build (SKIP_SSG) → Smoke Test
+```
+
+- **追加的**: 既存の Lint/Test ステップに Smoke Test を追加
+- **条件**: Node 20.x / 22.x マトリクスで両方実行
+
 ## 技術的負債
 
 - [ ] TypeScript 移行 (`typescript-migration-plan.md`)

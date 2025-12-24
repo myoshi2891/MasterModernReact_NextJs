@@ -113,6 +113,18 @@ app/_lib/
 
 ## データモデル
 
+### 命名規則
+
+| 種別 | 規則 | 例 |
+|------|------|-----|
+| テーブル名 | snake_case (複数形) | `cabins`, `bookings`, `guests` |
+| カラム名 (一般) | camelCase | `regularPrice`, `numNights`, `guestId` |
+| カラム名 (タイムスタンプ) | snake_case | `created_at` |
+| 外部キー | camelCase + Id | `cabinId`, `guestId` |
+
+**理由**: Supabase (PostgreSQL) の標準的なパターン。タイムスタンプのみ snake_case を維持し、
+その他のカラムは JavaScript/TypeScript との親和性のため camelCase を採用。
+
 ### ER図
 
 ```
@@ -132,11 +144,13 @@ app/_lib/
                     │ status      │     │  settings   │
                     │ isPaid      │     ├─────────────┤
                     │ observations│     │ id (PK)     │
-                    │ created_at  │     │ minNights   │
+                    │ created_at* │     │ minNights   │
                     └─────────────┘     │ maxNights   │
                                         │ maxGuests   │
-                                        │ breakfastPrice│
+                                        │breakfastPrice│
                                         └─────────────┘
+
+* created_at はタイムスタンプのため snake_case を維持
 ```
 
 ## ルーティング構成

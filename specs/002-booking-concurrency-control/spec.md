@@ -212,7 +212,6 @@ on bookings for select
 using ((current_setting('request.jwt.claims', true)::jsonb ->> 'guestId')::int = guestId);
 ```
 
-
 ## エラーハンドリング指針
 - Supabase error の `code` を判定
 - `code = 'P0001'` の場合は `message` を判定して CAPACITY_EXCEEDED / CABIN_NOT_FOUND を切り分ける
@@ -268,7 +267,6 @@ select id, cabinId, startDate, endDate
 from bookings
 where startDate >= endDate;
 ```
-
 
 ## 事前クリーンアップSQL（例）
 
