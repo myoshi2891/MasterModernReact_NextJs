@@ -43,14 +43,14 @@ export async function generateStaticParams() {
 /**
  * Render the cabin details and reservation UI for the cabin specified by `params.cabinId`.
  *
+ * Note: SKIP_SSG only affects generateStaticParams (build-time). At runtime,
+ * this page renders dynamically even when no static params were generated.
+ *
  * @param {{ params: { cabinId: string } }} props - Route props object.
  * @param {string} props.params.cabinId - The identifier of the cabin to fetch and display.
  * @returns {JSX.Element} A React element containing the cabin details and a reservation section.
  */
 export default async function Page({ params }) {
-  if (process.env.SKIP_SSG === "true") {
-    return <div>Cabin details unavailable in build mode.</div>;
-  }
   const cabin = await getCabin(params.cabinId);
 
   return (
