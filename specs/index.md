@@ -18,7 +18,7 @@
 | ID | 名称 | Status | 概要 |
 |----|------|--------|------|
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
-| 002 | [booking-concurrency-control](002-booking-concurrency-control/) | 設計完了・実装未着手 | 予約の同時実行対策（重複予約防止） |
+| 002 | [booking-concurrency-control](002-booking-concurrency-control/) | DB制約実装完了 | 予約の同時実行対策（重複予約防止） |
 
 ## 詳細
 
