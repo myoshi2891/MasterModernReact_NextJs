@@ -300,7 +300,21 @@ where id in (select id from conflicts);
 - `startDate` / `endDate` の型によって SQL が変わる
 - `status` の定義が曖昧だと誤判定が起きる
 
-## オープンクエスチョン
-- `status` の確定値（キャンセル判定の基準）
-- `startDate`/`endDate` の型（date/timestamptz）
-- 予約更新で日付変更を許可するか
+## オープンクエスチョン（解決済み 2025-12-25）
+
+| 質問 | 回答 |
+|------|------|
+| `status` の確定値 | `unconfirmed`, `checked-in`, `checked-out` の3値。`canceled` は未使用のため除外条件なしで制約適用 |
+| `startDate`/`endDate` の型 | `timestamp without time zone` → `tsrange` を使用 |
+| 予約更新で日付変更を許可するか | 現時点では許可（制約により重複は自動防止）|
+
+## 実装状況（2025-12-25）
+
+- [x] 重複データのクリーンアップ完了（id: 89, 124, 126 を削除）
+- [x] `btree_gist` 拡張有効化
+- [x] `bookings_no_overlap` 排他制約追加
+- [x] `bookings_date_order` チェック制約追加
+- [x] `bookings_num_guests` チェック制約追加
+- [ ] キャパシティチェックトリガー（将来対応）
+- [ ] idempotency key（将来対応）
+- [ ] SQLSTATE→HTTP マッピング（Phase 2.1 で対応予定）
