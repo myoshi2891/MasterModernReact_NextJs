@@ -304,7 +304,7 @@ where id in (select id from conflicts);
 
 | 質問 | 回答 |
 |------|------|
-| `status` の確定値 | `unconfirmed`, `checked-in`, `checked-out` の3値。`canceled` は未使用のため除外条件なしで制約適用 |
+| `status` の確定値 | 現在は `unconfirmed`, `checked-in`, `checked-out` の3値。将来の `canceled` 追加に備え `WHERE (status <> 'canceled')` 付きで制約適用 |
 | `startDate`/`endDate` の型 | `timestamp without time zone` → `tsrange` を使用 |
 | 予約更新で日付変更を許可するか | 現時点では許可（制約により重複は自動防止）|
 
@@ -312,7 +312,7 @@ where id in (select id from conflicts);
 
 - [x] 重複データのクリーンアップ完了（id: 89, 124, 126 を削除）
 - [x] `btree_gist` 拡張有効化
-- [x] `bookings_no_overlap` 排他制約追加
+- [x] `bookings_no_overlap` 排他制約追加（`WHERE (status <> 'canceled')` 付き）
 - [x] `bookings_date_order` チェック制約追加
 - [x] `bookings_num_guests` チェック制約追加
 - [ ] キャパシティチェックトリガー（将来対応）
