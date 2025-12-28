@@ -39,6 +39,7 @@ app/
 │   ├── auth.js           # NextAuth設定
 │   ├── booking.js        # 予約バリデーション
 │   ├── data-service.js   # Supabaseデータ取得
+│   ├── errors.js         # エラーマッピング (SQLSTATE → HTTP)
 │   ├── guest.js          # ゲストユーティリティ
 │   ├── supabaseServer.js # サーバー専用クライアント
 │   └── supabaseBrowser.js # ブラウザ用クライアント
@@ -67,6 +68,8 @@ app/
 - 日付選択 (react-day-picker)
 - 予約作成/編集/削除 (Server Actions)
 - 認証済みユーザーのみ操作可能
+- DB制約による重複予約防止 (EXCLUDE制約)
+- ユーザーフレンドリーなエラーメッセージ (SQLSTATE → HTTPマッピング)
 
 ### 3. 認証 (`/login`, `/account`)
 - Google OAuth

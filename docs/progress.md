@@ -5,6 +5,9 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 未コミット | - | 2025-12-28 | feat: implement DB error mapping for user-friendly messages | SQLSTATE→HTTPマッピング、errors.js作成、全77テスト通過 |
+| 完了 | 48c9bd1 | 2025-12-25 | fix(db): add canceled status exclusion to overlap constraint | WHERE句でcanceledを除外 |
+| 完了 | 9d674cd | 2025-12-25 | feat(db): implement booking concurrency control constraints | DB制約実装、重複データクリーンアップ |
 | 完了 | 90756b1 | 2025-12-24 | security: fix glob CLI command injection vulnerability (CVE) | npm overridesでglob 10.5.0に強制アップグレード |
 | 完了 | b086aae | 2025-12-24 | CodeRabbit レビューの3つの指摘に対応 | UI/入力改善 |
 | 完了 | 27b184c | 2025-12-24 | Claude Code メモリバンク構築 | CLAUDE.md, .specify/memory/ |
@@ -23,6 +26,64 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-28 変更内容まとめ（詳細）
+
+#### 概要
+
+- DB制約エラーのユーザーフレンドリーなエラーマッピング実装
+- PostgreSQL SQLSTATE → HTTP ステータスコード + 日本語メッセージの変換
+- PII (個人識別情報) を含まないエラーログの実装
+- 全77ユニットテスト通過を確認
+
+#### 1. エラーハンドリングモジュールの作成
+
+- 対象ファイル:
+  - `app/_lib/errors.js`（新規作成）
+  - `tests/unit/errors.test.js`（新規作成）
+- 変更内容:
+  - `BookingError` クラスの実装（statusCode、codeプロパティ付き）
+  - `mapSupabaseError` 関数の実装
+    - 23P01 (exclusion violation) → 409 Conflict「既に予約されています」
+    - 23514 (check constraint) → 400 Bad Request（日付順序/人数バリデーション）
+    - 23505 (unique violation) → 409 Conflict「既に処理済み」
+    - P0001 (raise exception) → 適切なコード（CAPACITY_EXCEEDED/CABIN_NOT_FOUND）
+  - 未知のエラーは500 Internal Errorにフォールバック、詳細はログのみ
+  - エラーメッセージは200文字に切り詰めてログ出力（PII保護）
+- テスト結果:
+  - 13テスト全て通過（BookingError: 2、mapSupabaseError: 11）
+
+#### 2. Server Actionsへのエラーマッピング適用
+
+- 対象ファイル:
+  - `app/_lib/actions.js`
+- 変更内容:
+  - `mapSupabaseError` のインポート追加
+  - `createBooking`、`updateBooking`、`deleteBooking` のエラーハンドリングを更新
+  - 汎用的な `new Error("Booking could not be created")` から `mapSupabaseError(error)` へ変更
+- 効果:
+  - DB制約違反時にユーザーフレンドリーなエラーメッセージを表示
+  - HTTPステータスコードが適切に設定される（409/400/404/500）
+  - 既存の77ユニットテスト全て通過を確認
+
+#### 3. ドキュメント更新
+
+- 対象ファイル:
+  - `CLAUDE.md`
+  - `specs/002-booking-concurrency-control/tasks.md`
+  - `docs/progress.md`
+- 変更内容:
+  - ディレクトリ構造に `errors.js` を追加
+  - 予約システムの説明に「ユーザーフレンドリーなエラーメッセージ」を追加
+  - タスク分解の進捗を更新（エラーコード変換完了、監視ログ定義完了）
+  - 本セクション（2025-12-28）を追加
+
+#### 4. 今後の残タスク（specs/002関連）
+
+- [ ] idempotency key の導入可否を決定
+- [ ] ローカル Supabase で並列予約テストを実施
+- [ ] パフォーマンス影響の計測（ステージング環境）
+- [ ] 409 連発時の運用判断基準を整理
 
 ### 2025-12-24 変更内容まとめ（詳細）
 
