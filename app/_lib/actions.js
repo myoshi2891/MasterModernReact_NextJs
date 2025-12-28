@@ -9,6 +9,7 @@ import {
   validateBookingInput,
 } from "./booking";
 import { getBookings } from "./data-service";
+import { mapSupabaseError } from "./errors";
 import { normalizeNationalId } from "./guest";
 import { supabaseServer } from "./supabaseServer";
 
@@ -108,7 +109,7 @@ export async function updateBooking(formData) {
     .eq("id", bookingId);
 
   if (error) {
-    throw new Error("Booking could not be updated");
+    throw mapSupabaseError(error);
   }
 
   revalidatePath(`/account/reservations/edit/${bookingId}`);
@@ -198,7 +199,7 @@ export async function createBooking(bookingData, formData) {
   const { error } = await supabaseServer.from("bookings").insert([newBooking]);
 
   if (error) {
-    throw new Error("Booking could not be created");
+    throw mapSupabaseError(error);
   }
 
   revalidatePath("/account/reservations");
@@ -243,7 +244,7 @@ export async function deleteBooking(bookingId) {
     .eq("id", numericBookingId);
 
   if (error) {
-    throw new Error("Booking could not be deleted");
+    throw mapSupabaseError(error);
   }
 
   revalidatePath("/account/reservations");
