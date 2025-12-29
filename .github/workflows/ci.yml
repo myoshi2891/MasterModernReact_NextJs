@@ -6,6 +6,17 @@ on:
   pull_request:
     branches: [main, dev]
 
+# Common environment variables for all jobs
+env:
+  NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+  NEXT_PUBLIC_SUPABASE_KEY: test
+  SUPABASE_URL: http://localhost:54321
+  SUPABASE_SERVICE_ROLE_KEY: test
+  AUTH_GOOGLE_ID: test
+  AUTH_GOOGLE_SECRET: test
+  NEXTAUTH_URL: http://localhost:3000
+  NEXTAUTH_SECRET: test-secret
+
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
@@ -14,14 +25,7 @@ jobs:
       matrix:
         node-version: [20.x, 22.x]
     env:
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-      NEXT_PUBLIC_SUPABASE_KEY: test
-      SUPABASE_URL: http://localhost:54321
-      SUPABASE_SERVICE_ROLE_KEY: test
-      AUTH_GOOGLE_ID: test
-      AUTH_GOOGLE_SECRET: test
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: test-secret
+      # Skip Playwright browser download for non-E2E jobs
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     steps:
       - name: Checkout
@@ -69,16 +73,6 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: lint-and-test
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-      NEXT_PUBLIC_SUPABASE_KEY: test
-      SUPABASE_URL: http://localhost:54321
-      SUPABASE_SERVICE_ROLE_KEY: test
-      AUTH_GOOGLE_ID: test
-      AUTH_GOOGLE_SECRET: test
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: test-secret
-      CI: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
