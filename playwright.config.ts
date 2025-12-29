@@ -20,12 +20,13 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321",
-      NEXT_PUBLIC_SUPABASE_KEY: "test-anon-key",
+      NEXT_PUBLIC_SUPABASE_KEY: "test",
       SUPABASE_URL: "http://localhost:54321",
-      SUPABASE_SERVICE_ROLE_KEY: "test-service-role-key",
-      AUTH_GOOGLE_ID: "test-google-id",
-      AUTH_GOOGLE_SECRET: "test-google-secret",
-      AUTH_SECRET: "test-auth-secret",
+      SUPABASE_SERVICE_ROLE_KEY: "test",
+      AUTH_GOOGLE_ID: "test",
+      AUTH_GOOGLE_SECRET: "test",
+      NEXTAUTH_URL: "http://localhost:3000",
+      NEXTAUTH_SECRET: "test-secret",
     },
   },
   projects: [
