@@ -33,7 +33,6 @@ export OPENAI_API_KEY="sk-..."   # if you prefer API key
 ```
 
 > Security note: avoid exporting secrets directly in the shell (they can land in history/logs). Prefer a `.env` file or a secrets manager, never commit `.env`, and clear shell history if you previously exported a key.
-
 > Why this matters here: your repo supports Node 20+ and CI checks 20/22 alongside testing libs we’ll target (Vitest, Playwright). ([GitHub][1])
 
 ---
@@ -74,14 +73,14 @@ codex "/review app/**/*.js app/**/*.tsx:
 
 Tips that work well in this repo:
 
-* Ask explicitly for **Server Actions** guardrails (form validation, idempotency).
-* Require **explained** diffs (“why is this safe?”) before accepting patch.
+- Ask explicitly for **Server Actions** guardrails (form validation, idempotency).
+- Require **explained** diffs (“why is this safe?”) before accepting patch.
 
 ## B) CI auto-review (keeps humans in control)
 
-* Add a CI job that runs `codex exec "review and propose minimal diffs"`.
-* Gate on **human approval** (branch protection stays on).
-* Have Codex comment on PRs with rationale and link to tests it adds.
+- Add a CI job that runs `codex exec "review and propose minimal diffs"`.
+- Gate on **human approval** (branch protection stays on).
+- Have Codex comment on PRs with rationale and link to tests it adds.
   (“Autofix CI / review with approvals” is a standard Codex pattern.) ([GitHub][1])
 
 ---
@@ -119,8 +118,8 @@ codex "Create Playwright specs for cabins > booking > account:
 
 ### D) CI policy
 
-* Fail PR if **new code lacks tests** touching SSR/server-actions.
-* Quarantine **flaky** tests; ask Codex to rewrite with stable waits.
+- Fail PR if **new code lacks tests** touching SSR/server-actions.
+- Quarantine **flaky** tests; ask Codex to rewrite with stable waits.
 
 ---
 
@@ -182,25 +181,25 @@ codex exec "Fix failing tests and open a PR 'test: stabilize and expand coverage
 
 If/when you want more, move to the **Agents SDK** + **MCP** (Git/FS tools only), then compose:
 
-* **Planner** → task breakdown
-* **Implementer** → code + tests
-* **Reviewer** → policy/security pass
+- **Planner** → task breakdown
+- **Implementer** → code + tests
+- **Reviewer** → policy/security pass
   (Still require human approval for merges.)
 
 ---
 
 # 7) Concurrency (without foot-guns)
 
-* Shard by area and run multiple Codex jobs:
+- Shard by area and run multiple Codex jobs:
 
   ```bash
   codex exec "refactor app/cabins/* for accessibility" &
   codex exec "harden auth middleware; add tests" &
   wait
   ```
-  
-* Lock shared files (`package.json`, migrations).
-* Keep **approvals=Read-only** until a branch is isolated; then enable **Auto**.
+
+- Lock shared files (`package.json`, migrations).
+- Keep **approvals=Read-only** until a branch is isolated; then enable **Auto**.
 
 ---
 

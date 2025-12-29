@@ -5,7 +5,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 30 * 1000,
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
   use: {
     baseURL,
     trace: "on-first-retry",
@@ -13,7 +13,9 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --port 3000 --hostname 127.0.0.1",
+    command: process.env.CI
+      ? "npm run start -- --port 3000 --hostname 127.0.0.1"
+      : "npm run dev -- --port 3000 --hostname 127.0.0.1",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     env: {
