@@ -18,6 +18,7 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 - Keep allowJs enabled during the migration, then disable it after completion
 - Ensure `next build`, `next lint`, and `tsc --noEmit` succeed
 - All existing tests must pass after migration
+- **Minimum TypeScript version: ^5.3** (for Next.js 14 compatibility)
 
 ## Scope
 
@@ -55,6 +56,7 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 - `types/supabase.ts` (generated via supabase gen types)
 - `types/next-auth.d.ts` (module augmentation for session.user.guestId)
 - `types/env.d.ts` (environment variable types)
+- `types/server-actions.ts` (typed Server Action helpers)
 
 ### Files to Migrate
 
@@ -77,11 +79,19 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 
 ## Dependencies
 
-### To Install
+### To Install (Pinned Versions)
 
 ```bash
-npm install -D typescript @types/node @types/react @types/react-dom
+npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
 ```
+
+**Version Policy:**
+- `typescript@~5.7.0` - Use tilde for patch updates only, compatible with Next.js 14
+- `@types/node@^20.0.0` - Match Node.js engine requirement (>=20)
+- `@types/react@^18.0.0` - Match React version
+- `@types/react-dom@^18.0.0` - Match React DOM version
+
+**Note:** `package-lock.json` ensures reproducible builds. Run `npm ci` in CI environments.
 
 ### Already Typed (No @types needed)
 
@@ -99,9 +109,9 @@ npm install -D typescript @types/node @types/react @types/react-dom
 
 ### Phase 1: Foundation Setup
 
-- [ ] Install TypeScript dependencies
+- [ ] Install TypeScript dependencies with pinned versions
   ```bash
-  npm install -D typescript @types/node @types/react @types/react-dom
+  npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
   ```
 - [ ] Create `tsconfig.json` with strict settings
   ```json
@@ -125,13 +135,32 @@ npm install -D typescript @types/node @types/react @types/react-dom
       "baseUrl": ".",
       "paths": { "@/*": ["./*"] }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "types/**/*.ts"],
-    "exclude": ["node_modules"]
+    "include": [
+      "next-env.d.ts",
+      "types/**/*.ts",
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "tests/**/*.ts",
+      "tests/**/*.tsx",
+      ".next/types/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules",
+      ".next",
+      "coverage",
+      "playwright-report",
+      "test-results"
+    ]
   }
   ```
 - [ ] Add `typecheck` script to package.json
   ```json
   "typecheck": "tsc --noEmit"
+  ```
+- [ ] Add typecheck to CI pipeline (`.github/workflows/ci.yml`)
+  ```yaml
+  - name: Type check
+    run: npm run typecheck
   ```
 - [ ] Create `types/` directory structure
 - [ ] Generate Supabase types
@@ -141,26 +170,40 @@ npm install -D typescript @types/node @types/react @types/react-dom
 - [ ] Create `types/domain.ts` with app-specific types
 - [ ] Create `types/next-auth.d.ts` for session augmentation
 - [ ] Create `types/env.d.ts` for environment variables
+- [ ] Create `types/server-actions.ts` with typed helpers (see reference below)
 
 ### Phase 2: Data/Auth Layer (.js → .ts)
 
-- [ ] `app/_lib/supabaseServer.js` → `.ts`
-  - Add `Database` generic to createClient
-- [ ] `app/_lib/supabaseBrowser.js` → `.ts`
-  - Add `Database` generic to createClient
-- [ ] `app/_lib/errors.js` → `.ts`
-  - Type BookingError class and mapSupabaseError function
-- [ ] `app/_lib/guest.js` → `.ts`
-  - Type normalizeNationalId function
-- [ ] `app/_lib/booking.js` → `.ts`
-  - Type validateBookingInput and related functions
-- [ ] `app/_lib/data-service.js` → `.ts`
-  - Type all data fetching functions (getCabins, getBooking, etc.)
-- [ ] `app/_lib/auth.js` → `.ts`
-  - Type NextAuth config and callbacks
-- [ ] `app/_lib/actions.js` → `.ts`
-  - Type Server Actions with FormData handling
-  - Handle `"use server"` directive
+**Migration Order** (utilities first, then consumers):
+
+1. [ ] `app/_lib/errors.js` → `.ts` **(First - no dependencies)**
+   - Type BookingError class and mapSupabaseError function
+   - Provides error types for downstream files
+
+2. [ ] `app/_lib/guest.js` → `.ts` **(Second - utility)**
+   - Type normalizeNationalId function
+
+3. [ ] `app/_lib/supabaseServer.js` → `.ts` **(Third - client setup)**
+   - Add `Database` generic to createClient
+
+4. [ ] `app/_lib/supabaseBrowser.js` → `.ts`
+   - Add `Database` generic to createClient
+
+5. [ ] `app/_lib/booking.js` → `.ts`
+   - Type validateBookingInput and related functions
+
+6. [ ] `app/_lib/data-service.js` → `.ts`
+   - Type all data fetching functions (getCabins, getBooking, etc.)
+   - Uses Supabase client types
+
+7. [ ] `app/_lib/auth.js` → `.ts`
+   - Type NextAuth config and callbacks
+   - Uses session augmentation types
+
+8. [ ] `app/_lib/actions.js` → `.ts` **(Last - depends on all above)**
+   - Type Server Actions with FormData handling
+   - Use typed helpers from `types/server-actions.ts`
+   - Handle `"use server"` directive
 
 ### Phase 3: API Routes & Middleware
 
@@ -202,12 +245,38 @@ npm install -D typescript @types/node @types/react @types/react-dom
 
 ### Phase 5: Strict Mode Resolution & Finalization
 
-- [ ] Resolve all strict TypeScript errors
-  - Add explicit null checks
-  - Add type guards where needed
-  - Handle optional chaining properly
+#### Common Errors Checklist
+
+- [ ] **Null/undefined checks on Supabase query results**
+  - `data` can be null; always check before use
+  - Example: `if (!data) throw new Error("Not found")`
+
+- [ ] **Optional chaining on session properties**
+  - `session?.user?.guestId` may be undefined
+  - Use type guards: `if (session?.user?.guestId) { ... }`
+
+- [ ] **FormData type assertions**
+  - `formData.get()` returns `FormDataEntryValue | null`
+  - Cast appropriately: `formData.get("field") as string`
+
+- [ ] **NextAuth callback type narrowing**
+  - JWT callback: check `token.guestId` existence
+  - Session callback: spread user properties safely
+
+- [ ] **Date constructor arguments**
+  - Ensure string dates are valid before `new Date()`
+
+- [ ] **Array method return types**
+  - `.find()` can return undefined
+  - `.filter()` narrows types correctly
+
+#### Finalization Steps
+
 - [ ] Disable `allowJs` in tsconfig.json
 - [ ] Verify no .js/.jsx files remain in app/ directory
+  ```bash
+  find app -name "*.js" -o -name "*.jsx" | wc -l  # Should be 0
+  ```
 - [ ] Run full validation suite:
   ```bash
   npm run lint
@@ -216,6 +285,8 @@ npm install -D typescript @types/node @types/react @types/react-dom
   npm run test:unit
   npm run test:component
   ```
+
+**Note:** `skipLibCheck: true` may mask issues in `@types/next-auth` or similar. If strange runtime errors occur, temporarily set to `false` to surface hidden type issues.
 
 ### Phase 6: Test Migration
 
@@ -331,6 +402,73 @@ declare namespace NodeJS {
 }
 ```
 
+### Server Actions Helper (types/server-actions.ts)
+
+```typescript
+/**
+ * Type-safe Server Action result pattern
+ */
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+/**
+ * Helper to extract typed form data with automatic whitespace trimming.
+ * All string values are trimmed to prevent subtle bugs from whitespace-only input.
+ */
+export function getFormString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  if (typeof value !== "string") {
+    throw new Error(`Expected string for form field: ${key}`);
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error(`Form field is empty: ${key}`);
+  }
+  return trimmed;
+}
+
+export function getFormNumber(formData: FormData, key: string): number {
+  const value = getFormString(formData, key);
+  const num = Number(value);
+  if (Number.isNaN(num)) {
+    throw new Error(`Expected number for form field: ${key}`);
+  }
+  return num;
+}
+
+export function getFormOptionalString(
+  formData: FormData,
+  key: string
+): string | undefined {
+  const value = formData.get(key);
+  if (value === null) return undefined;
+  if (typeof value !== "string") {
+    throw new Error(`Expected string for form field: ${key}`);
+  }
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+/**
+ * Example usage in Server Action:
+ *
+ * "use server";
+ * import { getFormString, getFormNumber, ActionResult } from "@/types/server-actions";
+ *
+ * export async function createBooking(formData: FormData): Promise<ActionResult<{ id: number }>> {
+ *   try {
+ *     const cabinId = getFormNumber(formData, "cabinId");
+ *     const observations = getFormOptionalString(formData, "observations");
+ *     // ... create booking
+ *     return { success: true, data: { id: newBooking.id } };
+ *   } catch (error) {
+ *     return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
+ *   }
+ * }
+ */
+```
+
 ## Testing and Validation
 
 ### Per-Phase Validation
@@ -360,40 +498,62 @@ npm run test:e2e
 1. **Server Actions Type Safety**
    - `"use server"` files require careful FormData typing
    - Return types must be serializable
-   - Solution: Create typed wrapper functions
+   - **Mitigation:** Use `types/server-actions.ts` helpers and `ActionResult<T>` pattern
 
 2. **NextAuth Callbacks**
    - JWT and session callbacks need proper type narrowing
-   - Solution: Use type guards for token properties
+   - **Mitigation:** Use type guards for token properties
 
 3. **Supabase Type Regeneration**
    - Schema changes require type regeneration
-   - Solution: Add `supabase gen types` to CI or pre-commit
+   - **Mitigation:** Add `supabase gen types` to CI or pre-commit
 
 ### Medium Risk
 
 4. **Date Handling**
    - `date-fns` functions expect specific types
    - Booking date ranges need careful null handling
-   - Solution: Create utility types for date ranges
+   - **Mitigation:** Create utility types for date ranges
 
 5. **ReservationContext**
    - Context value includes DateRange from react-day-picker
-   - Solution: Import types from react-day-picker
+   - **Mitigation:** Import types from react-day-picker
 
 6. **Dynamic Route Params**
    - `params` is now a Promise in Next.js 15 (future consideration)
-   - Solution: Follow Next.js upgrade guide when upgrading
+   - **Mitigation:** Follow Next.js upgrade guide when upgrading
 
 ### Low Risk
 
 7. **allowJs Removal**
    - Forgetting to convert a file will cause build failure
-   - Solution: Run `find app -name "*.js" -o -name "*.jsx"` to verify
+   - **Mitigation:** Run `find app -name "*.js" -o -name "*.jsx"` to verify
 
 8. **Test Mock Types**
    - vi.mock and vi.fn need type annotations
-   - Solution: Use `vi.fn<[], ReturnType>()` pattern
+   - **Mitigation:** Use `vi.fn<[], ReturnType>()` pattern
+
+### Operational Risks
+
+9. **CI/CD Integration**
+   - TypeScript errors may slip into production if CI doesn't enforce typecheck
+   - **Mitigation:** Add `npm run typecheck` to CI pipeline before build step
+   - Consider adding pre-commit hook: `npx lint-staged` with typecheck
+
+10. **Team Coordination**
+    - In-flight PRs during migration may conflict with file renames
+    - **Mitigation:**
+      - Announce migration start to team
+      - Merge or close long-running PRs before Phase 2
+      - Consider feature freeze during active migration phases
+      - Use atomic commits per file/group for easy cherry-picking
+
+11. **Build Performance**
+    - `tsc --noEmit` can add 10-30 seconds to builds
+    - **Mitigation:**
+      - Use `incremental: true` in tsconfig (already included)
+      - Monitor typecheck duration; alert if >30 seconds
+      - Consider `typescript-coverage-report` to track progress
 
 ## Open Questions
 
@@ -409,6 +569,8 @@ If issues arise during migration:
 
 ## Success Criteria
 
+### Functional
+
 - [ ] All 56 app files converted to TypeScript
 - [ ] All 16 test files converted to TypeScript
 - [ ] `npm run typecheck` passes with no errors
@@ -419,3 +581,14 @@ If issues arise during migration:
 - [ ] All E2E tests pass
 - [ ] `allowJs: false` in tsconfig.json
 - [ ] No `.js` or `.jsx` files in `app/` directory
+
+### Performance
+
+- [ ] `tsc --noEmit` completes in <30 seconds
+- [ ] `npm run build` time regression <10% from baseline
+
+### Quality
+
+- [ ] No `any` types except in explicitly annotated exceptions
+- [ ] All Server Actions use typed helpers
+- [ ] No new ESLint warnings introduced by migration
