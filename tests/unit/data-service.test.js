@@ -2,18 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "../msw/server";
 
-const { supabaseBrowserMock, supabaseServerMock, notFoundMock } = vi.hoisted(
-  () => ({
-    supabaseBrowserMock: { from: vi.fn() },
-    supabaseServerMock: { from: vi.fn() },
-    notFoundMock: vi.fn(() => {
-      throw new Error("NEXT_NOT_FOUND");
-    }),
-  })
-);
-
-vi.mock("../../app/_lib/supabaseBrowser", () => ({
-  supabaseBrowser: supabaseBrowserMock,
+const { supabaseServerMock, notFoundMock } = vi.hoisted(() => ({
+  supabaseServerMock: { from: vi.fn() },
+  notFoundMock: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 vi.mock("../../app/_lib/supabaseServer", () => ({
@@ -37,12 +30,12 @@ describe("data-service", () => {
     const cabins = [{ id: 1, name: "A" }];
     const order = vi.fn().mockResolvedValue({ data: cabins, error: null });
     const select = vi.fn().mockReturnValue({ order });
-    supabaseBrowserMock.from.mockReturnValue({ select });
+    supabaseServerMock.from.mockReturnValue({ select });
 
     const { getCabins } = await import("../../app/_lib/data-service");
     const result = await getCabins();
 
-    expect(supabaseBrowserMock.from).toHaveBeenCalledWith("cabins");
+    expect(supabaseServerMock.from).toHaveBeenCalledWith("cabins");
     expect(select).toHaveBeenCalledWith(
       "id, name, maxCapacity, regularPrice, discount, image"
     );
@@ -56,7 +49,7 @@ describe("data-service", () => {
       .fn()
       .mockResolvedValue({ data: null, error: new Error("fail") });
     const select = vi.fn().mockReturnValue({ order });
-    supabaseBrowserMock.from.mockReturnValue({ select });
+    supabaseServerMock.from.mockReturnValue({ select });
 
     const { getCabins } = await import("../../app/_lib/data-service");
 
@@ -71,7 +64,7 @@ describe("data-service", () => {
       .mockResolvedValue({ data: null, error: new Error("fail") });
     const eq = vi.fn().mockReturnValue({ single });
     const select = vi.fn().mockReturnValue({ eq });
-    supabaseBrowserMock.from.mockReturnValue({ select });
+    supabaseServerMock.from.mockReturnValue({ select });
 
     const { getCabin } = await import("../../app/_lib/data-service");
 
@@ -94,14 +87,14 @@ describe("data-service", () => {
     const or = vi.fn().mockResolvedValue({ data: bookings, error: null });
     const eq = vi.fn().mockReturnValue({ or });
     const select = vi.fn().mockReturnValue({ eq });
-    supabaseBrowserMock.from.mockReturnValue({ select });
+    supabaseServerMock.from.mockReturnValue({ select });
 
     const { getBookedDatesByCabinId } = await import(
       "../../app/_lib/data-service"
     );
     const result = await getBookedDatesByCabinId(7);
 
-    expect(supabaseBrowserMock.from).toHaveBeenCalledWith("bookings");
+    expect(supabaseServerMock.from).toHaveBeenCalledWith("bookings");
     expect(select).toHaveBeenCalledWith("*");
     expect(eq).toHaveBeenCalledWith("cabinId", 7);
     expect(or).toHaveBeenCalledWith(
