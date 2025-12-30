@@ -104,6 +104,24 @@ import supabaseBrowser from "@/app/_lib/supabaseBrowser";
 | Component | `tests/component/` | jsdom |
 | E2E | `tests/e2e/` | Playwright |
 
+## CI構成
+
+```
+lint-and-test (Node 20.19.6, 22.x)
+    ├── Lint
+    ├── Unit tests
+    ├── Component tests
+    ├── Build
+    └── Smoke test (/api/health)
+           ↓
+        e2e (Node 20.19.6)
+    ├── Build
+    └── Playwright E2E tests (レポート7日間保持)
+```
+
+- E2Eテストは `lint-and-test` 完了後に実行
+- テストレポートはGitHub Actionsアーティファクトで確認可能
+
 ## 環境変数 (.env)
 
 ```

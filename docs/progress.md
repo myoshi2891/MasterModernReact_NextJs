@@ -5,7 +5,12 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
-| 未コミット | - | 2025-12-28 | feat: implement DB error mapping for user-friendly messages | SQLSTATE→HTTPマッピング、errors.js作成、全77テスト通過 |
+| 完了 | 0509ffe | 2025-12-30 | chore: unify env variables and pin Node.js version | 環境変数統一、Node.js 20.19.6ピン |
+| 完了 | 145e183 | 2025-12-30 | fix: resolve CORS error by unifying hostname to localhost | CORSエラー解消 |
+| 完了 | f725cf7 | 2025-12-30 | fix: resolve E2E test failure and security vulnerabilities | main重複修正、Node.jsセキュリティ更新 |
+| 完了 | 1925e6d | 2025-12-30 | chore: add .nvmrc and fix markdown formatting | .nvmrc追加 |
+| 完了 | 9a79d78 | 2025-12-30 | ci: add Playwright E2E test job to CI workflow | E2EテストCI統合 |
+| 完了 | 76d047c | 2025-12-28 | feat: implement DB error mapping for user-friendly messages | SQLSTATE→HTTPマッピング、errors.js作成、全77テスト通過 |
 | 完了 | 48c9bd1 | 2025-12-25 | fix(db): add canceled status exclusion to overlap constraint | WHERE句でcanceledを除外 |
 | 完了 | 9d674cd | 2025-12-25 | feat(db): implement booking concurrency control constraints | DB制約実装、重複データクリーンアップ |
 | 完了 | 90756b1 | 2025-12-24 | security: fix glob CLI command injection vulnerability (CVE) | npm overridesでglob 10.5.0に強制アップグレード |
@@ -26,6 +31,79 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-30 変更内容まとめ（詳細）
+
+#### 概要
+
+- E2EテストのCI統合 (Phase 3.1)
+- Playwright設定の最適化とCORS問題の解消
+- Node.jsセキュリティアップデート
+- 環境変数の統一
+
+#### 1. E2EテストのCI統合
+
+- 対象ファイル:
+  - `.github/workflows/ci.yml`
+  - `playwright.config.ts`
+- 変更内容:
+  - CIワークフローに `e2e` ジョブを追加（`lint-and-test` 完了後に実行）
+  - Playwright chromiumブラウザのインストールステップを追加
+  - テストレポートをアーティファクトとして7日間保持
+  - 共通環境変数をワークフローレベルに抽出して重複解消
+- 効果:
+  - PRマージ前にE2Eテストが自動実行される
+  - テスト失敗時のデバッグが容易に（レポート参照可能）
+
+#### 2. Playwright設定の最適化
+
+- 対象ファイル:
+  - `playwright.config.ts`
+- 変更内容:
+  - CI環境では本番ビルド（`npm run start`）を使用するよう変更
+  - CIでリトライを2回に設定（フレイキーテスト対策）
+  - ホスト名を `127.0.0.1` から `localhost` に統一（CORS問題解消）
+  - 環境変数をCI設定と統一
+- 効果:
+  - `NEXTAUTH_URL` とオリジンの一致によりCORSエラーが解消
+  - ローカルとCI環境での一貫した動作
+
+#### 3. HTMLセマンティクスの修正
+
+- 対象ファイル:
+  - `app/page.jsx`
+- 変更内容:
+  - ホームページの `<main>` を `<div>` に変更
+  - `layout.jsx` に既に `<main>` があるため、重複を解消
+- 効果:
+  - HTMLセマンティクスの正規化（`<main>` は1ページに1つ）
+  - Playwrightの `getByRole("main")` が正しく動作
+
+#### 4. Node.jsセキュリティアップデート
+
+- 対象ファイル:
+  - `.nvmrc`
+  - `.github/workflows/ci.yml`
+- 変更内容:
+  - Node.js 20.19.0 → 20.19.6 にアップグレード
+  - CIのNode.jsバージョンを 20.19.6 に明示的にピン
+- 対応CVE:
+  - CVE-2025-23166（高）：async crypto エラーハンドリングでクラッシュ
+  - CVE-2025-23167（中）：llhttp HTTP1ヘッダー処理の脆弱性
+  - CVE-2025-23165（低）：メモリリークによるDoS
+  - CVE-2025-47153（中）：32ビット Debian ビルドのアウトオブバウンズアクセス
+
+#### 5. 環境変数の統一
+
+- 対象ファイル:
+  - `playwright.config.ts`
+  - `.github/workflows/ci.yml`
+- 変更内容:
+  - `playwright.config.ts` の環境変数をCI設定と統一
+  - `AUTH_SECRET` → `NEXTAUTH_SECRET` に変更
+  - `NEXTAUTH_URL` を追加
+- 効果:
+  - ローカルテストとCI環境での一貫した動作
 
 ### 2025-12-28 変更内容まとめ（詳細）
 
