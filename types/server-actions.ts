@@ -11,8 +11,11 @@ export type ActionResult<T = void> =
  */
 export function getFormString(formData: FormData, key: string): string {
   const value = formData.get(key);
+  if (value === null) {
+    throw new Error(`Form field is missing: ${key}`);
+  }
   if (typeof value !== "string") {
-    throw new Error(`Expected string for form field: ${key}`);
+    throw new Error(`Expected string for form field: ${key}, got File`);
   }
   const trimmed = value.trim();
   if (!trimmed) {
@@ -24,7 +27,7 @@ export function getFormString(formData: FormData, key: string): string {
 export function getFormNumber(formData: FormData, key: string): number {
   const value = getFormString(formData, key);
   const num = Number(value);
-  if (Number.isNaN(num)) {
+  if (Number.isNaN(num) || !Number.isFinite(num)) {
     throw new Error(`Expected number for form field: ${key}`);
   }
   return num;
@@ -37,7 +40,7 @@ export function getFormOptionalString(
   const value = formData.get(key);
   if (value === null) return undefined;
   if (typeof value !== "string") {
-    throw new Error(`Expected string for form field: ${key}`);
+    throw new Error(`Expected string for form field: ${key}, got File`);
   }
   const trimmed = value.trim();
   return trimmed || undefined;

@@ -14,6 +14,9 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+/** Booking status enum - single source of truth */
+export type BookingStatus = "unconfirmed" | "checked-in" | "checked-out";
+
 export interface Database {
   public: {
     Tables: {
@@ -60,7 +63,7 @@ export interface Database {
           cabinPrice: number;
           extrasPrice: number;
           totalPrice: number;
-          status: "unconfirmed" | "checked-in" | "checked-out";
+          status: BookingStatus;
           hasBreakfast: boolean;
           isPaid: boolean;
           observations: string | null;
@@ -77,7 +80,7 @@ export interface Database {
           cabinPrice: number;
           extrasPrice?: number;
           totalPrice: number;
-          status?: "unconfirmed" | "checked-in" | "checked-out";
+          status?: BookingStatus;
           hasBreakfast?: boolean;
           isPaid?: boolean;
           observations?: string | null;
@@ -94,7 +97,7 @@ export interface Database {
           cabinPrice?: number;
           extrasPrice?: number;
           totalPrice?: number;
-          status?: "unconfirmed" | "checked-in" | "checked-out";
+          status?: BookingStatus;
           hasBreakfast?: boolean;
           isPaid?: boolean;
           observations?: string | null;
@@ -165,7 +168,7 @@ export interface Database {
       [_ in never]: never;
     };
     Enums: {
-      booking_status: "unconfirmed" | "checked-in" | "checked-out";
+      booking_status: BookingStatus;
     };
   };
 }

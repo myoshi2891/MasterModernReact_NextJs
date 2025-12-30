@@ -14,12 +14,20 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 
+interface MockImageProps {
+  alt?: string;
+  fill?: unknown;
+  fetchPriority?: unknown;
+  priority?: unknown;
+  [key: string]: unknown;
+}
+
 vi.mock("next/image", () => ({
-  default: (props: Record<string, unknown>) => {
+  default: (props: MockImageProps) => {
     const { fill, fetchPriority, priority, alt = "", ...rest } = props ?? {};
     return createElement("img", {
       ...rest,
-      alt: alt as string,
+      alt,
     });
   },
 }));
