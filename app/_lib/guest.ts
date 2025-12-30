@@ -20,11 +20,13 @@
  * // 短すぎる場合はエラー
  * normalizeNationalId("ABC") // throws Error
  *
- * @param {*} rawValue - 生の入力値（文字列、数値など）
- * @returns {string} 正規化されたID（6-12文字の英数字）、または空文字列（入力が空または空白のみの場合）
- * @throws {Error} 正規化後の値が空、または6-12文字の英数字形式に一致しない場合
+ * @param rawValue - 生の入力値（文字列、数値など）
+ * @returns 正規化されたID（6-12文字の英数字）、または空文字列（入力が空または空白のみの場合）
+ * @throws Error 正規化後の値が空、または6-12文字の英数字形式に一致しない場合
  */
-export function normalizeNationalId(rawValue) {
+export function normalizeNationalId(
+  rawValue: string | number | null | undefined
+): string {
   const normalized = rawValue?.toString().trim() ?? "";
 
   if (!normalized) return "";

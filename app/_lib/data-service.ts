@@ -2,11 +2,12 @@ import { eachDayOfInterval } from "date-fns";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { supabaseServer } from "./supabaseServer";
+import type { Cabin, Booking, Guest, Settings, Country } from "@/types/domain";
 
 /////////////
 // GET
 
-export async function getCabin(id) {
+export async function getCabin(id: number | string): Promise<Cabin> {
   const { data, error } = await supabaseServer
     .from("cabins")
     .select("*")
@@ -21,10 +22,12 @@ export async function getCabin(id) {
     notFound();
   }
 
-  return data;
+  return data as Cabin;
 }
 
-export async function getCabinPrice(id) {
+export async function getCabinPrice(
+  id: number | string
+): Promise<{ regularPrice: number; discount: number } | null> {
   const { data, error } = await supabaseServer
     .from("cabins")
     .select("regularPrice, discount")
@@ -38,7 +41,7 @@ export async function getCabinPrice(id) {
   return data;
 }
 
-export const getCabins = async function () {
+export const getCabins = async function (): Promise<Cabin[]> {
   const { data, error } = await supabaseServer
     .from("cabins")
     .select("id, name, maxCapacity, regularPrice, discount, image")
@@ -51,11 +54,11 @@ export const getCabins = async function () {
     throw new Error("Cabins could not be loaded");
   }
 
-  return data;
+  return data as Cabin[];
 };
 
 // Guests are uniquely identified by their email address
-export async function getGuest(email) {
+export async function getGuest(email: string): Promise<Guest | null> {
   const { data, error } = await supabaseServer
     .from("guests")
     .select("*")
@@ -63,16 +66,28 @@ export async function getGuest(email) {
     .single();
 
   // No error here! We handle the possibility of no guest in the sign in callback
-  return data;
+  if (error) {
+    return null;
+  }
+  return data as Guest;
+}
+
+/**
+ * Booking with related cabin data.
+ */
+export interface BookingWithCabin extends Booking {
+  cabins: Pick<Cabin, "name" | "maxCapacity" | "image">;
 }
 
 /**
  * Retrieve a single booking by its id, including selected cabin details.
- * @param {string|number} id - The booking's unique identifier.
- * @returns {Object} The booking record with nested `cabins` object containing `name`, `maxCapacity`, and `image`.
- * @throws {Error} If the booking query fails ("Booking could not get loaded") or if no booking is found ("Booking not found").
+ * @param id - The booking's unique identifier.
+ * @returns The booking record with nested `cabins` object containing `name`, `maxCapacity`, and `image`.
+ * @throws Error If the booking query fails ("Booking could not get loaded") or if no booking is found ("Booking not found").
  */
-export async function getBooking(id) {
+export async function getBooking(
+  id: number | string
+): Promise<BookingWithCabin> {
   const { data, error } = await supabaseServer
     .from("bookings")
     .select("*, cabins(name, maxCapacity, image)")
@@ -88,16 +103,34 @@ export async function getBooking(id) {
     throw new Error("Booking not found");
   }
 
-  return data;
+  return data as BookingWithCabin;
+}
+
+/**
+ * Booking list item with selected cabin data.
+ */
+export interface BookingListItem {
+  id: number;
+  created_at: string;
+  startDate: string;
+  endDate: string;
+  numNights: number;
+  numGuests: number;
+  totalPrice: number;
+  guestId: number;
+  cabinId: number;
+  cabins: Pick<Cabin, "name" | "image" | "maxCapacity">;
 }
 
 /**
  * Retrieve all bookings for a specific guest, ordered by start date.
  *
- * @param {string|number} guestId - Identifier of the guest whose bookings to fetch.
- * @returns {Array<Object>} An array of booking objects containing: `id`, `created_at`, `startDate`, `endDate`, `numNights`, `numGuests`, `totalPrice`, `guestId`, `cabinId`, and a `cabins` object with `name`, `image`, and `maxCapacity`.
+ * @param guestId - Identifier of the guest whose bookings to fetch.
+ * @returns An array of booking objects containing: `id`, `created_at`, `startDate`, `endDate`, `numNights`, `numGuests`, `totalPrice`, `guestId`, `cabinId`, and a `cabins` object with `name`, `image`, and `maxCapacity`.
  */
-export async function getBookings(guestId) {
+export async function getBookings(
+  guestId: number | string
+): Promise<BookingListItem[]> {
   const { data, error } = await supabaseServer
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
@@ -112,13 +145,15 @@ export async function getBookings(guestId) {
     throw new Error("Bookings could not get loaded");
   }
 
-  return data;
+  return data as unknown as BookingListItem[];
 }
 
-export async function getBookedDatesByCabinId(cabinId) {
-  let today = new Date();
+export async function getBookedDatesByCabinId(
+  cabinId: number | string
+): Promise<Date[]> {
+  const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
-  today = today.toISOString();
+  const todayISO = today.toISOString();
 
   // await new Promise((res) => setTimeout(res, 5000));
 
@@ -127,7 +162,7 @@ export async function getBookedDatesByCabinId(cabinId) {
     .from("bookings")
     .select("*")
     .eq("cabinId", cabinId)
-    .or(`startDate.gte.${today},status.eq.checked-in`);
+    .or(`startDate.gte.${todayISO},status.eq.checked-in`);
 
   if (error) {
     console.error(error);
@@ -149,10 +184,10 @@ export async function getBookedDatesByCabinId(cabinId) {
 
 /**
  * Retrieve the single settings record from the database.
- * @returns {Object} The settings record from the "settings" table.
- * @throws {Error} Throws an error with message "Settings could not be loaded" if the database query fails.
+ * @returns The settings record from the "settings" table.
+ * @throws Error Throws an error with message "Settings could not be loaded" if the database query fails.
  */
-export async function getSettings() {
+export async function getSettings(): Promise<Settings> {
   const { data, error } = await supabaseServer
     .from("settings")
     .select("*")
@@ -163,7 +198,7 @@ export async function getSettings() {
     throw new Error("Settings could not be loaded");
   }
 
-  return data;
+  return data as Settings;
 }
 
 /**
@@ -175,9 +210,12 @@ export async function getSettings() {
  *
  * @see https://react.dev/reference/react/cache
  */
-const cacheFn = typeof cache === "function" ? cache : (fn) => fn;
+const cacheFn =
+  typeof cache === "function"
+    ? cache
+    : <T extends (...args: never[]) => unknown>(fn: T) => fn;
 
-const getCountriesCached = cacheFn(async () => {
+const getCountriesCached = cacheFn(async (): Promise<Country[]> => {
   try {
     const res = await fetch(
       "https://restcountries.com/v3.1/all?fields=name,flags",
@@ -186,7 +224,10 @@ const getCountriesCached = cacheFn(async () => {
 
     if (!res.ok) throw new Error("Failed to load countries");
 
-    const countries = await res.json();
+    const countries = (await res.json()) as Array<{
+      name?: { common?: string };
+      flags?: { svg?: string; png?: string };
+    }>;
 
     return countries
       .map((country) => ({
@@ -202,21 +243,39 @@ const getCountriesCached = cacheFn(async () => {
 
 /**
  * Return a list of countries with a display name and flag URL.
- * @returns {Promise<Array<{name: string, flag: string}>>} An array of country objects where `name` is the country's common name and `flag` is a URL to the country's flag (SVG or PNG).
+ * @returns An array of country objects where `name` is the country's common name and `flag` is a URL to the country's flag (SVG or PNG).
  */
-export async function getCountries() {
+export async function getCountries(): Promise<Country[]> {
   return getCountriesCached();
 }
 
 /////////////
+
+/**
+ * Input for creating a new guest.
+ */
+export interface NewGuestInput {
+  email: string;
+  fullName: string;
+  nationalID?: string;
+  nationality?: string;
+  countryFlag?: string;
+}
+
+/**
+ * Custom error with code property for database errors.
+ */
+export interface DatabaseError extends Error {
+  code?: string;
+}
+
 /**
  * Creates a new guest record in the database.
- * @param {Object} newGuest - Guest data to insert; should contain the fields accepted by the `guests` table.
- * @returns {Object} The created guest record as returned by the database.
- * @throws {Error} When the insert fails; the thrown error's message will be "Guest could not be created" and it preserves the original database error `code`.
+ * @param newGuest - Guest data to insert; should contain the fields accepted by the `guests` table.
+ * @returns The created guest record as returned by the database.
+ * @throws Error When the insert fails; the thrown error's message will be "Guest could not be created" and it preserves the original database error `code`.
  */
-
-export async function createGuest(newGuest) {
+export async function createGuest(newGuest: NewGuestInput): Promise<Guest> {
   const { data, error } = await supabaseServer
     .from("guests")
     .insert([newGuest])
@@ -225,12 +284,12 @@ export async function createGuest(newGuest) {
 
   if (error) {
     console.error(error);
-    const wrappedError = new Error("Guest could not be created");
+    const wrappedError = new Error("Guest could not be created") as DatabaseError;
     wrappedError.code = error.code;
     throw wrappedError;
   }
 
-  return data;
+  return data as Guest;
 }
 
 /*
