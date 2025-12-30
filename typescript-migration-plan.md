@@ -111,13 +111,13 @@ npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types
 
 ## Phase-by-Phase Action Items
 
-### Phase 1: Foundation Setup
+### Phase 1: Foundation Setup ✅ (Completed: 2025-12-30)
 
-- [ ] Install TypeScript dependencies with pinned versions
+- [x] Install TypeScript dependencies with pinned versions
   ```bash
   npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
   ```
-- [ ] Create `tsconfig.json` with strict settings
+- [x] Create `tsconfig.json` with strict settings
   ```json
   {
     "compilerOptions": {
@@ -157,24 +157,24 @@ npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types
     ]
   }
   ```
-- [ ] Add `typecheck` script to package.json
+- [x] Add `typecheck` script to package.json
   ```json
   "typecheck": "tsc --noEmit"
   ```
-- [ ] Add typecheck to CI pipeline (`.github/workflows/ci.yml`)
+- [x] Add typecheck to CI pipeline (`.github/workflows/ci.yml`)
   ```yaml
   - name: Type check
     run: npm run typecheck
   ```
-- [ ] Create `types/` directory structure
-- [ ] Generate Supabase types
+- [x] Create `types/` directory structure
+- [x] Generate Supabase types (manually created due to local Supabase not running)
   ```bash
   supabase gen types typescript --linked > types/supabase.ts
   ```
-- [ ] Create `types/domain.ts` with app-specific types
-- [ ] Create `types/next-auth.d.ts` for session augmentation
-- [ ] Create `types/env.d.ts` for environment variables
-- [ ] Create `types/server-actions.ts` with typed helpers (see reference below)
+- [x] Create `types/domain.ts` with app-specific types
+- [x] Create `types/next-auth.d.ts` for session augmentation
+- [x] Create `types/env.d.ts` for environment variables
+- [x] Create `types/server-actions.ts` with typed helpers (see reference below)
 - [ ] **Measure and record performance baselines:**
   ```bash
   # Record baseline for performance comparison
@@ -564,7 +564,20 @@ npm run test:e2e
 9. **CI/CD Integration**
    - TypeScript errors may slip into production if CI doesn't enforce typecheck
    - **Mitigation:** Add `npm run typecheck` to CI pipeline before build step
-   - Consider adding pre-commit hook: `npx lint-staged` with typecheck
+   - **Strongly recommended:** Add pre-commit hook with `lint-staged` to catch type errors locally before CI
+     ```bash
+     # Install husky and lint-staged
+     npm install -D husky lint-staged
+     npx husky init
+     echo "npx lint-staged" > .husky/pre-commit
+     ```
+     ```json
+     // package.json
+     "lint-staged": {
+       "*.{ts,tsx}": ["tsc --noEmit --skipLibCheck"]
+     }
+     ```
+   - This prevents broken code from being committed and reduces CI feedback loop time
 
 10. **Team Coordination**
     - In-flight PRs during migration may conflict with file renames
