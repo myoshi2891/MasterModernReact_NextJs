@@ -82,11 +82,11 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 ### To Install (Pinned Versions)
 
 ```bash
-npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
+npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
 ```
 
 **Version Policy:**
-- `typescript@~5.7.0` - Use tilde for patch updates only, compatible with Next.js 14
+- `typescript@~5.7.2` - Use tilde for patch updates only, compatible with Next.js 14
 - `@types/node@^20.0.0` - Match Node.js engine requirement (>=20)
 - `@types/react@^18.0.0` - Match React version
 - `@types/react-dom@^18.0.0` - Match React DOM version
@@ -111,13 +111,13 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
 
 - [ ] Install TypeScript dependencies with pinned versions
   ```bash
-  npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
+  npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
   ```
 - [ ] Create `tsconfig.json` with strict settings
   ```json
   {
     "compilerOptions": {
-      "target": "ES2017",
+      "target": "ES2022",
       "lib": ["dom", "dom.iterable", "esnext"],
       "allowJs": true,
       "checkJs": false,
@@ -262,8 +262,12 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
   - Use type guards: `if (session?.user?.guestId) { ... }`
 
 - [ ] **FormData type assertions**
-  - `formData.get()` returns `FormDataEntryValue | null`
-  - Cast appropriately: `formData.get("field") as string`
+  - `formData.get()` returns `FormDataEntryValue | null` (i.e., `string | File | null`)
+  - **Recommended:** Use typed helpers from `types/server-actions.ts`:
+    - `getFormString(formData, "field")` - required string with validation
+    - `getFormNumber(formData, "field")` - required number with validation
+    - `getFormOptionalString(formData, "field")` - optional string
+  - Avoid raw casts like `formData.get("field") as string` (unsafe)
 
 - [ ] **NextAuth callback type narrowing**
   - JWT callback: check `token.guestId` existence
