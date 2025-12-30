@@ -61,16 +61,18 @@ export const authOptions: NextAuthOptions = {
         console.warn(
           "[auth][jwt] guest lookup failed, keep token without guestId"
         );
-        if (token.guestId === undefined) token.guestId = undefined;
+        // guestIdが未設定の場合はundefinedのまま維持（明示的に何もしない）
       }
       return token;
     },
 
     // ③ セッション：DBに触れず token から写すだけ
     async session({ session, token }): Promise<Session> {
-      // token.guestId が null の可能性もあるので安全に代入
+      // token.guestId は number | null | undefined のいずれかを取りうる
+      // session.user.guestId は number | undefined のみ許容するため、null を undefined に変換
       if (session?.user) {
-        session.user.guestId = (token?.guestId as number | null) ?? undefined;
+        session.user.guestId =
+          typeof token?.guestId === "number" ? token.guestId : undefined;
       }
       return session;
     },

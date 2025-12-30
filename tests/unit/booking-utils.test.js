@@ -8,11 +8,13 @@ import {
 } from "../../app/_lib/booking";
 
 describe("booking utils", () => {
-  it("calculates zero nights for same-day dates", () => {
+  it("throws an error for same-day dates (end must be after start)", () => {
     const start = new Date("2025-01-01T00:00:00.000Z");
     const end = new Date("2025-01-01T00:00:00.000Z");
 
-    expect(calculateNumNights(start, end)).toBe(0);
+    expect(() => calculateNumNights(start, end)).toThrow(
+      "End date must be after start date"
+    );
   });
 
   it("calculates nights across a multi-day range", () => {
@@ -22,11 +24,13 @@ describe("booking utils", () => {
     expect(calculateNumNights(start, end)).toBe(3);
   });
 
-  it("returns a negative night count when the end date is before start", () => {
+  it("throws an error when the end date is before start", () => {
     const start = new Date("2025-01-05T00:00:00.000Z");
     const end = new Date("2025-01-03T00:00:00.000Z");
 
-    expect(calculateNumNights(start, end)).toBe(-2);
+    expect(() => calculateNumNights(start, end)).toThrow(
+      "End date must be after start date"
+    );
   });
 
   it("handles PST dates without shifting nights", () => {
@@ -157,6 +161,18 @@ describe("booking utils", () => {
         startDate: new Date("2099-01-05T00:00:00.000Z"),
         endDate: new Date("2099-01-03T00:00:00.000Z"),
         numNights: 2,
+        numGuests: 2,
+        maxCapacity: 4,
+      })
+    ).toThrow("End date must be after start date");
+  });
+
+  it("rejects same-day booking dates", () => {
+    expect(() =>
+      validateBookingInput({
+        startDate: new Date("2099-01-02T00:00:00.000Z"),
+        endDate: new Date("2099-01-02T00:00:00.000Z"),
+        numNights: 1,
         numGuests: 2,
         maxCapacity: 4,
       })

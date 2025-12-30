@@ -1,7 +1,6 @@
 import {
   differenceInCalendarDays,
   isBefore,
-  isPast,
   isSameDay,
   isWithinInterval,
   startOfDay,
@@ -33,8 +32,21 @@ export interface BookingValidationInput {
  * @param startDate - The start (check-in) date.
  * @param endDate - The end (check-out) date.
  * @returns The number of nights as the difference in calendar days between endDate and startDate.
+ * @throws Error If either date is invalid (e.g., new Date("invalid")).
+ * @throws Error If endDate is not after startDate.
  */
 export function calculateNumNights(startDate: Date, endDate: Date): number {
+  if (
+    !startDate ||
+    !endDate ||
+    isNaN(startDate.getTime()) ||
+    isNaN(endDate.getTime())
+  ) {
+    throw new Error("Invalid dates provided to calculateNumNights");
+  }
+  if (!isBefore(startDate, endDate)) {
+    throw new Error("End date must be after start date");
+  }
   // Use calendar days to avoid DST offsets shifting night counts.
   return differenceInCalendarDays(endDate, startDate);
 }
@@ -45,12 +57,28 @@ export function calculateNumNights(startDate: Date, endDate: Date): number {
  * @param regularPrice - Regular price per night.
  * @param discount - Discount amount applied per night.
  * @returns Total price for the stay (numNights × (regularPrice − discount)).
+ * @throws Error If numNights is not a non-negative finite number.
+ * @throws Error If regularPrice is not a non-negative finite number.
+ * @throws Error If discount is not a non-negative finite number.
+ * @throws Error If discount exceeds regularPrice.
  */
 export function calculateCabinPrice(
   numNights: number,
   regularPrice: number,
   discount: number
 ): number {
+  if (!Number.isFinite(numNights) || numNights < 0) {
+    throw new Error("numNights must be a non-negative finite number");
+  }
+  if (!Number.isFinite(regularPrice) || regularPrice < 0) {
+    throw new Error("regularPrice must be a non-negative finite number");
+  }
+  if (!Number.isFinite(discount) || discount < 0) {
+    throw new Error("discount must be a non-negative finite number");
+  }
+  if (discount > regularPrice) {
+    throw new Error("discount cannot exceed regularPrice");
+  }
   return numNights * (regularPrice - discount);
 }
 
@@ -78,14 +106,18 @@ export function isRangeBooked(
  * Determines whether a date should be disabled for booking.
  * @param date - The date to check.
  * @param bookedDates - An array of already booked dates; treated as empty when `null` or `undefined`.
- * @returns `true` if the date is in the past or matches any booked date, `false` otherwise.
+ * @returns `true` if the date is before today (date-only comparison) or matches any booked date, `false` otherwise.
  */
 export function isDateDisabled(
   date: Date,
   bookedDates: Date[] | null | undefined
 ): boolean {
   const dates = bookedDates ?? [];
-  return isPast(date) || dates.some((day) => isSameDay(day, date));
+  // Use date-only comparison (consistent with validateBookingInput)
+  return (
+    isBefore(startOfDay(date), startOfDay(new Date())) ||
+    dates.some((day) => isSameDay(day, date))
+  );
 }
 
 /**
