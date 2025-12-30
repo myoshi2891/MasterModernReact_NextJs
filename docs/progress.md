@@ -54,7 +54,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 - 環境変数の統一
 - Phase 5 ドキュメント整備完了
 
-#### 0. TypeScript Phase 1 基盤構築（完了）
+#### TypeScript Phase 1 基盤構築（完了）
 
 - 対象ファイル:
   - `tsconfig.json`（新規作成）
@@ -84,7 +84,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 - 関連ドキュメント:
   - [typescript-migration-plan.md](../typescript-migration-plan.md) - 詳細な移行計画
 
-#### 1. Phase 5 ドキュメント整備（完了）
+#### Phase 5 ドキュメント整備（完了）
 
 - 対象ファイル:
   - `app/_lib/guest.js`
@@ -98,7 +98,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - コードの意図が明確化され、保守性が向上
   - review-action-plan.md の全 Phase が完了
 
-#### 1. E2EテストのCI統合
+#### E2EテストのCI統合
 
 - 対象ファイル:
   - `.github/workflows/ci.yml`
@@ -112,7 +112,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - PRマージ前にE2Eテストが自動実行される
   - テスト失敗時のデバッグが容易に（レポート参照可能）
 
-#### 2. Playwright設定の最適化
+#### Playwright設定の最適化
 
 - 対象ファイル:
   - `playwright.config.ts`
@@ -125,7 +125,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - `NEXTAUTH_URL` とオリジンの一致によりCORSエラーが解消
   - ローカルとCI環境での一貫した動作
 
-#### 3. HTMLセマンティクスの修正
+#### HTMLセマンティクスの修正
 
 - 対象ファイル:
   - `app/page.jsx`
@@ -136,7 +136,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - HTMLセマンティクスの正規化（`<main>` は1ページに1つ）
   - Playwrightの `getByRole("main")` が正しく動作
 
-#### 4. Node.jsセキュリティアップデート
+#### Node.jsセキュリティアップデート
 
 - 対象ファイル:
   - `.nvmrc`
@@ -150,7 +150,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - CVE-2025-23165（低）：メモリリークによるDoS
   - CVE-2025-47153（中）：32ビット Debian ビルドのアウトオブバウンズアクセス
 
-#### 5. 環境変数の統一
+#### 環境変数の統一
 
 - 対象ファイル:
   - `playwright.config.ts`

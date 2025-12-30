@@ -564,7 +564,20 @@ npm run test:e2e
 9. **CI/CD Integration**
    - TypeScript errors may slip into production if CI doesn't enforce typecheck
    - **Mitigation:** Add `npm run typecheck` to CI pipeline before build step
-   - Consider adding pre-commit hook: `npx lint-staged` with typecheck
+   - **Strongly recommended:** Add pre-commit hook with `lint-staged` to catch type errors locally before CI
+     ```bash
+     # Install husky and lint-staged
+     npm install -D husky lint-staged
+     npx husky init
+     echo "npx lint-staged" > .husky/pre-commit
+     ```
+     ```json
+     // package.json
+     "lint-staged": {
+       "*.{ts,tsx}": ["tsc --noEmit --skipLibCheck"]
+     }
+     ```
+   - This prevents broken code from being committed and reduces CI feedback loop time
 
 10. **Team Coordination**
     - In-flight PRs during migration may conflict with file renames
