@@ -362,5 +362,5 @@ const cacheFn = typeof cache === "function" ? cache : (fn) => fn;
 - [ ] 本番適用
 
 ### Phase 5 完了条件
-- [ ] guest.js のJSDocが拡充された
-- [ ] data-service.js のコメントが追加された
+- [x] guest.js のJSDocが拡充された
+- [x] data-service.js のコメントが追加された
