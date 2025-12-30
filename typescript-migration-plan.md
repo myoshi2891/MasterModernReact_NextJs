@@ -82,14 +82,18 @@ Migrate the existing Next.js 14 App Router codebase from JavaScript to TypeScrip
 ### To Install (Pinned Versions)
 
 ```bash
-npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
+npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
 ```
 
 **Version Policy:**
-- `typescript@~5.7.0` - Use tilde for patch updates only, compatible with Next.js 14
+- `typescript@~5.7.2` - Use tilde for patch updates only, compatible with Next.js 14
 - `@types/node@^20.0.0` - Match Node.js engine requirement (>=20)
 - `@types/react@^18.0.0` - Match React version
 - `@types/react-dom@^18.0.0` - Match React DOM version
+
+**Why tilde (~) for TypeScript, caret (^) for @types?**
+- **TypeScript (~):** Minor version upgrades (e.g., 5.7 → 5.8) can introduce stricter type checking or breaking changes. Using tilde limits updates to patch versions only (5.7.x), ensuring consistent behavior across team members and CI.
+- **@types packages (^):** These are type-only and follow the library they type. Caret allows minor version updates (e.g., 18.0 → 18.3) which typically add new type definitions without breaking changes. Patch-only would miss useful type improvements.
 
 **Note:** `package-lock.json` ensures reproducible builds. Run `npm ci` in CI environments.
 
@@ -111,13 +115,13 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
 
 - [ ] Install TypeScript dependencies with pinned versions
   ```bash
-  npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
+  npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types/react-dom@^18.0.0
   ```
 - [ ] Create `tsconfig.json` with strict settings
   ```json
   {
     "compilerOptions": {
-      "target": "ES2017",
+      "target": "ES2022",
       "lib": ["dom", "dom.iterable", "esnext"],
       "allowJs": true,
       "checkJs": false,
@@ -177,6 +181,11 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
   time npm run typecheck  # Target: <30 seconds
   time npm run build      # Record for <10% regression check
   ```
+- [ ] **Document baselines and set up monitoring:**
+  - Record actual measured values in `docs/progress.md`
+  - If typecheck approaches 25s, consider more aggressive incremental settings
+  - Factor in CI runner specs (cold cache vs warm cache)
+  - Set up alert if build time exceeds baseline + 10%
 
 ### Phase 2: Data/Auth Layer (.js → .ts)
 
@@ -262,8 +271,12 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
   - Use type guards: `if (session?.user?.guestId) { ... }`
 
 - [ ] **FormData type assertions**
-  - `formData.get()` returns `FormDataEntryValue | null`
-  - Cast appropriately: `formData.get("field") as string`
+  - `formData.get()` returns `FormDataEntryValue | null` (i.e., `string | File | null`)
+  - **Recommended:** Use typed helpers from `types/server-actions.ts`:
+    - `getFormString(formData, "field")` - required string with validation
+    - `getFormNumber(formData, "field")` - required number with validation
+    - `getFormOptionalString(formData, "field")` - optional string
+  - Avoid raw casts like `formData.get("field") as string` (unsafe)
 
 - [ ] **NextAuth callback type narrowing**
   - JWT callback: check `token.guestId` existence
@@ -568,6 +581,44 @@ npm run test:e2e
       - Monitor typecheck duration; alert if >30 seconds
       - Consider `typescript-coverage-report` to track progress
 
+12. **@types/* Version Conflicts**
+    - Strict mode may surface conflicts between @types packages
+    - **Mitigation:**
+      - Pin specific @types versions if conflicts arise
+      - Use `skipLibCheck: true` (already included) to avoid .d.ts conflicts
+      - If needed, create local type declarations to override
+
+## Troubleshooting: @types/* Conflicts
+
+If you encounter type errors from `@types/*` packages during strict migration:
+
+1. **Identify the conflict:**
+   ```bash
+   npm run typecheck 2>&1 | grep "node_modules/@types"
+   ```
+
+2. **Try version bump:**
+   ```bash
+   npm update @types/[package-name]
+   ```
+
+3. **Pin specific version (if needed):**
+   ```json
+   "@types/problematic-package": "1.2.3"
+   ```
+
+4. **Create local override (last resort):**
+   ```typescript
+   // types/overrides.d.ts
+   declare module "problematic-package" {
+     // Custom type declarations
+   }
+   ```
+
+5. **Temporary workaround:**
+   - Keep `skipLibCheck: true` (already set)
+   - File issue with @types package maintainer
+
 ## Open Questions
 
 - None at this time.
@@ -605,3 +656,22 @@ If issues arise during migration:
 - [ ] No `any` types except in explicitly annotated exceptions
 - [ ] All Server Actions use typed helpers
 - [ ] No new ESLint warnings introduced by migration
+
+### Style Guide for `any` Type Exceptions
+
+When `any` is unavoidable (e.g., third-party library interop), use this format:
+
+```typescript
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- [reason]
+const handler = (event: any) => { ... };
+```
+
+**Required:**
+- Use `eslint-disable-next-line` (not `@ts-ignore`)
+- Include `-- [reason]` explaining why `any` is necessary
+- Prefer `unknown` over `any` when possible, then narrow with type guards
+
+**Examples of valid reasons:**
+- `-- Third-party library X lacks types`
+- `-- React event handler type conflict with form submission`
+- `-- JSON.parse return type before validation`

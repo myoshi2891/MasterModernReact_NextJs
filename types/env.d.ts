@@ -8,9 +8,9 @@ declare namespace NodeJS {
     SUPABASE_URL?: string;
     /** Supabase service role key (server-side only) */
     SUPABASE_SERVICE_ROLE_KEY: string;
-    /** Google OAuth client ID */
+    /** Google OAuth client ID (required - only auth provider) */
     AUTH_GOOGLE_ID: string;
-    /** Google OAuth client secret */
+    /** Google OAuth client secret (required - only auth provider) */
     AUTH_GOOGLE_SECRET: string;
     /** NextAuth canonical URL */
     NEXTAUTH_URL: string;

@@ -22,6 +22,12 @@ interface MockImageProps {
   [key: string]: unknown;
 }
 
+interface MockLinkProps {
+  href: string | { pathname?: string };
+  children: ReactNode;
+  [key: string]: unknown;
+}
+
 vi.mock("next/image", () => ({
   default: (props: MockImageProps) => {
     const { fill, fetchPriority, priority, alt = "", ...rest } = props ?? {};
@@ -33,15 +39,7 @@ vi.mock("next/image", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({
-    href,
-    children,
-    ...rest
-  }: {
-    href: string | { pathname?: string };
-    children: ReactNode;
-    [key: string]: unknown;
-  }) =>
+  default: ({ href, children, ...rest }: MockLinkProps) =>
     createElement(
       "a",
       {
