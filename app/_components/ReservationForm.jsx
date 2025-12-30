@@ -27,8 +27,9 @@ function ReservationForm({ cabin, user }) {
 	const startDate = range.from;
 	const endDate = range.to;
 
-	const numNights = calculateNumNights(startDate, endDate);
-	const cabinPrice = calculateCabinPrice(numNights, regularPrice, discount);
+	// Only calculate when both dates are selected
+	const numNights = startDate && endDate ? calculateNumNights(startDate, endDate) : 0;
+	const cabinPrice = startDate && endDate ? calculateCabinPrice(numNights, regularPrice, discount) : 0;
 
 	const bookingData = {
 		startDate,
@@ -61,7 +62,6 @@ function ReservationForm({ cabin, user }) {
 			</div>
 
 				<form
-				// action={createBookingWithData}
 				action={async (formData) => {
 					await createBookingWithData(formData);
 					resetRange();

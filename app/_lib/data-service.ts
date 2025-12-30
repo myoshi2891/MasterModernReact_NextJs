@@ -4,6 +4,26 @@ import { notFound } from "next/navigation";
 import { supabaseServer } from "./supabaseServer";
 import type { Cabin, Booking, Guest, Settings, Country } from "@/types/domain";
 
+/**
+ * Partial cabin data for list views.
+ */
+export interface CabinListItem {
+  id: number;
+  name: string;
+  maxCapacity: number;
+  regularPrice: number;
+  discount: number;
+  image: string | null;
+}
+
+/**
+ * Pricing information for a cabin.
+ */
+export interface CabinPrice {
+  regularPrice: number;
+  discount: number;
+}
+
 /////////////
 // GET
 
@@ -25,9 +45,18 @@ export async function getCabin(id: number | string): Promise<Cabin> {
   return data as Cabin;
 }
 
+/**
+ * Retrieve the price information for a cabin.
+ *
+ * Unlike other data-service functions that throw on error, this function
+ * returns `null` on failure to allow graceful degradation in UI components.
+ *
+ * @param id - The cabin's unique identifier.
+ * @returns The price info object, or `null` if the cabin is not found or on database error.
+ */
 export async function getCabinPrice(
   id: number | string
-): Promise<{ regularPrice: number; discount: number } | null> {
+): Promise<CabinPrice | null> {
   const { data, error } = await supabaseServer
     .from("cabins")
     .select("regularPrice, discount")
@@ -36,12 +65,13 @@ export async function getCabinPrice(
 
   if (error) {
     console.error(error);
+    return null;
   }
 
-  return data;
+  return data as CabinPrice;
 }
 
-export const getCabins = async function (): Promise<Cabin[]> {
+export const getCabins = async function (): Promise<CabinListItem[]> {
   const { data, error } = await supabaseServer
     .from("cabins")
     .select("id, name, maxCapacity, regularPrice, discount, image")
@@ -54,7 +84,7 @@ export const getCabins = async function (): Promise<Cabin[]> {
     throw new Error("Cabins could not be loaded");
   }
 
-  return data as Cabin[];
+  return data as CabinListItem[];
 };
 
 // Guests are uniquely identified by their email address
