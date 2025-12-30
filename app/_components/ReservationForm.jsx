@@ -63,8 +63,13 @@ function ReservationForm({ cabin, user }) {
 
 				<form
 				action={async (formData) => {
-					await createBookingWithData(formData);
-					resetRange();
+					try {
+						await createBookingWithData(formData);
+						resetRange();
+					} catch (error) {
+						// エラー時は日付選択を保持（Server Actionはエラーを再スローするのでUIに伝播）
+						throw error;
+					}
 				}}
 				className="flex flex-1 flex-col gap-5 bg-primary-900 px-4 py-6 text-sm sm:gap-6 sm:px-8 sm:py-8 sm:text-base md:gap-7 md:px-10 md:py-10"
 			>
