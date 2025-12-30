@@ -19,6 +19,7 @@ vi.mock("next/navigation", () => ({
 
 describe("data-service", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.resetModules();
   });
 
