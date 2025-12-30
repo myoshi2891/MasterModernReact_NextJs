@@ -5,6 +5,17 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | ffe6cea | 2025-12-30 | docs: add MockLinkProps interface and version constraint rationale | TypeScript Phase 1 最終レビュー対応 |
+| 完了 | 93a624d | 2025-12-30 | refactor: address additional code review feedback | TypeScript Phase 1 追加レビュー対応 |
+| 完了 | 3f95872 | 2025-12-30 | docs: address review feedback on TypeScript migration plan | マイグレーション計画レビュー対応 |
+| 完了 | bd65479 | 2025-12-30 | refactor: address code review feedback on type definitions | 型定義レビュー対応 |
+| 完了 | 897b636 | 2025-12-30 | chore: implement TypeScript Phase 1 foundation setup | **TypeScript Phase 1 基盤構築完了** |
+| 完了 | 22e4d50 | 2025-12-30 | docs: address review feedback on TypeScript migration plan | マイグレーション計画初回レビュー対応 |
+| 完了 | b881221 | 2025-12-30 | docs: revise TypeScript migration plan with comprehensive updates | マイグレーション計画大幅改訂 |
+| 完了 | 4fa9256 | 2025-12-30 | test: improve test isolation and verify DB constraint | テスト分離改善、DB制約検証 |
+| 完了 | 71abd86 | 2025-12-30 | fix: update tests for supabaseServer migration and clean up middleware | supabaseServer移行テスト更新 |
+| 完了 | a971c01 | 2025-12-30 | fix: use supabaseServer for server-side data fetching and secure account routes | サーバーサイドデータ取得統一 |
+| 完了 | c592d8b | 2025-12-30 | docs: complete Phase 5 documentation improvements | Phase 5 ドキュメント改善完了 |
 | 完了 | 0509ffe | 2025-12-30 | chore: unify env variables and pin Node.js version | 環境変数統一、Node.js 20.19.6ピン |
 | 完了 | 145e183 | 2025-12-30 | fix: resolve CORS error by unifying hostname to localhost | CORSエラー解消 |
 | 完了 | f725cf7 | 2025-12-30 | fix: resolve E2E test failure and security vulnerabilities | main重複修正、Node.jsセキュリティ更新 |
@@ -36,13 +47,44 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 #### 概要
 
+- **TypeScript Phase 1 基盤構築完了**
 - E2EテストのCI統合 (Phase 3.1)
 - Playwright設定の最適化とCORS問題の解消
 - Node.jsセキュリティアップデート
 - 環境変数の統一
-- **Phase 5 ドキュメント整備完了**
+- Phase 5 ドキュメント整備完了
 
-#### 0. Phase 5 ドキュメント整備（完了）
+#### 0. TypeScript Phase 1 基盤構築（完了）
+
+- 対象ファイル:
+  - `tsconfig.json`（新規作成）
+  - `types/domain.ts`（新規作成）
+  - `types/supabase.ts`（新規作成）
+  - `types/next-auth.d.ts`（新規作成）
+  - `types/env.d.ts`（新規作成）
+  - `types/server-actions.ts`（新規作成）
+  - `package.json`（TypeScript依存追加）
+  - `.github/workflows/ci.yml`（typecheck追加）
+  - `tests/setup.ts`（型定義改善）
+  - `vitest.config.mts`（esbuild設定追加）
+- 変更内容:
+  - TypeScript ~5.7.2 と @types パッケージをインストール
+  - strict モードの tsconfig.json を作成（ES2022ターゲット）
+  - Supabase Database 型を手動生成（ローカルSupabase未起動のため）
+  - ドメイン型（Cabin, Booking, Guest, Settings, Country）を定義
+  - NextAuth セッション拡張型を定義（guestId プロパティ）
+  - 環境変数の型定義を作成
+  - Server Action ヘルパー関数を型安全に実装（getFormString, getFormNumber等）
+  - CI に `npm run typecheck` ステップを追加
+  - テストモック（MockImageProps, MockLinkProps）の型定義を改善
+- 効果:
+  - `npm run typecheck` が正常動作（全型チェック通過）
+  - 全77ユニットテスト、全22コンポーネントテストが通過
+  - Phase 2（データ/認証レイヤー移行）の準備完了
+- 関連ドキュメント:
+  - [typescript-migration-plan.md](../typescript-migration-plan.md) - 詳細な移行計画
+
+#### 1. Phase 5 ドキュメント整備（完了）
 
 - 対象ファイル:
   - `app/_lib/guest.js`

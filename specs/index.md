@@ -19,6 +19,7 @@
 |----|------|--------|------|
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
 | 002 | [booking-concurrency-control](002-booking-concurrency-control/) | DB制約実装完了 | 予約の同時実行対策（重複予約防止） |
+| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 1完了** | JSからTSへの段階的移行 |
 
 ## 詳細
 
@@ -51,7 +52,6 @@
 
 | ID | 名称 | 優先度 | 概要 |
 |----|------|--------|------|
-| 003 | typescript-migration | 中 | JSからTSへの段階的移行 |
 | 004 | npm-to-bun | 低 | npmからBunへの移行 |
 | 005 | structured-logging | 低 | 構造化ログの導入 |
 
