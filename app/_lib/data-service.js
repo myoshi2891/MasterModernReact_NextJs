@@ -167,6 +167,15 @@ export async function getSettings() {
   return data;
 }
 
+/**
+ * React 18.2以前またはテスト環境で `cache` が未定義の場合のフォールバック。
+ * 本番環境 (Next.js 14+) では常に React の `cache` が使用される。
+ *
+ * - `cache` が関数として存在する場合: React のリクエストスコープキャッシュを使用
+ * - `cache` が未定義の場合: 関数をそのまま返すアイデンティティ関数にフォールバック
+ *
+ * @see https://react.dev/reference/react/cache
+ */
 const cacheFn = typeof cache === "function" ? cache : (fn) => fn;
 
 const getCountriesCached = cacheFn(async () => {

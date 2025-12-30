@@ -40,6 +40,21 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 - Playwright設定の最適化とCORS問題の解消
 - Node.jsセキュリティアップデート
 - 環境変数の統一
+- **Phase 5 ドキュメント整備完了**
+
+#### 0. Phase 5 ドキュメント整備（完了）
+
+- 対象ファイル:
+  - `app/_lib/guest.js`
+  - `app/_lib/data-service.js`
+  - `docs/review-action-plan.md`
+- 変更内容:
+  - `normalizeNationalId` 関数のJSDocを拡充（日本語、使用例追加）
+  - `cacheFn` のフォールバック処理にコメント追加（React cache の説明）
+  - review-action-plan.md の Phase 5 チェックリストを完了に更新
+- 効果:
+  - コードの意図が明確化され、保守性が向上
+  - review-action-plan.md の全 Phase が完了
 
 #### 1. E2EテストのCI統合
 
