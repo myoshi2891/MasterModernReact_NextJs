@@ -56,6 +56,16 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 #### TypeScript Phase 1 基盤構築（完了）
 
+- **パフォーマンスベースライン（2025-12-31計測）**:
+  | 項目 | 計測値 | 目標 | 状態 |
+  |------|--------|------|------|
+  | `npm run typecheck` | **4.2秒** | <30秒 | ✅ 良好 |
+  | `npm run build` | **47.6秒** | - | ✅ ベースライン設定 |
+
+  - 計測環境: macOS (Darwin 24.6.0), Node.js 20.19.6
+  - 監視基準: build時間が52.4秒（+10%）を超えた場合はアラート対象
+  - typecheck が25秒に近づいた場合は incremental 設定の見直しを検討
+
 - 対象ファイル:
   - `tsconfig.json`（新規作成）
   - `types/domain.ts`（新規作成）
@@ -733,7 +743,7 @@ echo "[supabase-admin] Database role setup completed successfully" >&2
 1. セキュリティ強化
 
    - 外部リソースのパス制限を定期的に見直す
-   - 認証エラーハンドリングの強化
+   - 認証エラーハンドリ���グの強化
 
 1. パフォーマンス最適化
 

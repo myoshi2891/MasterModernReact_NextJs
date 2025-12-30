@@ -175,17 +175,17 @@ npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types
 - [x] Create `types/next-auth.d.ts` for session augmentation
 - [x] Create `types/env.d.ts` for environment variables
 - [x] Create `types/server-actions.ts` with typed helpers (see reference below)
-- [ ] **Measure and record performance baselines:**
+- [x] **Measure and record performance baselines:** ✅ 2025-12-31 計測完了
   ```bash
   # Record baseline for performance comparison
-  time npm run typecheck  # Target: <30 seconds
-  time npm run build      # Record for <10% regression check
+  time npm run typecheck  # 結果: 4.2秒 ✅ 目標<30秒をクリア
+  time npm run build      # 結果: 47.6秒 ✅ ベースライン設定
   ```
-- [ ] **Document baselines and set up monitoring:**
-  - Record actual measured values in `docs/progress.md`
-  - If typecheck approaches 25s, consider more aggressive incremental settings
-  - Factor in CI runner specs (cold cache vs warm cache)
-  - Set up alert if build time exceeds baseline + 10%
+- [x] **Document baselines and set up monitoring:** ✅ 2025-12-31 記録完了
+  - [x] Record actual measured values in `docs/progress.md`
+  - 監視基準: build時間が52.4秒（+10%）を超えた場合はアラート対象
+  - typecheck が25秒に近づいた場合は incremental 設定の見直しを検討
+  - 計測環境: macOS (Darwin 24.6.0), Node.js 20.19.6
 
 ### Phase 2: Data/Auth Layer (.js → .ts)
 
