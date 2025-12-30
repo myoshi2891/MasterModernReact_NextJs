@@ -15,7 +15,7 @@ export type Json =
   | Json[];
 
 /** Booking status enum - single source of truth */
-export type BookingStatus = "unconfirmed" | "checked-in" | "checked-out";
+export type BookingStatus = "unconfirmed" | "checked-in" | "checked-out" | "canceled";
 
 export interface Database {
   public: {

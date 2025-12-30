@@ -1,18 +1,48 @@
 /**
+ * Application-specific error codes for booking operations.
+ */
+export type BookingErrorCode =
+  | "BOOKING_CONFLICT"
+  | "INVALID_DATE_ORDER"
+  | "INVALID_GUEST_COUNT"
+  | "VALIDATION_ERROR"
+  | "DUPLICATE_REQUEST"
+  | "CAPACITY_EXCEEDED"
+  | "CABIN_NOT_FOUND"
+  | "INTERNAL_ERROR";
+
+/**
  * Custom error class for booking operations with HTTP status code support.
  */
 export class BookingError extends Error {
+  readonly statusCode: number;
+  readonly code: BookingErrorCode | null;
+
   /**
-   * @param {string} message - User-friendly error message
-   * @param {number} statusCode - HTTP status code (default: 500)
-   * @param {string|null} code - Application-specific error code (optional)
+   * @param message - User-friendly error message
+   * @param statusCode - HTTP status code (default: 500)
+   * @param code - Application-specific error code (optional)
    */
-  constructor(message, statusCode = 500, code = null) {
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    code: BookingErrorCode | null = null
+  ) {
     super(message);
     this.name = "BookingError";
     this.statusCode = statusCode;
     this.code = code;
   }
+}
+
+/**
+ * Supabase/PostgreSQL error object structure.
+ */
+export interface SupabaseError {
+  code?: string;
+  message?: string;
+  details?: string;
+  hint?: string;
 }
 
 /**
@@ -27,12 +57,10 @@ export class BookingError extends Error {
  * - 23505: Unique violation (duplicate idempotency key) → 409 Conflict
  * - P0001: Raised exception (custom trigger errors) → Varies by message
  *
- * @param {Object} error - Supabase error object
- * @param {string} [error.code] - PostgreSQL SQLSTATE code
- * @param {string} [error.message] - Error message from database
- * @returns {BookingError} Mapped error with appropriate status code and message
+ * @param error - Supabase error object
+ * @returns Mapped error with appropriate status code and message
  */
-export function mapSupabaseError(error) {
+export function mapSupabaseError(error: SupabaseError | null): BookingError {
   const code = error?.code;
   const message = error?.message ?? "";
 

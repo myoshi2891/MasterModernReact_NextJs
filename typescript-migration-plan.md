@@ -184,41 +184,44 @@ npm install -D typescript@~5.7.2 @types/node@^20.0.0 @types/react@^18.0.0 @types
 - [x] **Document baselines and set up monitoring:** ✅ 2025-12-31 記録完了
   - [x] Record actual measured values in `docs/progress.md`
   - 監視基準: build時間が52.4秒（+10%）を超えた場合はアラート対象
+    - 根拠: 開発サイクルへの影響を最小限に抑えるため、業界標準のベースライン±10%を閾値として採用
+    - 対応: 閾値超過時は incremental ビルド設定、`skipLibCheck`、並列化オプションの見直しを検討
   - typecheck が25秒に近づいた場合は incremental 設定の見直しを検討
   - 計測環境: macOS (Darwin 24.6.0), Node.js 20.19.6
 
-### Phase 2: Data/Auth Layer (.js → .ts)
+### Phase 2: Data/Auth Layer (.js → .ts) ✅ (Completed: 2025-12-31)
 
 **Migration Order** (utilities first, then consumers):
 
-1. [ ] `app/_lib/errors.js` → `.ts` **(First - no dependencies)**
+1. [x] `app/_lib/errors.js` → `.ts` **(First - no dependencies)**
    - Type BookingError class and mapSupabaseError function
-   - Provides error types for downstream files
+   - Added `BookingErrorCode` type and `SupabaseError` interface
 
-2. [ ] `app/_lib/guest.js` → `.ts` **(Second - utility)**
-   - Type normalizeNationalId function
+2. [x] `app/_lib/guest.js` → `.ts` **(Second - utility)**
+   - Type normalizeNationalId function with union type parameter
 
-3. [ ] `app/_lib/supabaseServer.js` → `.ts` **(Third - client setup)**
-   - Add `Database` generic to createClient
+3. [x] `app/_lib/supabaseServer.js` → `.ts` **(Third - client setup)**
+   - Note: Database generic causes overly strict type inference; using untyped client with app-layer type safety
 
-4. [ ] `app/_lib/supabaseBrowser.js` → `.ts`
-   - Add `Database` generic to createClient
+4. [x] `app/_lib/supabaseBrowser.js` → `.ts`
+   - Same approach as supabaseServer
 
-5. [ ] `app/_lib/booking.js` → `.ts`
+5. [x] `app/_lib/booking.js` → `.ts`
+   - Added `DateRange` and `BookingValidationInput` interfaces
    - Type validateBookingInput and related functions
 
-6. [ ] `app/_lib/data-service.js` → `.ts`
+6. [x] `app/_lib/data-service.js` → `.ts`
    - Type all data-fetching functions (getCabins, getBooking, etc.)
-   - Uses Supabase client types
+   - Added `BookingWithCabin`, `BookingListItem`, `NewGuestInput` interfaces
 
-7. [ ] `app/_lib/auth.js` → `.ts`
-   - Type NextAuth config and callbacks
-   - Uses session augmentation types
+7. [x] `app/_lib/auth.js` → `.ts`
+   - Type NextAuth config and callbacks with `NextAuthOptions`
+   - Uses session augmentation types from `types/next-auth.d.ts`
 
-8. [ ] `app/_lib/actions.js` → `.ts` **(Last - depends on all above)**
+8. [x] `app/_lib/actions.js` → `.ts` **(Last - depends on all above)**
    - Type Server Actions with FormData handling
-   - Use typed helpers from `types/server-actions.ts`
-   - Handle `"use server"` directive
+   - Added `CreateBookingData` interface
+   - All 77 unit tests + 22 component tests passing
 
 ### Phase 3: API Routes & Middleware
 

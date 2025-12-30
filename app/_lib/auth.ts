@@ -1,38 +1,40 @@
 import NextAuth from "next-auth";
-import { getServerSession } from "next-auth/next";
+import { getServerSession, NextAuthOptions, Session } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
-import { createGuest, getGuest } from "./data-service";
+import { createGuest, getGuest, DatabaseError } from "./data-service";
+import type { Guest } from "@/types/domain";
 
 /**
  * Fetches a guest by email and creates one if none exists.
- * @param {string} email - The guest's email address to look up or create.
- * @param {string|null|undefined} name - Optional full name for a new guest; if omitted, the guest's `fullName` will be set to `null`.
- * @returns {Object} The guest record for the given email, either existing or newly created.
+ * @param email - The guest's email address to look up or create.
+ * @param name - Optional full name for a new guest; if omitted, the guest's `fullName` will be set to empty string.
+ * @returns The guest record for the given email, either existing or newly created.
  */
-async function getOrCreateGuestByEmail(email, name) {
+async function getOrCreateGuestByEmail(
+  email: string,
+  name: string | null | undefined
+): Promise<Guest> {
   const existing = await getGuest(email); // publicクライアントでOK（SELECT）
   if (existing) return existing;
   // 作成は service-role（createGuest内でadminクライアント使用）
   try {
-    return await createGuest({ email, fullName: name ?? null });
+    return await createGuest({ email, fullName: name ?? "" });
   } catch (error) {
-    if (error?.code === "23505") {
-      try {
-        const createdByAnotherRequest = await getGuest(email);
-        if (createdByAnotherRequest) return createdByAnotherRequest;
-      } catch (retryError) {
-        throw retryError;
-      }
+    const dbError = error as DatabaseError;
+    if (dbError?.code === "23505") {
+      const createdByAnotherRequest = await getGuest(email);
+      if (createdByAnotherRequest) return createdByAnotherRequest;
     }
     throw error;
   }
 }
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
   // セッションはJWT運用を明示
@@ -45,7 +47,7 @@ export const authOptions = {
     },
 
     // ② JWT：ここで一度だけDBに触れて guestId をトークンへ
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger }): Promise<JWT> {
       try {
         // 初回（サインイン直後）は user が入る。以後は token 維持
         const email = user?.email ?? token?.email;
@@ -55,20 +57,20 @@ export const authOptions = {
           const guest = await getOrCreateGuestByEmail(email, name);
           token.guestId = guest?.id ?? null; // 失敗してもnullを格納しておく
         }
-      } catch (e) {
+      } catch {
         console.warn(
           "[auth][jwt] guest lookup failed, keep token without guestId"
         );
-        if (token.guestId === undefined) token.guestId = null;
+        if (token.guestId === undefined) token.guestId = undefined;
       }
       return token;
     },
 
     // ③ セッション：DBに触れず token から写すだけ
-    async session({ session, token }) {
+    async session({ session, token }): Promise<Session> {
       // token.guestId が null の可能性もあるので安全に代入
       if (session?.user) {
-        session.user.guestId = token?.guestId ?? null;
+        session.user.guestId = (token?.guestId as number | null) ?? undefined;
       }
       return session;
     },
@@ -77,7 +79,7 @@ export const authOptions = {
   pages: { signIn: "/login" },
 };
 
-export const auth = () => getServerSession(authOptions);
+export const auth = (): Promise<Session | null> => getServerSession(authOptions);
 
 const handler = NextAuth(authOptions);
 
