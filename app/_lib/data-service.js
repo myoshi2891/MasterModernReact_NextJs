@@ -1,14 +1,13 @@
 import { eachDayOfInterval } from "date-fns";
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { supabaseBrowser } from "./supabaseBrowser";
 import { supabaseServer } from "./supabaseServer";
 
 /////////////
 // GET
 
 export async function getCabin(id) {
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await supabaseServer
     .from("cabins")
     .select("*")
     .eq("id", id)
@@ -26,7 +25,7 @@ export async function getCabin(id) {
 }
 
 export async function getCabinPrice(id) {
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await supabaseServer
     .from("cabins")
     .select("regularPrice, discount")
     .eq("id", id)
@@ -40,7 +39,7 @@ export async function getCabinPrice(id) {
 }
 
 export const getCabins = async function () {
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await supabaseServer
     .from("cabins")
     .select("id, name, maxCapacity, regularPrice, discount, image")
     .order("name");
@@ -57,7 +56,7 @@ export const getCabins = async function () {
 
 // Guests are uniquely identified by their email address
 export async function getGuest(email) {
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await supabaseServer
     .from("guests")
     .select("*")
     .eq("email", email)
@@ -124,7 +123,7 @@ export async function getBookedDatesByCabinId(cabinId) {
   // await new Promise((res) => setTimeout(res, 5000));
 
   // Getting all bookings
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await supabaseServer
     .from("bookings")
     .select("*")
     .eq("cabinId", cabinId)
