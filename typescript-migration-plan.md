@@ -121,7 +121,7 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
       "lib": ["dom", "dom.iterable", "esnext"],
       "allowJs": true,
       "checkJs": false,
-      "skipLibCheck": true,
+      "skipLibCheck": true,  // Skip type checking of declaration files for faster builds
       "strict": true,
       "noEmit": true,
       "esModuleInterop": true,
@@ -171,6 +171,12 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
 - [ ] Create `types/next-auth.d.ts` for session augmentation
 - [ ] Create `types/env.d.ts` for environment variables
 - [ ] Create `types/server-actions.ts` with typed helpers (see reference below)
+- [ ] **Measure and record performance baselines:**
+  ```bash
+  # Record baseline for performance comparison
+  time npm run typecheck  # Target: <30 seconds
+  time npm run build      # Record for <10% regression check
+  ```
 
 ### Phase 2: Data/Auth Layer (.js → .ts)
 
@@ -193,7 +199,7 @@ npm install -D typescript@~5.7.0 @types/node@^20.0.0 @types/react@^18.0.0 @types
    - Type validateBookingInput and related functions
 
 6. [ ] `app/_lib/data-service.js` → `.ts`
-   - Type all data fetching functions (getCabins, getBooking, etc.)
+   - Type all data-fetching functions (getCabins, getBooking, etc.)
    - Uses Supabase client types
 
 7. [ ] `app/_lib/auth.js` → `.ts`
@@ -415,11 +421,17 @@ export type ActionResult<T = void> =
 /**
  * Helper to extract typed form data with automatic whitespace trimming.
  * All string values are trimmed to prevent subtle bugs from whitespace-only input.
+ *
+ * Note: FormData.get() returns FormDataEntryValue | null (string | File | null).
+ * These helpers provide explicit error messages for each case.
  */
 export function getFormString(formData: FormData, key: string): string {
   const value = formData.get(key);
+  if (value === null) {
+    throw new Error(`Form field is missing: ${key}`);
+  }
   if (typeof value !== "string") {
-    throw new Error(`Expected string for form field: ${key}`);
+    throw new Error(`Expected string for form field: ${key}, got File`);
   }
   const trimmed = value.trim();
   if (!trimmed) {
@@ -431,7 +443,8 @@ export function getFormString(formData: FormData, key: string): string {
 export function getFormNumber(formData: FormData, key: string): number {
   const value = getFormString(formData, key);
   const num = Number(value);
-  if (Number.isNaN(num)) {
+  // Reject NaN and Infinity values
+  if (Number.isNaN(num) || !Number.isFinite(num)) {
     throw new Error(`Expected number for form field: ${key}`);
   }
   return num;
@@ -444,7 +457,7 @@ export function getFormOptionalString(
   const value = formData.get(key);
   if (value === null) return undefined;
   if (typeof value !== "string") {
-    throw new Error(`Expected string for form field: ${key}`);
+    throw new Error(`Expected string for form field: ${key}, got File`);
   }
   const trimmed = value.trim();
   return trimmed || undefined;

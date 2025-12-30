@@ -7,7 +7,6 @@ export default defineConfig({
   esbuild: {
     include: /\.[jt]sx?$/,
     jsx: "automatic",
-    loader: "jsx",
   },
   test: {
     setupFiles: ["./tests/setup.ts"],

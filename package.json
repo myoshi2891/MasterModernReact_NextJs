@@ -19,7 +19,8 @@
 		"test:unit": "vitest run tests/unit",
 		"test:component": "vitest run tests/component",
 		"test:e2e": "playwright test",
-		"test:all": "npm run test:unit && npm run test:component && npm run test:e2e"
+		"test:all": "npm run test:unit && npm run test:component && npm run test:e2e",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@heroicons/react": "^2.1.5",
@@ -35,12 +36,16 @@
 		"@playwright/test": "^1.55.1",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.0",
+		"@types/node": "^20.19.27",
+		"@types/react": "^18.3.27",
+		"@types/react-dom": "^18.3.7",
 		"eslint": "^8.57.0",
 		"eslint-config-next": "14.2.5",
 		"jsdom": "^26.1.0",
 		"msw": "^2.11.3",
 		"postcss": "^8",
 		"tailwindcss": "^3.4.1",
+		"typescript": "~5.7.0",
 		"vitest": "^3.2.4"
 	}
 }
