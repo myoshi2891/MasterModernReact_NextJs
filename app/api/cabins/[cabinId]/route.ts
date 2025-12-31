@@ -14,7 +14,7 @@ interface RouteContext {
  */
 interface CabinResponse {
 	cabin: Cabin;
-	bookedDates: Date[];
+	bookedDates: string[];
 }
 
 /**
@@ -39,7 +39,7 @@ interface NextError extends Error {
  * @returns On success, a JSON response with `{ cabin, bookedDates }`. If the cabin is not found, a 404 JSON response with `{ message: "Cabin not found..." }`. On other errors, a 500 JSON response with `{ message: "Internal Server Error" }`.
  */
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	context: RouteContext
 ): Promise<Response> {
 	const { cabinId } = await context.params;
@@ -49,7 +49,10 @@ export async function GET(
 			getCabin(cabinId),
 			getBookedDatesByCabinId(cabinId),
 		]);
-		return Response.json({ cabin, bookedDates } as CabinResponse);
+		return Response.json({
+			cabin,
+			bookedDates: bookedDates.map((d) => d.toISOString()),
+		} as CabinResponse);
 	} catch (error) {
 		const nextError = error as NextError;
 		const message =

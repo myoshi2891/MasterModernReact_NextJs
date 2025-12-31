@@ -1,15 +1,10 @@
-/**
- * Health check response structure.
- */
-interface HealthResponse {
-	status: "ok";
-}
+import { NextResponse } from "next/server";
 
 /**
  * Responds to GET requests with a simple JSON health status.
  *
  * @returns A response whose JSON body is { status: "ok" }.
  */
-export function GET(): Response {
-	return Response.json({ status: "ok" } as HealthResponse);
+export function GET() {
+	return NextResponse.json({ status: "ok" });
 }
