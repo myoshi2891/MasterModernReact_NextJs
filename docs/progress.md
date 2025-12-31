@@ -5,6 +5,8 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | 8f3bdaf | 2025-12-31 | fix: address CodeRabbit review feedback for test files | テストファイルレビュー対応 |
+| 完了 | 58d0c7f | 2025-12-31 | refactor: complete TypeScript Phase 6 - migrate all tests to TypeScript | **TypeScript Phase 6 完了** |
 | 完了 | 988f063 | 2025-12-31 | fix: address CodeRabbit review feedback (round 5) | Counter動的aria-label、TextExpander改善 |
 | 完了 | 38b8896 | 2025-12-31 | fix: address additional CodeRabbit review feedback | アクセシビリティ・UX改善 |
 | 完了 | fb75e3e | 2025-12-31 | fix: address CodeRabbit review feedback for Phase 4 TypeScript migration | Phase 4レビュー対応 |
