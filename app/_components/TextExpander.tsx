@@ -15,7 +15,7 @@ interface TextExpanderProps {
 function TextExpander({ children }: TextExpanderProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const words = children.trim().split(/\s+/);
-	const isLongText = words.length > 40 && children.trim().length > 0;
+	const isLongText = words.length > 40;
 	const displayText =
 		isExpanded || !isLongText ? children : words.slice(0, 40).join(" ") + "...";
 

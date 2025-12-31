@@ -5,6 +5,18 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | 988f063 | 2025-12-31 | fix: address CodeRabbit review feedback (round 5) | Counter動的aria-label、TextExpander改善 |
+| 完了 | 38b8896 | 2025-12-31 | fix: address additional CodeRabbit review feedback | アクセシビリティ・UX改善 |
+| 完了 | fb75e3e | 2025-12-31 | fix: address CodeRabbit review feedback for Phase 4 TypeScript migration | Phase 4レビュー対応 |
+| 完了 | e84fe72 | 2025-12-31 | 📝 Add docstrings to `macbook-dev` | JSDoc追加 |
+| 完了 | 4b5005b | 2025-12-31 | refactor: migrate React components and pages to TypeScript (Phase 4) | **TypeScript Phase 4 完了** |
+| 完了 | a29d97b | 2025-12-31 | refactor: address code review feedback for Phase 3 migration | Phase 3レビュー対応 |
+| 完了 | f86a596 | 2025-12-31 | refactor: migrate API routes and middleware to TypeScript (Phase 3) | **TypeScript Phase 3 完了** |
+| 完了 | f520c8e | 2025-12-31 | fix: preserve date selection on booking error | 予約エラー時の日付保持 |
+| 完了 | b281c68 | 2025-12-31 | refactor: address code review feedback for Phase 2 migration | Phase 2レビュー対応 |
+| 完了 | 4e351fc | 2025-12-31 | refactor: migrate app/_lib to TypeScript (Phase 2) | **TypeScript Phase 2 完了** |
+| 完了 | 372d287 | 2025-12-31 | docs: record TypeScript Phase 1 performance baselines | パフォーマンスベースライン記録 |
+| 完了 | b518d3c | 2025-12-31 | docs: address review feedback on specs and migration plan | 仕様書・計画レビュー対応 |
 | 完了 | ffe6cea | 2025-12-30 | docs: add MockLinkProps interface and version constraint rationale | TypeScript Phase 1 最終レビュー対応 |
 | 完了 | 93a624d | 2025-12-30 | refactor: address additional code review feedback | TypeScript Phase 1 追加レビュー対応 |
 | 完了 | 3f95872 | 2025-12-30 | docs: address review feedback on TypeScript migration plan | マイグレーション計画レビュー対応 |
@@ -42,6 +54,70 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2025-12-31 変更内容まとめ（詳細）
+
+#### 概要
+
+- **TypeScript Phase 2〜4 完了**
+- CodeRabbitレビュー対応（5ラウンド）
+- アクセシビリティ・UX改善
+
+#### TypeScript Phase 2: データ/認証レイヤー移行（完了）
+
+- 対象ファイル:
+  - `app/_lib/errors.js` → `.ts`
+  - `app/_lib/guest.js` → `.ts`
+  - `app/_lib/supabaseServer.js` → `.ts`
+  - `app/_lib/supabaseBrowser.js` → `.ts`
+  - `app/_lib/booking.js` → `.ts`
+  - `app/_lib/data-service.js` → `.ts`
+  - `app/_lib/auth.js` → `.ts`
+  - `app/_lib/actions.js` → `.ts`
+- 変更内容:
+  - `BookingError`クラスと`mapSupabaseError`関数の型定義
+  - `DateRange`、`BookingValidationInput`インターフェース追加
+  - `BookingWithCabin`、`BookingListItem`、`NewGuestInput`インターフェース追加
+  - NextAuth設定とコールバックの型定義（`NextAuthOptions`）
+  - Server Actionsの`FormData`ハンドリング型定義
+- 効果:
+  - データレイヤーの完全な型安全性
+  - 全77ユニットテスト + 22コンポーネントテスト通過
+
+#### TypeScript Phase 3: API ルート & Middleware 移行（完了）
+
+- 対象ファイル:
+  - `middleware.js` → `middleware.ts`
+  - `app/api/auth/[...nextauth]/route.js` → `.ts`
+  - `app/api/cabins/[cabinId]/route.js` → `.ts`
+  - `app/api/health/route.js` → `.ts`
+- 変更内容:
+  - `withAuth`設定に`NextAuthMiddlewareOptions`型を適用
+  - APIレスポンスに`NextResponse<T>`型を適用
+- 効果:
+  - ミドルウェアとAPIルートの型安全性確保
+
+#### TypeScript Phase 4: コンポーネント & ページ移行（完了）
+
+- 対象ファイル:
+  - コンポーネント: 27ファイル（`.jsx` → `.tsx`）
+  - ページ/レイアウト: 18ファイル（`.jsx` → `.tsx`）
+- 変更内容:
+  - 全コンポーネントにPropsインターフェース定義
+  - `params`と`searchParams`の型定義
+  - `generateMetadata`と`generateStaticParams`の型定義
+  - JSDocコメント追加
+- 効果:
+  - UIレイヤーの完全な型安全性
+  - 開発時の補完とエラー検出が向上
+
+#### CodeRabbitレビュー対応
+
+- 5ラウンドにわたるレビュー対応
+- 主な改善:
+  - アクセシビリティ: `aria-label`、`aria-expanded`、`role`属性追加
+  - UX: 動的ラベル、レスポンシブ対応、エラーハンドリング
+  - コード品質: 空白文字処理改善、JSDoc更新、冗長チェック削除
 
 ### 2025-12-30 変更内容まとめ（詳細）
 
