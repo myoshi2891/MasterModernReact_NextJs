@@ -1,7 +1,7 @@
 ---
 name: typescript-migration-plan
 description: Next.js App Router TS migration plan (phased)
-updated: 2025-12-30
+updated: 2025-12-31
 ---
 
 # Plan
