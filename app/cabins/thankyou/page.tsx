@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+/**
+ * Render a centered reservation confirmation with a link to manage reservations.
+ *
+ * @returns A JSX element containing a confirmation heading and a link to the reservations management page.
+ */
 export default function Page() {
 	return (
 		<div className="mt-4 space-y-6 text-center">

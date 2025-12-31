@@ -19,7 +19,11 @@ interface UpdateProfileFormProps {
 }
 
 /**
- * Render a profile update form with read-only full name and email, an editable national ID with client-side validation, and an optional country flag.
+ * Renders a form for updating a guest's profile with read-only name/email, an editable National ID, and an optional country flag.
+ *
+ * @param guest - Guest data containing `fullName`, `email`, optional `nationalID`, and optional `countryFlag` URL
+ * @param children - Optional nodes rendered inside the nationality section (e.g., country selector)
+ * @returns The form element used to submit profile updates
  */
 function UpdateProfileForm({ children, guest }: UpdateProfileFormProps) {
 	const [error, setError] = useState("");

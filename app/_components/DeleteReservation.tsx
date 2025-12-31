@@ -8,6 +8,13 @@ interface DeleteReservationProps {
 	onDelete: (bookingId: number) => void;
 }
 
+/**
+ * Render a delete button that prompts the user for confirmation and triggers removal of a reservation.
+ *
+ * @param bookingId - The identifier of the reservation to delete.
+ * @param onDelete - Callback invoked with `bookingId` when the user confirms deletion.
+ * @returns A button element that shows a trash icon and "Delete" label, or a centered spinner while deletion is pending.
+ */
 function DeleteReservation({ bookingId, onDelete }: DeleteReservationProps) {
 	const [isPending, startTransition] = useTransition();
 

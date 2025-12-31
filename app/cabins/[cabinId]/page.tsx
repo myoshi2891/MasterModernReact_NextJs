@@ -46,10 +46,10 @@ export async function generateStaticParams(): Promise<PageParams[]> {
 }
 
 /**
- * Render the cabin details and reservation UI for the cabin specified by `params.cabinId`.
+ * Render the cabin detail page for the cabin identified by `params.cabinId`.
  *
- * Note: SKIP_SSG only affects generateStaticParams (build-time). At runtime,
- * this page renders dynamically even when no static params were generated.
+ * @param params - A promise that resolves to the route parameters object containing `cabinId`
+ * @returns The React element containing the cabin details, a reservation heading, and the reservation UI (the reservation form is rendered inside a Suspense boundary)
  */
 export default async function Page({ params }: PageProps) {
 	const { cabinId } = await params;

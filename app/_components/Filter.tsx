@@ -25,6 +25,13 @@ function Filter() {
 		"sm:[&_button:not(:first-child)]:border-primary-800",
 	].join(" ");
 
+	/**
+	 * Update the URL's "capacity" query parameter and navigate to the updated URL without scrolling.
+	 *
+	 * Sets the "capacity" parameter to the provided filter value and replaces the current route with the new query string (prevents page scroll).
+	 *
+	 * @param filter - The capacity filter value to set (e.g., "all", "small", "medium", "large")
+	 */
 	function handleFilter(filter: string) {
 		const params = new URLSearchParams(searchParams);
 		params.set("capacity", filter);
@@ -72,6 +79,15 @@ interface ButtonProps {
 	children: ReactNode;
 }
 
+/**
+ * Renders a single filter button representing a capacity option.
+ *
+ * @param filter - The identifier for this filter option (e.g., "all", "small", "medium", "large").
+ * @param handleFilter - Callback invoked with `filter` when the button is clicked.
+ * @param activeFilter - The currently selected filter identifier used to determine active styling.
+ * @param children - Visible label content placed inside the button.
+ * @returns The button element for the given filter option.
+ */
 function Button({ filter, handleFilter, activeFilter, children }: ButtonProps) {
 	return (
 		<button

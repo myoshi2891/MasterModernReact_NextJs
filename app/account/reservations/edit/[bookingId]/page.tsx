@@ -11,9 +11,13 @@ interface PageProps {
 }
 
 /**
- * Render an edit reservation page for the booking identified by `params.bookingId`.
+ * Render an edit reservation page for the given booking.
  *
- * @throws {Error} If loading the booking data fails.
+ * The page displays a form pre-filled with the booking's values (number of guests and observations)
+ * and posts updates to the `updateBooking` action.
+ *
+ * @returns A React element containing the edit reservation form for the specified booking.
+ * @throws If loading the booking data fails.
  */
 export default async function Page({ params }: PageProps) {
 	const { bookingId } = await params;

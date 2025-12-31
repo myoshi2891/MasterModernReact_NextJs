@@ -4,7 +4,9 @@ import Link from "next/link";
 import bg from "@/public/bg.png";
 
 /**
- * Render the landing page hero: full-bleed background image with centered heading and a CTA link to /cabins.
+ * Renders the landing page hero with a full-bleed background image, centered heading, and a CTA linking to /cabins.
+ *
+ * @returns The page's JSX element containing the hero section.
  */
 export default function Page() {
 	return (

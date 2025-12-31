@@ -11,11 +11,10 @@ interface NavigationMenuProps {
 }
 
 /**
- * Render a responsive site navigation with desktop links and a toggleable mobile menu.
+ * Render a responsive navigation bar with desktop links and a toggleable mobile menu.
  *
- * Shows horizontal navigation on medium and larger screens and an accessible collapsible
- * mobile panel on small screens. Displays an account link that shows the user's name and
- * avatar when `session.user.image` is present; otherwise shows a "Guest area" link.
+ * @param session - Session object (or null) used to display the account area: shows the user's name and avatar when available; otherwise displays a "Guest area" link
+ * @returns The navigation element containing the site links and the account area for desktop and mobile layouts
  */
 function NavigationMenu({ session }: NavigationMenuProps) {
 	const [isOpen, setIsOpen] = useState(false);

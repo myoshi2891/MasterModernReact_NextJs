@@ -10,6 +10,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Renders the reservations page for the currently authenticated user.
+ *
+ * @returns A JSX element containing the reservations UI: either a message linking to cabins when there are no bookings or a ReservationList when bookings exist.
+ * @throws Error when there is no authenticated user with a `guestId`.
+ */
 export default async function Page() {
 	const session = await auth();
 	if (!session?.user?.guestId) {

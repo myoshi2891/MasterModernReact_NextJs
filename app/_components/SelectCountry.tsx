@@ -7,6 +7,15 @@ interface SelectCountryProps {
 	className?: string;
 }
 
+/**
+ * Renders a country <select> populated from the service, encoding each option's value as `name%flag`.
+ *
+ * @param defaultCountry - Optional country name to preselect; when provided, the component finds its flag and uses `name%flag` as the initial value.
+ * @param name - The HTML `name` attribute for the <select>.
+ * @param id - The HTML `id` attribute for the <select>.
+ * @param className - Optional CSS class applied to the <select>.
+ * @returns A JSX <select> element with a placeholder option and one option per country; each option's `value` is the country name and flag joined with `%` (e.g., `United States%🇺🇸`).
+ */
 async function SelectCountry({
 	defaultCountry,
 	name,

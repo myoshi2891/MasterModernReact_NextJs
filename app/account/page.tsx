@@ -5,6 +5,11 @@ export const metadata: Metadata = {
 	title: "Guest area",
 };
 
+/**
+ * Renders the account page header greeting the current user by first name.
+ *
+ * @returns A heading element that displays "Welcome {firstName}", where `{firstName}` is the authenticated user's first name or `"Guest"` if unavailable.
+ */
 export default async function Page() {
 	const session = await auth();
 

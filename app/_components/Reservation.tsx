@@ -9,6 +9,15 @@ interface ReservationProps {
 	cabin: Cabin;
 }
 
+/**
+ * Render the reservation UI for a specific cabin, including date selection and a user-facing booking area.
+ *
+ * Fetches required settings and booked dates before rendering; shows the reservation form populated with
+ * the authenticated user's summary when signed in, or a login prompt otherwise.
+ *
+ * @param cabin - The cabin to display reservation controls for
+ * @returns The reservation UI element containing a date selector and either a reservation form for authenticated users or a login message
+ */
 async function Reservation({ cabin }: ReservationProps) {
 	const [settings, bookedDates] = await Promise.all([
 		getSettings(),

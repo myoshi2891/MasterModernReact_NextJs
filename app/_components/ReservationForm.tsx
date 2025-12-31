@@ -22,10 +22,11 @@ interface ReservationFormProps {
 }
 
 /**
- * Render a reservation form for a cabin that displays the logged-in user and collects guest count and observations.
+ * Render a reservation form that displays the logged-in user and collects guest count and observations for booking a cabin.
  *
- * The form prepares booking data (dates, number of nights, calculated cabin price, cabin id, and capacity),
- * submits that data when the form is posted, and resets the selected date range after successful submission.
+ * The component prepares booking metadata (startDate and endDate as null when absent, calculated `numNights`, and `cabinId`) and binds it to the server action that handles form submissions. When the form is submitted successfully the selected date range is reset; if submission fails the date range is preserved.
+ *
+ * @returns A JSX element containing the reservation form UI.
  */
 function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const { range, resetRange } = useReservation();

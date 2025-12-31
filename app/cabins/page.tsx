@@ -17,6 +17,14 @@ interface PageProps {
 	searchParams: Promise<{ capacity?: string }>;
 }
 
+/**
+ * Renders the Cabins page with header text, filter controls, and a list of cabins.
+ *
+ * Derives the active filter from `searchParams.capacity` (defaults to `"all"`) and passes it to the cabin list.
+ *
+ * @param searchParams - A promise that resolves to route query parameters; may include `capacity` to control which cabins are shown
+ * @returns The page JSX containing the header, filter UI, and a cabin list filtered by the derived capacity
+ */
 export default async function Page({ searchParams }: PageProps) {
 	const params = await searchParams;
 	const filter = (params?.capacity ?? "all") as FilterType;

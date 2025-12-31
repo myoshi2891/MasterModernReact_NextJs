@@ -6,6 +6,12 @@ interface TextExpanderProps {
 	children: string;
 }
 
+/**
+ * Displays text truncated to the first 40 words with an inline toggle to reveal or hide the full text.
+ *
+ * @param children - The text to display; when longer than 40 words it is truncated to the first 40 words followed by "..."
+ * @returns A span element containing the displayed (possibly truncated) text and a button that toggles between truncated and full text
+ */
 function TextExpander({ children }: TextExpanderProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const displayText = isExpanded

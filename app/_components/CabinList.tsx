@@ -10,8 +10,11 @@ interface CabinListProps {
 /**
  * Render a responsive grid of CabinCard components filtered by cabin size.
  *
- * If process.env.SKIP_SSG === "true", the component returns `null` without fetching data.
+ * If the environment variable `SKIP_SSG` is set to `"true"`, rendering is skipped and the component returns `null`.
  * Also returns `null` when no cabins are available.
+ *
+ * @param filter - Selected size filter: `"all"` (no filtering), `"small"` (maxCapacity ≤ 3), `"medium"` (maxCapacity between 4 and 7 inclusive), `"large"` (maxCapacity ≥ 8)
+ * @returns A grid of `CabinCard` elements matching the selected filter, or `null` if rendering is skipped or there are no cabins
  */
 async function CabinList({ filter }: CabinListProps) {
 	if (process.env.SKIP_SSG === "true") {

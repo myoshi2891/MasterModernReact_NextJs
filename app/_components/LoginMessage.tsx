@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+/**
+ * Renders a styled message that prompts the user to sign in and provides a link to the login page so they can reserve a cabin.
+ *
+ * @returns A JSX element containing a centered paragraph with a link to `/login` styled for emphasis.
+ */
 function LoginMessage() {
 	return (
 		<div className="grid bg-primary-800">

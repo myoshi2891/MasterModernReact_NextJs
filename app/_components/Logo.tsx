@@ -2,6 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/logo.png";
 
+/**
+ * Renders the site brand as a linked logo and text that navigates to the root path.
+ *
+ * @returns The JSX element containing the logo image and the "The Wild Oasis" text wrapped in a link to `/`.
+ */
 function Logo() {
 	return (
 		<Link href="/" className="z-10 flex items-center gap-4">

@@ -5,9 +5,11 @@ import { format } from "date-fns";
 import { useReservation } from "./ReservationContext";
 
 /**
- * Display a dismissible banner showing the selected reservation date range when both start and end dates are set.
+ * Displays a dismissible banner showing the selected reservation date range when both start and end dates are set.
  *
- * Renders a fixed, styled reminder with the formatted `range.from` and `range.to` dates and a close button that clears the range.
+ * The banner shows formatted `range.from` and `range.to` dates and includes a close button that clears the selected range.
+ *
+ * @returns The banner element when both start and end dates are defined, or `null` otherwise.
  */
 function ReservationReminder() {
 	const { range, resetRange } = useReservation();
