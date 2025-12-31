@@ -8,10 +8,11 @@ import {
 
 /**
  * Date range type for booking selection.
+ * Compatible with react-day-picker's DateRange type.
  */
 export interface DateRange {
   from: Date | undefined;
-  to: Date | undefined;
+  to?: Date | undefined;
 }
 
 /**
