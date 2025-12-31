@@ -144,7 +144,6 @@ describe("mapSupabaseError", () => {
 
     const error2 = mapSupabaseError({});
 
-    
     expect(error2.statusCode).toBe(500);
     expect(error2.code).toBe("INTERNAL_ERROR");
   });
