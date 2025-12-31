@@ -268,8 +268,8 @@ describe("booking actions", () => {
 
     await createBooking(bookingData, makeCreateFormData());
 
-    const [booking] = insertMock.mock.calls[0][0] as [Record<string, unknown>];
-    expect(booking).toMatchObject({
+    const [createdBooking] = insertMock.mock.calls[0][0] as [Record<string, unknown>];
+    expect(createdBooking).toMatchObject({
       cabinPrice: 300,
       totalPrice: 300,
     });

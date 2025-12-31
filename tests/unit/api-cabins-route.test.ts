@@ -3,8 +3,8 @@ import type { Cabin } from "@/types/domain";
 import { NextRequest } from "next/server";
 
 const { getCabinMock, getBookedDatesMock } = vi.hoisted(() => ({
-  getCabinMock: vi.fn<() => Promise<Cabin>>(),
-  getBookedDatesMock: vi.fn<() => Promise<Date[]>>(),
+  getCabinMock: vi.fn<(cabinId: string) => Promise<Cabin>>(),
+  getBookedDatesMock: vi.fn<(cabinId: string) => Promise<Date[]>>(),
 }));
 
 vi.mock("../../app/_lib/data-service", () => ({

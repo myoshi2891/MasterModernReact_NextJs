@@ -52,6 +52,7 @@ describe("ReservationCard", () => {
       ...baseBooking,
       startDate: "2025-02-01T00:00:00.000Z",
       endDate: "2025-02-03T00:00:00.000Z",
+      numNights: 2,
     };
 
     render(<ReservationCard booking={upcomingBooking} onDelete={vi.fn()} />);

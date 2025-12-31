@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 vi.mock("../../app/_lib/actions", () => ({
   updateGuest: vi.fn(),
@@ -79,7 +79,7 @@ describe("UpdateProfileForm", () => {
     expect(form).not.toBeNull();
     fireEvent.submit(form!);
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(await screen.findByRole("alert")).toHaveTextContent(
       /national id must be 6/i
     );
   });
@@ -94,6 +94,8 @@ describe("UpdateProfileForm", () => {
     expect(form).not.toBeNull();
     fireEvent.submit(form!);
 
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
   });
 });
