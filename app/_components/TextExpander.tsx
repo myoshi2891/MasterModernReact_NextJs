@@ -14,8 +14,8 @@ interface TextExpanderProps {
  */
 function TextExpander({ children }: TextExpanderProps) {
 	const [isExpanded, setIsExpanded] = useState(false);
-	const words = children.split(" ");
-	const isLongText = words.length > 40;
+	const words = children.trim().split(/\s+/);
+	const isLongText = words.length > 40 && children.trim().length > 0;
 	const displayText =
 		isExpanded || !isLongText ? children : words.slice(0, 40).join(" ") + "...";
 
@@ -27,6 +27,7 @@ function TextExpander({ children }: TextExpanderProps) {
 					{" "}
 					<button
 						type="button"
+						aria-expanded={isExpanded}
 						className="border-b border-primary-700 pb-1 leading-3 text-primary-700"
 						onClick={() => setIsExpanded(!isExpanded)}
 					>

@@ -27,7 +27,7 @@ export async function generateMetadata({
 	try {
 		const { cabinId } = await params;
 		const cabin = await getCabin(cabinId);
-		return { title: `Cabin ${cabin?.name ?? ""}` };
+		return { title: cabin?.name ? `Cabin ${cabin.name}` : "Cabin" };
 	} catch {
 		return { title: "Cabin" };
 	}
