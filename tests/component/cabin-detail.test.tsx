@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import Cabin from "../../app/_components/Cabin";
+import type { Cabin as CabinType } from "@/types/domain";
 
-const cabin = {
+const cabin: CabinType = {
   id: 1,
   name: "Aspen",
   maxCapacity: 4,
@@ -10,6 +11,7 @@ const cabin = {
   discount: 50,
   image: "/aspen.jpg",
   description: "A cozy cabin in the mountains.",
+  created_at: "2024-01-01T00:00:00.000Z",
 };
 
 describe("Cabin", () => {

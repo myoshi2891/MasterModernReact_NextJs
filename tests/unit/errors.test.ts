@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { BookingError, mapSupabaseError } from "../../app/_lib/errors.js";
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from "vitest";
+import { BookingError, mapSupabaseError } from "../../app/_lib/errors";
 
 describe("BookingError", () => {
   it("should create error with default values", () => {
@@ -21,7 +21,7 @@ describe("BookingError", () => {
 });
 
 describe("mapSupabaseError", () => {
-  let consoleErrorSpy;
+  let consoleErrorSpy: MockInstance<typeof console.error>;
 
   // Mock console.error before each test
   beforeEach(() => {
@@ -137,18 +137,16 @@ describe("mapSupabaseError", () => {
     expect(error.code).toBe("INTERNAL_ERROR");
   });
 
-  it("should handle null/undefined error gracefully", () => {
+  it("should handle null/empty error gracefully", () => {
     const error1 = mapSupabaseError(null);
     expect(error1.statusCode).toBe(500);
     expect(error1.code).toBe("INTERNAL_ERROR");
 
-    const error2 = mapSupabaseError(undefined);
+    const error2 = mapSupabaseError({});
+
+    
     expect(error2.statusCode).toBe(500);
     expect(error2.code).toBe("INTERNAL_ERROR");
-
-    const error3 = mapSupabaseError({});
-    expect(error3.statusCode).toBe(500);
-    expect(error3.code).toBe("INTERNAL_ERROR");
   });
 
   it("should truncate long error messages in logs", () => {

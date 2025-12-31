@@ -19,7 +19,7 @@
 |----|------|--------|------|
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
 | 002 | [booking-concurrency-control](002-booking-concurrency-control/) | DB制約実装完了 | 予約の同時実行対策（重複予約防止） |
-| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 5 完了** | JSからTSへの段階的移行 |
+| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 6 完了** | JSからTSへの段階的移行 |
 
 ## 詳細
 
@@ -53,14 +53,14 @@
 - **目的**: JavaScript から TypeScript への段階的移行（挙動を変えない）
 - **ファイル**: [typescript-migration-plan.md](../typescript-migration-plan.md)
   - ※ 詳細な計画（700行以上）のため、専用ファイルで管理
-- **現在のステータス**: **Phase 5 完了**（Strict モード解決 & 最終化）
+- **現在のステータス**: **Phase 6 完了**（テストファイル移行 & 完全TypeScript化）
 - **Phase 概要**:
   - Phase 1: 基盤構築（tsconfig.json、型定義ファイル）✅ 完了
   - Phase 2: データ/認証レイヤー移行（`app/_lib/*.js` → `.ts`）✅ 完了
   - Phase 3: API ルート & Middleware 移行 ✅ 完了
   - Phase 4: コンポーネント & ページ移行（`.jsx` → `.tsx`）✅ 完了
   - Phase 5: Strict モード解決 & 最終化 ✅ 完了
-  - Phase 6: テストファイル移行
+  - Phase 6: テストファイル移行 ✅ 完了
 - **成果物**:
   - `tsconfig.json` - strict モード有効
   - `types/domain.ts` - ドメイン型（Cabin, Booking, Guest 等）

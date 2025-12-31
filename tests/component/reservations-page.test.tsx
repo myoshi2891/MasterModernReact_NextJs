@@ -1,9 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { Session } from "next-auth";
+import type { BookingWithCabin } from "@/app/_lib/data-service";
 
 const { authMock, getBookingsMock } = vi.hoisted(() => ({
-  authMock: vi.fn(),
-  getBookingsMock: vi.fn(),
+  authMock: vi.fn<() => Promise<Session | null>>(),
+  getBookingsMock: vi.fn<() => Promise<BookingWithCabin[]>>(),
 }));
 
 vi.mock("../../app/_lib/auth", () => ({
@@ -20,7 +22,7 @@ vi.mock("../../app/_components/ReservationList", () => ({
 
 describe("Reservations page", () => {
   it("shows an empty-state message when there are no bookings", async () => {
-    authMock.mockResolvedValue({ user: { guestId: 123 } });
+    authMock.mockResolvedValue({ user: { guestId: 123 } } as Session);
     getBookingsMock.mockResolvedValue([]);
 
     const { default: ReservationsPage } = await import(
@@ -38,8 +40,8 @@ describe("Reservations page", () => {
   });
 
   it("renders the reservation list when bookings exist", async () => {
-    authMock.mockResolvedValue({ user: { guestId: 123 } });
-    getBookingsMock.mockResolvedValue([{ id: 1 }]);
+    authMock.mockResolvedValue({ user: { guestId: 123 } } as Session);
+    getBookingsMock.mockResolvedValue([{ id: 1 } as BookingWithCabin]);
 
     const { default: ReservationsPage } = await import(
       "../../app/account/reservations/page"

@@ -1,4 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import type { Session } from "next-auth";
+import type { BookingWithCabin } from "@/app/_lib/data-service";
+
+interface CabinData {
+  maxCapacity: number;
+  regularPrice: number;
+  discount: number;
+}
+
+interface SupabaseQueryResult<T> {
+  data: T | null;
+  error: Error | null;
+}
 
 const {
   authMock,
@@ -18,7 +31,7 @@ const {
   const cabinSingleMock = vi.fn().mockResolvedValue({
     data: { maxCapacity: 4, regularPrice: 200, discount: 50 },
     error: null,
-  });
+  } as SupabaseQueryResult<CabinData>);
   const cabinEqMock = vi.fn(() => ({ single: cabinSingleMock }));
   const cabinSelectMock = vi.fn(() => ({ eq: cabinEqMock }));
   const insertMock = vi.fn().mockResolvedValue({ error: null });
@@ -26,7 +39,7 @@ const {
   const updateMock = vi.fn(() => ({ eq: updateEqMock }));
   const deleteEqMock = vi.fn().mockResolvedValue({ error: null });
   const deleteMock = vi.fn(() => ({ eq: deleteEqMock }));
-  const supabaseFromMock = vi.fn((table) => {
+  const supabaseFromMock = vi.fn((table: string) => {
     if (table === "cabins") {
       return { select: cabinSelectMock };
     }
@@ -39,8 +52,8 @@ const {
   });
 
   return {
-    authMock: vi.fn(),
-    getBookingsMock: vi.fn(),
+    authMock: vi.fn<() => Promise<Session | null>>(),
+    getBookingsMock: vi.fn<() => Promise<BookingWithCabin[]>>(),
     supabaseFromMock,
     cabinSelectMock,
     cabinEqMock,
@@ -75,7 +88,16 @@ vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-const baseBookingData = {
+interface BaseBookingData {
+  startDate: Date;
+  endDate: Date;
+  numNights: number;
+  cabinPrice: number;
+  cabinId: number;
+  maxCapacity: number;
+}
+
+const baseBookingData: BaseBookingData = {
   startDate: new Date("2099-02-10T00:00:00.000Z"),
   endDate: new Date("2099-02-12T00:00:00.000Z"),
   numNights: 2,
@@ -84,7 +106,7 @@ const baseBookingData = {
   maxCapacity: 4,
 };
 
-const makeFormData = (values) => {
+const makeFormData = (values: Record<string, string | number | undefined>): FormData => {
   const formData = new FormData();
   Object.entries(values).forEach(([key, value]) => {
     if (value !== undefined) {
@@ -94,14 +116,14 @@ const makeFormData = (values) => {
   return formData;
 };
 
-const makeCreateFormData = (overrides = {}) =>
+const makeCreateFormData = (overrides: Record<string, string | number | undefined> = {}): FormData =>
   makeFormData({
     numGuests: "2",
     observations: "No peanuts please.",
     ...overrides,
   });
 
-const makeUpdateFormData = (overrides = {}) =>
+const makeUpdateFormData = (overrides: Record<string, string | number | undefined> = {}): FormData =>
   makeFormData({
     bookingId: "1",
     numGuests: "2",
@@ -112,9 +134,9 @@ const makeUpdateFormData = (overrides = {}) =>
 describe("booking actions", () => {
   beforeEach(() => {
     vi.resetModules();
-    authMock.mockResolvedValue({ user: { guestId: 1 } });
+    authMock.mockResolvedValue({ user: { guestId: 1 } } as Session);
     getBookingsMock.mockResolvedValue([
-      { id: 1, cabins: { maxCapacity: 4 } },
+      { id: 1, cabins: { maxCapacity: 4 } } as unknown as BookingWithCabin,
     ]);
     cabinSingleMock.mockResolvedValue({
       data: { maxCapacity: 4, regularPrice: 200, discount: 50 },
@@ -127,7 +149,7 @@ describe("booking actions", () => {
     deleteEqMock.mockResolvedValue({ error: null });
     updateMock.mockReturnValue({ eq: updateEqMock });
     deleteMock.mockReturnValue({ eq: deleteEqMock });
-    supabaseFromMock.mockImplementation((table) => {
+    supabaseFromMock.mockImplementation((table: string) => {
       if (table === "cabins") {
         return { select: cabinSelectMock };
       }
@@ -153,7 +175,7 @@ describe("booking actions", () => {
   });
 
   it("rejects createBooking when guestId is missing", async () => {
-    authMock.mockResolvedValue({ user: { guestId: null } });
+    authMock.mockResolvedValue({ user: { guestId: null } } as unknown as Session);
 
     const { createBooking } = await import("../../app/_lib/actions");
 
@@ -219,7 +241,7 @@ describe("booking actions", () => {
     expect(cabinEqMock).toHaveBeenCalledWith("id", 7);
     expect(supabaseFromMock).toHaveBeenCalledWith("bookings");
     expect(insertMock).toHaveBeenCalledTimes(1);
-    const [createdBooking] = insertMock.mock.calls[0][0];
+    const [createdBooking] = insertMock.mock.calls[0][0] as [Record<string, unknown>];
     expect(createdBooking).toMatchObject({
       cabinId: 7,
       guestId: 1,
@@ -246,7 +268,8 @@ describe("booking actions", () => {
 
     await createBooking(bookingData, makeCreateFormData());
 
-    expect(insertMock.mock.calls[0][0][0]).toMatchObject({
+    const [booking] = insertMock.mock.calls[0][0] as [Record<string, unknown>];
+    expect(booking).toMatchObject({
       cabinPrice: 300,
       totalPrice: 300,
     });
@@ -265,7 +288,7 @@ describe("booking actions", () => {
   });
 
   it("rejects updateBooking when guestId is missing", async () => {
-    authMock.mockResolvedValue({ user: { guestId: null } });
+    authMock.mockResolvedValue({ user: { guestId: null } } as unknown as Session);
 
     const { updateBooking } = await import("../../app/_lib/actions");
 
@@ -298,7 +321,7 @@ describe("booking actions", () => {
 
   it("rejects updateBooking when guest count exceeds capacity", async () => {
     getBookingsMock.mockResolvedValue([
-      { id: 1, cabins: { maxCapacity: 2 } },
+      { id: 1, cabins: { maxCapacity: 2 } } as unknown as BookingWithCabin,
     ]);
 
     const { updateBooking } = await import("../../app/_lib/actions");
@@ -354,7 +377,7 @@ describe("booking actions", () => {
   });
 
   it("rejects deleteBooking when guestId is missing", async () => {
-    authMock.mockResolvedValue({ user: { guestId: null } });
+    authMock.mockResolvedValue({ user: { guestId: null } } as unknown as Session);
 
     const { deleteBooking } = await import("../../app/_lib/actions");
 

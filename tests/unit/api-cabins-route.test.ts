@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Cabin } from "@/types/domain";
+import { NextRequest } from "next/server";
 
 const { getCabinMock, getBookedDatesMock } = vi.hoisted(() => ({
-  getCabinMock: vi.fn(),
-  getBookedDatesMock: vi.fn(),
+  getCabinMock: vi.fn<() => Promise<Cabin>>(),
+  getBookedDatesMock: vi.fn<() => Promise<Date[]>>(),
 }));
 
 vi.mock("../../app/_lib/data-service", () => ({
@@ -17,13 +19,14 @@ describe("GET /api/cabins/[cabinId]", () => {
 
   it("returns cabin details and booked dates", async () => {
     const date = new Date("2025-01-01T00:00:00.000Z");
-    getCabinMock.mockResolvedValue({ id: 1, name: "Test Cabin" });
+    getCabinMock.mockResolvedValue({ id: 1, name: "Test Cabin" } as Cabin);
     getBookedDatesMock.mockResolvedValue([date]);
 
-    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
-    const response = await GET(new Request("http://localhost/api/cabins/1"), {
-      params: { cabinId: "1" },
-    });
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/cabins/1"),
+      { params: Promise.resolve({ cabinId: "1" }) }
+    );
 
     const body = await response.json();
 
@@ -36,15 +39,16 @@ describe("GET /api/cabins/[cabinId]", () => {
   });
 
   it("returns a 404 when the cabin is not found", async () => {
-    const notFoundError = new Error("NEXT_NOT_FOUND");
+    const notFoundError = new Error("NEXT_NOT_FOUND") as Error & { digest?: string };
     notFoundError.digest = "NEXT_NOT_FOUND";
     getCabinMock.mockRejectedValue(notFoundError);
     getBookedDatesMock.mockResolvedValue([]);
 
-    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
-    const response = await GET(new Request("http://localhost/api/cabins/1"), {
-      params: { cabinId: "1" },
-    });
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/cabins/1"),
+      { params: Promise.resolve({ cabinId: "1" }) }
+    );
 
     const body = await response.json();
 
@@ -56,10 +60,11 @@ describe("GET /api/cabins/[cabinId]", () => {
     getCabinMock.mockRejectedValue(new Error("NEXT_NOT_FOUND"));
     getBookedDatesMock.mockResolvedValue([]);
 
-    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
-    const response = await GET(new Request("http://localhost/api/cabins/1"), {
-      params: { cabinId: "1" },
-    });
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/cabins/1"),
+      { params: Promise.resolve({ cabinId: "1" }) }
+    );
 
     const body = await response.json();
 
@@ -72,10 +77,11 @@ describe("GET /api/cabins/[cabinId]", () => {
     getCabinMock.mockRejectedValue(new Error("db unavailable"));
     getBookedDatesMock.mockResolvedValue([]);
 
-    const { GET } = await import("../../app/api/cabins/[cabinId]/route.js");
-    const response = await GET(new Request("http://localhost/api/cabins/1"), {
-      params: { cabinId: "1" },
-    });
+    const { GET } = await import("../../app/api/cabins/[cabinId]/route");
+    const response = await GET(
+      new NextRequest("http://localhost/api/cabins/1"),
+      { params: Promise.resolve({ cabinId: "1" }) }
+    );
 
     const body = await response.json();
 

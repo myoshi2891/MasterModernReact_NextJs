@@ -1,8 +1,8 @@
-const { test, expect } = require("@playwright/test");
+import { test, expect, type ConsoleMessage } from "@playwright/test";
 
 test("shows the hero heading", async ({ page }) => {
-  const consoleErrors = [];
-  page.on("console", (msg) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (msg: ConsoleMessage) => {
     if (msg.type() === "error") consoleErrors.push(msg.text());
   });
 

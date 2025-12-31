@@ -5,13 +5,27 @@ vi.mock("../../app/_lib/actions", () => ({
   updateGuest: vi.fn(),
 }));
 
+interface SubmitButtonProps {
+  children: React.ReactNode;
+  pendingLabel?: string;
+  [key: string]: unknown;
+}
+
 vi.mock("../../app/_components/SubmitButton", () => ({
-  default: ({ children, pendingLabel, ...props }) => (
+  default: ({ children, pendingLabel, ...props }: SubmitButtonProps) => (
     <button {...props}>{children}</button>
   ),
 }));
 
-const guest = {
+interface GuestData {
+  fullName: string;
+  email: string;
+  nationality?: string;
+  nationalID?: string;
+  countryFlag?: string;
+}
+
+const guest: GuestData = {
   fullName: "Ada Lovelace",
   email: "ada@example.com",
   nationality: "Japan",
@@ -19,13 +33,15 @@ const guest = {
   countryFlag: "",
 };
 
-async function renderForm(overrides = {}) {
+async function renderForm(overrides: Partial<GuestData> = {}) {
   const { default: UpdateProfileForm } = await import(
     "../../app/_components/UpdateProfileForm"
   );
 
+  const mergedGuest = { ...guest, ...overrides };
+
   return render(
-    <UpdateProfileForm guest={{ ...guest, ...overrides }}>
+    <UpdateProfileForm guest={mergedGuest}>
       <select id="nationality" name="nationality">
         <option value="">Select country...</option>
         <option value="Japan%flag">Japan</option>
@@ -61,7 +77,7 @@ describe("UpdateProfileForm", () => {
     });
     const form = submitButton.closest("form");
     expect(form).not.toBeNull();
-    fireEvent.submit(form);
+    fireEvent.submit(form!);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       /national id must be 6/i
@@ -76,7 +92,7 @@ describe("UpdateProfileForm", () => {
     });
     const form = submitButton.closest("form");
     expect(form).not.toBeNull();
-    fireEvent.submit(form);
+    fireEvent.submit(form!);
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
