@@ -34,6 +34,13 @@ const navLinks: NavLink[] = [
 	},
 ];
 
+/**
+ * Renders the account side navigation containing page links and a sign-out control.
+ *
+ * The link whose `href` matches the current pathname is visually highlighted.
+ *
+ * @returns A navigation element with account page links and a sign-out button.
+ */
 function SideNavigation() {
 	const pathname = usePathname();
 

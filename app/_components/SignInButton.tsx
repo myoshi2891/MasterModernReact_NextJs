@@ -5,7 +5,11 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 /**
- * Render a button that initiates Google OAuth sign-in and redirects the user to /account on success.
+ * Render a Google sign-in button that initiates OAuth and navigates to /account on success.
+ *
+ * While signing in the button is disabled and shows a loading label; any sign-in error is shown below the button.
+ *
+ * @returns The JSX element for the Google sign-in button and optional error message.
  */
 function SignInButton() {
 	const [isLoading, setIsLoading] = useState(false);

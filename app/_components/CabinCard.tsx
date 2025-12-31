@@ -7,6 +7,15 @@ interface CabinCardProps {
 	cabin: CabinListItem;
 }
 
+/**
+ * Render a card summarizing a cabin with image, capacity, pricing, and a link to its details page.
+ *
+ * The component displays the cabin image and name, shows capacity, renders a discounted price
+ * when `discount > 0` (with the original price struck through), otherwise shows the regular price,
+ * and includes a link to `/cabins/{id}` labeled "Details & reservation →".
+ *
+ * @param cabin - Cabin data used to populate the card (expects `id`, `name`, `maxCapacity`, `regularPrice`, `discount`, and `image`)
+ */
 function CabinCard({ cabin }: CabinCardProps) {
 	const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
 

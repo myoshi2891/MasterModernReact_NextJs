@@ -10,6 +10,14 @@ export const metadata: Metadata = {
 	title: "About",
 };
 
+/**
+ * Renders the About page for The Wild Oasis and includes live cabin data.
+ *
+ * Fetches cabin data and returns the page's React element tree that displays
+ * the About content, images, family history, and a dynamic cabin count.
+ *
+ * @returns The React element representing the About page layout
+ */
 export default async function Page() {
 	const cabins = await getCabins();
 	return (

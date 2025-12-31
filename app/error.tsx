@@ -5,6 +5,13 @@ interface ErrorProps {
 	reset: () => void;
 }
 
+/**
+ * Render a centered error UI that displays the provided error message and a "Try again" button.
+ *
+ * @param error - The Error object whose `message` is shown to the user
+ * @param reset - Callback invoked when the user clicks the "Try again" button to retry or reset state
+ * @returns A JSX element containing the error message and a retry button
+ */
 export default function Error({ error, reset }: ErrorProps) {
 	return (
 		<main className="flex flex-col items-center justify-center gap-6">

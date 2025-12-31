@@ -20,7 +20,10 @@ interface CabinProps {
 }
 
 /**
- * Render a cabin card showing the cabin image, title, expandable description, and key features.
+ * Renders a cabin card populated with the provided cabin data.
+ *
+ * @param cabin - Data for the cabin (name, maxCapacity, optional image and description) used to populate the card's image, title, description, and feature list.
+ * @returns The JSX markup for a cabin card populated with the given data.
  */
 function Cabin({ cabin }: CabinProps) {
 	const { name, maxCapacity, image, description } = cabin;
