@@ -19,7 +19,7 @@
 |----|------|--------|------|
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
 | 002 | [booking-concurrency-control](002-booking-concurrency-control/) | DB制約実装完了 | 予約の同時実行対策（重複予約防止） |
-| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 1完了** | JSからTSへの段階的移行 |
+| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 4完了** | JSからTSへの段階的移行 |
 
 ## 詳細
 
@@ -53,12 +53,12 @@
 - **目的**: JavaScript から TypeScript への段階的移行（挙動を変えない）
 - **ファイル**: [typescript-migration-plan.md](../typescript-migration-plan.md)
   - ※ 詳細な計画（700行以上）のため、専用ファイルで管理
-- **現在のステータス**: **Phase 1 完了**（基盤構築）
+- **現在のステータス**: **Phase 4 完了**（コンポーネント & ページ移行）
 - **Phase 概要**:
   - Phase 1: 基盤構築（tsconfig.json、型定義ファイル）✅ 完了
-  - Phase 2: データ/認証レイヤー移行（`app/_lib/*.js` → `.ts`）
-  - Phase 3: API ルート & Middleware 移行
-  - Phase 4: コンポーネント & ページ移行（`.jsx` → `.tsx`）
+  - Phase 2: データ/認証レイヤー移行（`app/_lib/*.js` → `.ts`）✅ 完了
+  - Phase 3: API ルート & Middleware 移行 ✅ 完了
+  - Phase 4: コンポーネント & ページ移行（`.jsx` → `.tsx`）✅ 完了
   - Phase 5: Strict モード解決 & 最終化
   - Phase 6: テストファイル移行
 - **成果物**:
