@@ -3,7 +3,7 @@
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Session } from "next-auth";
 
 interface NavigationMenuProps {
@@ -21,6 +21,18 @@ function NavigationMenu({ session }: NavigationMenuProps) {
 
 	const toggleMenu = () => setIsOpen((prev) => !prev);
 	const closeMenu = () => setIsOpen(false);
+
+	// Close menu on Escape key press
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && isOpen) {
+				closeMenu();
+			}
+		};
+
+		document.addEventListener("keydown", handleEscape);
+		return () => document.removeEventListener("keydown", handleEscape);
+	}, [isOpen]);
 
 	const links = [
 		{ href: "/cabins", label: "Cabins" },
@@ -98,7 +110,7 @@ function NavigationMenu({ session }: NavigationMenuProps) {
 								{session?.user?.image ? (
 									<Link
 										href="/account"
-										className="flex flex-col items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-primary-800 hover:text-accent-400"
+										className="flex flex-col items-center gap-2 rounded-md px-2 py-2 transition-colors hover:bg-primary-800 hover:text-accent-400"
 										onClick={closeMenu}
 									>
 										<Image
@@ -109,6 +121,7 @@ function NavigationMenu({ session }: NavigationMenuProps) {
 											width={32}
 											height={32}
 										/>
+										<span className="text-sm">{session.user.name}</span>
 									</Link>
 								) : (
 									<Link

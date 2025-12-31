@@ -41,7 +41,7 @@ function SignInButton() {
 				className="flex items-center gap-6 border border-primary-300 px-10 py-4 text-lg font-medium disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				<Image
-					src="https://authjs.dev/img/providers/google.svg"
+					src="/google-logo.svg"
 					alt="Google logo"
 					height={24}
 					width={24}

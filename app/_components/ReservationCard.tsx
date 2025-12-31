@@ -44,13 +44,19 @@ function ReservationCard({ booking, onDelete }: ReservationCardProps) {
 	return (
 		<div className="flex flex-col overflow-hidden rounded-lg border border-primary-800 bg-primary-950 sm:flex-row">
 			<div className="relative h-52 w-full border-b border-primary-800 sm:h-auto sm:w-52 sm:border-b-0 sm:border-r md:w-60">
-				<Image
-					src={image ?? ""}
-					alt={`Cabin ${name}`}
-					fill
-					sizes="(min-width: 768px) 240px, (min-width: 640px) 208px, 100vw"
-					className="object-cover"
-				/>
+				{image ? (
+					<Image
+						src={image}
+						alt={`Cabin ${name}`}
+						fill
+						sizes="(min-width: 768px) 240px, (min-width: 640px) 208px, 100vw"
+						className="object-cover"
+					/>
+				) : (
+					<div className="flex h-full w-full items-center justify-center bg-primary-800 text-primary-400">
+						No image
+					</div>
+				)}
 			</div>
 
 			<div className="flex flex-grow flex-col gap-4 px-5 py-5 sm:px-6 sm:py-6">

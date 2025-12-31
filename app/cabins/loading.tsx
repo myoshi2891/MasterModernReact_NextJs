@@ -7,7 +7,7 @@ import Spinner from "@/app/_components/Spinner";
  */
 export default function Loading() {
 	return (
-		<div className="grid items-center justify-center">
+		<div className="grid place-items-center" role="status" aria-live="polite">
 			<Spinner />
 			<p className="text-xl text-primary-200">Loading cabin data...</p>
 		</div>

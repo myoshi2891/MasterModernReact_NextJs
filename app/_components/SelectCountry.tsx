@@ -23,10 +23,14 @@ async function SelectCountry({
 	className,
 }: SelectCountryProps) {
 	const countries = await getCountries();
-	const flag =
-		countries.find((country) => country.name === defaultCountry)?.flag ?? "";
+	const matchedCountry = countries.find(
+		(country) => country.name === defaultCountry
+	);
 
-	const defaultValue = defaultCountry ? `${defaultCountry}%${flag}` : "";
+	const defaultValue =
+		defaultCountry && matchedCountry
+			? `${defaultCountry}%${matchedCountry.flag}`
+			: "";
 
 	return (
 		<select

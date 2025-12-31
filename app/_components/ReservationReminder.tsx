@@ -29,6 +29,7 @@ function ReservationReminder() {
 					type="button"
 					className="rounded-full p-1 transition-colors duration-150 hover:bg-accent-600"
 					onClick={resetRange}
+					aria-label="Dismiss reservation reminder"
 				>
 					<XMarkIcon className="h-5 w-5" />
 				</button>
