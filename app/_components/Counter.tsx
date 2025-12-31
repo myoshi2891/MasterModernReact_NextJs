@@ -21,7 +21,7 @@ export default function Counter({ users }: CounterProps) {
 			<button
 				type="button"
 				onClick={() => setCount((c) => c + 1)}
-				aria-label="Increment counter"
+				aria-label={`Count: ${count}, click to increment`}
 			>
 				{count}
 			</button>
