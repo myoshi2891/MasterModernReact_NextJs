@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import CabinList from "../_components/CabinList";
 import Spinner from "../_components/Spinner";
-import Filter from "../_components/Filter";
+import Filter, { type FilterValue } from "../_components/Filter";
 import ReservationReminder from "../_components/ReservationReminder";
 
 export const revalidate = 3600;
@@ -11,7 +11,11 @@ export const metadata: Metadata = {
 	title: "Cabins",
 };
 
-type FilterType = "all" | "small" | "medium" | "large";
+const validFilters: FilterValue[] = ["all", "small", "medium", "large"];
+
+function isValidFilter(value: string): value is FilterValue {
+	return validFilters.includes(value as FilterValue);
+}
 
 interface PageProps {
 	searchParams: Promise<{ capacity?: string }>;
@@ -27,7 +31,8 @@ interface PageProps {
  */
 export default async function Page({ searchParams }: PageProps) {
 	const params = await searchParams;
-	const filter = (params?.capacity ?? "all") as FilterType;
+	const rawFilter = params?.capacity ?? "all";
+	const filter: FilterValue = isValidFilter(rawFilter) ? rawFilter : "all";
 
 	return (
 		<div className="mx-auto mt-6 max-w-6xl px-4 sm:mt-8 sm:px-6 lg:px-0">

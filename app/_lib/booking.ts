@@ -93,14 +93,13 @@ export function isRangeBooked(
   range: DateRange | null | undefined,
   bookedDates: Date[] | null | undefined
 ): boolean {
+  const from = range?.from;
+  const to = range?.to;
+  if (!from || !to) {
+    return false;
+  }
   const dates = bookedDates ?? [];
-  return Boolean(
-    range?.from &&
-      range?.to &&
-      dates.some((date) =>
-        isWithinInterval(date, { start: range.from!, end: range.to! })
-      )
-  );
+  return dates.some((date) => isWithinInterval(date, { start: from, end: to }));
 }
 
 /**

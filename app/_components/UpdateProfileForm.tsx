@@ -53,6 +53,7 @@ function UpdateProfileForm({ children, guest }: UpdateProfileFormProps) {
 			<div className="space-y-2">
 				<label htmlFor="fullName">Full name</label>
 				<input
+					type="text"
 					id="fullName"
 					disabled
 					defaultValue={fullName}
@@ -64,6 +65,7 @@ function UpdateProfileForm({ children, guest }: UpdateProfileFormProps) {
 			<div className="space-y-2">
 				<label htmlFor="email">Email address</label>
 				<input
+					type="email"
 					id="email"
 					disabled
 					defaultValue={email}
@@ -93,6 +95,7 @@ function UpdateProfileForm({ children, guest }: UpdateProfileFormProps) {
 			<div className="space-y-2">
 				<label htmlFor="nationalID">National ID number</label>
 				<input
+					type="text"
 					id="nationalID"
 					name="nationalID"
 					defaultValue={nationalID ?? ""}

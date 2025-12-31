@@ -13,8 +13,9 @@ interface LayoutProps {
  */
 export default function Layout({ children }: LayoutProps) {
 	return (
-		<div className="grid h-full grid-cols-[16rem_1fr] gap-12">
-			<SideNavigation /> <div className="py-1">{children}</div>
+		<div className="flex h-full flex-col gap-6 lg:grid lg:grid-cols-[16rem_1fr] lg:gap-12">
+			<SideNavigation />
+			<div className="py-1">{children}</div>
 		</div>
 	);
 }

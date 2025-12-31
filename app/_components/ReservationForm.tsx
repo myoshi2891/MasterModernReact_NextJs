@@ -13,7 +13,7 @@ interface CabinData {
 
 interface UserData {
 	name: string;
-	image: string;
+	image?: string;
 }
 
 interface ReservationFormProps {
@@ -31,6 +31,7 @@ interface ReservationFormProps {
 function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const { range, resetRange } = useReservation();
 	const { maxCapacity, id } = cabin;
+	const userImage = user.image;
 
 	const startDate = range.from;
 	const endDate = range.to;
@@ -54,14 +55,20 @@ function ReservationForm({ cabin, user }: ReservationFormProps) {
 				<p className="uppercase tracking-wide text-primary-200">Logged in as</p>
 
 				<div className="flex items-center gap-3">
-					<Image
-						referrerPolicy="no-referrer"
-						className="size-9 rounded-full object-cover"
-						src={user.image}
-						alt={user.name}
-						width={36}
-						height={36}
-					/>
+					{userImage ? (
+						<Image
+							referrerPolicy="no-referrer"
+							className="size-9 rounded-full object-cover"
+							src={userImage}
+							alt={user.name}
+							width={36}
+							height={36}
+						/>
+					) : (
+						<span className="flex size-9 items-center justify-center rounded-full bg-primary-600 text-sm font-medium text-primary-100">
+							{user.name.charAt(0).toUpperCase()}
+						</span>
+					)}
 					<p className="font-medium text-primary-100">{user.name}</p>
 				</div>
 			</div>

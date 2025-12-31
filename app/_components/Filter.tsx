@@ -3,6 +3,8 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+export type FilterValue = "all" | "small" | "medium" | "large";
+
 /**
  * Render a cabin-capacity filter UI that updates the URL's "capacity" query parameter without scrolling.
  *
@@ -32,7 +34,7 @@ function Filter() {
 	 *
 	 * @param filter - The capacity filter value to set (e.g., "all", "small", "medium", "large")
 	 */
-	function handleFilter(filter: string) {
+	function handleFilter(filter: FilterValue) {
 		const params = new URLSearchParams(searchParams);
 		params.set("capacity", filter);
 		router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -73,8 +75,8 @@ function Filter() {
 }
 
 interface ButtonProps {
-	filter: string;
-	handleFilter: (filter: string) => void;
+	filter: FilterValue;
+	handleFilter: (filter: FilterValue) => void;
 	activeFilter: string;
 	children: ReactNode;
 }

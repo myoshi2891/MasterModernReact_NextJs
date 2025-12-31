@@ -23,7 +23,7 @@ function CabinCard({ cabin }: CabinCardProps) {
 		<div className="flex flex-col overflow-hidden border border-primary-800 sm:flex-row">
 			<div className="relative h-56 w-full sm:h-auto sm:min-h-full sm:w-1/2">
 				<Image
-					src={image ?? ""}
+					src={image ?? "/placeholder-cabin.png"}
 					fill
 					alt={`Cabin ${name}`}
 					className="object-cover sm:border-r sm:border-primary-800"

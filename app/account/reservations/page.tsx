@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import ReservationList from "@/app/_components/ReservationList";
 import { auth } from "@/app/_lib/auth";
 import { getBookings } from "@/app/_lib/data-service";
@@ -14,12 +15,12 @@ export const dynamic = "force-dynamic";
  * Renders the reservations page for the currently authenticated user.
  *
  * @returns A JSX element containing the reservations UI: either a message linking to cabins when there are no bookings or a ReservationList when bookings exist.
- * @throws Error when there is no authenticated user with a `guestId`.
+ * @remarks Redirects to `/login` when there is no authenticated user with a `guestId`.
  */
 export default async function Page() {
 	const session = await auth();
 	if (!session?.user?.guestId) {
-		throw new Error("You must be logged in to view reservations");
+		redirect("/login");
 	}
 	const bookings = await getBookings(session.user.guestId);
 

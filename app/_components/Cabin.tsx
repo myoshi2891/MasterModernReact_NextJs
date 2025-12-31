@@ -9,8 +9,6 @@ import Image from "next/image";
 interface CabinData {
 	name: string;
 	maxCapacity: number;
-	regularPrice?: number;
-	discount?: number;
 	image: string | null;
 	description: string | null;
 }
