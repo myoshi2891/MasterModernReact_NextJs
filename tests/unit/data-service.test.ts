@@ -1,9 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "../msw/server";
 
+interface SupabaseQueryResult<T> {
+  data: T | null;
+  error: Error | null;
+}
+
+interface SupabaseChainMock {
+  from: Mock;
+}
+
 const { supabaseServerMock, notFoundMock } = vi.hoisted(() => ({
-  supabaseServerMock: { from: vi.fn() },
+  supabaseServerMock: { from: vi.fn() } as SupabaseChainMock,
   notFoundMock: vi.fn(() => {
     throw new Error("NEXT_NOT_FOUND");
   }),
@@ -29,7 +38,7 @@ describe("data-service", () => {
 
   it("returns cabins ordered by name", async () => {
     const cabins = [{ id: 1, name: "A" }];
-    const order = vi.fn().mockResolvedValue({ data: cabins, error: null });
+    const order = vi.fn().mockResolvedValue({ data: cabins, error: null } as SupabaseQueryResult<typeof cabins>);
     const select = vi.fn().mockReturnValue({ order });
     supabaseServerMock.from.mockReturnValue({ select });
 
@@ -48,7 +57,7 @@ describe("data-service", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     const order = vi
       .fn()
-      .mockResolvedValue({ data: null, error: new Error("fail") });
+      .mockResolvedValue({ data: null, error: new Error("fail") } as SupabaseQueryResult<null>);
     const select = vi.fn().mockReturnValue({ order });
     supabaseServerMock.from.mockReturnValue({ select });
 
@@ -62,7 +71,7 @@ describe("data-service", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     const single = vi
       .fn()
-      .mockResolvedValue({ data: null, error: new Error("fail") });
+      .mockResolvedValue({ data: null, error: new Error("fail") } as SupabaseQueryResult<null>);
     const eq = vi.fn().mockReturnValue({ single });
     const select = vi.fn().mockReturnValue({ eq });
     supabaseServerMock.from.mockReturnValue({ select });

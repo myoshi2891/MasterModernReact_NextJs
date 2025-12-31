@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import type { DateRange } from "react-day-picker";
 import {
   calculateCabinPrice,
   calculateNumNights,
@@ -63,14 +64,14 @@ describe("booking utils", () => {
   });
 
   it("returns false when the range is incomplete", () => {
-    const range = { from: new Date("2025-01-01T00:00:00.000Z") };
+    const range: DateRange = { from: new Date("2025-01-01T00:00:00.000Z") };
     const bookedDates = [new Date("2025-01-02T00:00:00.000Z")];
 
     expect(isRangeBooked(range, bookedDates)).toBe(false);
   });
 
   it("detects a booked date inside the range", () => {
-    const range = {
+    const range: DateRange = {
       from: new Date("2025-01-01T00:00:00.000Z"),
       to: new Date("2025-01-05T00:00:00.000Z"),
     };
@@ -80,7 +81,7 @@ describe("booking utils", () => {
   });
 
   it("ignores booked dates outside the range", () => {
-    const range = {
+    const range: DateRange = {
       from: new Date("2025-01-01T00:00:00.000Z"),
       to: new Date("2025-01-02T00:00:00.000Z"),
     };
@@ -90,7 +91,7 @@ describe("booking utils", () => {
   });
 
   it("treats missing booked dates as an empty list", () => {
-    const range = {
+    const range: DateRange = {
       from: new Date("2025-01-01T00:00:00.000Z"),
       to: new Date("2025-01-02T00:00:00.000Z"),
     };

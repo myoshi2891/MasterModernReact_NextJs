@@ -59,7 +59,7 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 #### 概要
 
-- **TypeScript Phase 2〜5 完了**
+- **TypeScript Phase 2〜6 完了**（完全TypeScript化達成）
 - CodeRabbitレビュー対応（6ラウンド）
 - アクセシビリティ・UX改善
 
@@ -123,8 +123,48 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - `npm run typecheck` ✅ No type errors
   - `npm run test:unit` ✅ 78 tests passed
   - `npm run test:component` ✅ 22 tests passed
-- 備考:
-  - `allowJs: true`はテストファイル（17個）のため維持（Phase 6待ち）
+
+#### TypeScript Phase 6: テストファイル移行（完了）
+
+- 対象ファイル:
+  - Unit tests（6ファイル）:
+    - `tests/unit/errors.test.js` → `.ts`
+    - `tests/unit/guest-utils.test.js` → `.ts`
+    - `tests/unit/booking-utils.test.js` → `.ts`
+    - `tests/unit/data-service.test.js` → `.ts`
+    - `tests/unit/api-cabins-route.test.js` → `.ts`
+    - `tests/unit/actions.test.js` → `.ts`
+  - Component tests（10ファイル）:
+    - `tests/component/app-states.test.jsx` → `.tsx`
+    - `tests/component/cabin-detail.test.jsx` → `.tsx`
+    - `tests/component/cabin-list.test.jsx` → `.tsx`
+    - `tests/component/delete-reservation.test.jsx` → `.tsx`
+    - `tests/component/profile-form.test.jsx` → `.tsx`
+    - `tests/component/reservation-card.test.jsx` → `.tsx`
+    - `tests/component/reservation-form.test.jsx` → `.tsx`
+    - `tests/component/reservation.test.jsx` → `.tsx`
+    - `tests/component/reservations-page.test.jsx` → `.tsx`
+    - `tests/component/text-expander.test.jsx` → `.tsx`
+  - E2E tests（1ファイル）:
+    - `tests/e2e/home.spec.js` → `.ts`
+- 変更内容:
+  - Vitest mock型の更新: `vi.fn<() => ReturnType>()` 新構文を採用
+  - `NextRequest` 型の使用（api-cabins-route.test.ts）
+  - Supabase型に合わせた `created_at` 必須プロパティの追加
+  - `Session` 型に `expires` プロパティを追加
+  - CommonJS `require` から ESM `import` への変換（E2Eテスト）
+  - `tsconfig.json` の `allowJs: false` を設定し純粋TypeScriptコードベース化
+- 結果:
+  - `npm run lint` ✅ No ESLint warnings or errors
+  - `npm run typecheck` ✅ No type errors
+  - `npm run test:unit` ✅ 78 tests passed
+  - `npm run test:component` ✅ 22 tests passed
+  - `npm run build` ✅ Build successful
+  - `find app tests -name "*.js" -o -name "*.jsx"` → 結果なし（完全移行確認）
+- 効果:
+  - 完全TypeScript化達成（app/ および tests/ に .js/.jsx ファイルなし）
+  - テストコードでも型安全性を確保
+  - `allowJs: false` により新規JSファイルの追加を防止
 
 #### CodeRabbitレビュー対応
 

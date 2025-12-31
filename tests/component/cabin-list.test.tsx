@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import CabinList from "../../app/_components/CabinList";
+import type { Cabin } from "@/types/domain";
 
 const { getCabinsMock } = vi.hoisted(() => ({
-  getCabinsMock: vi.fn(),
+  getCabinsMock: vi.fn<() => Promise<Cabin[]>>(),
 }));
 
 vi.mock("../../app/_lib/data-service", () => ({
@@ -14,6 +15,8 @@ const baseCabin = {
   regularPrice: 200,
   discount: 0,
   image: "/cabin.jpg",
+  created_at: "2024-01-01T00:00:00.000Z",
+  description: null,
 };
 
 describe("CabinList", () => {

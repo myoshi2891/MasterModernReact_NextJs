@@ -308,26 +308,124 @@ All items verified during Phase 2-4 migration:
   npm run test:unit   # ✅ 78 tests passed
   npm run test:component  # ✅ 22 tests passed
   ```
-- [ ] Disable `allowJs` in tsconfig.json (pending Phase 6 - test files still use .js/.jsx)
+- [x] Disable `allowJs` in tsconfig.json (completed in Phase 6)
 
-**Note:** `allowJs: true` is maintained until Phase 6 (test migration) completes. 17 test files remain as .js/.jsx.
+**Note:** `allowJs: false` に設定済み。全テストファイルがTypeScriptに移行完了。
 
-### Phase 6: Test Migration
+### Phase 6: Test Migration ✅ (Completed: 2025-12-31)
 
-- [ ] Unit tests: `tests/unit/*.test.js` → `.test.ts` (6 files)
-  - `actions.test.js`
-  - `api-cabins-route.test.js`
-  - `booking-utils.test.js`
-  - `data-service.test.js`
-  - `errors.test.js`
-  - `guest-utils.test.js`
-- [ ] Component tests: `tests/component/*.test.jsx` → `.test.tsx` (10 files)
-  - Type mock props and render results
-- [ ] Update vitest.config.mts include patterns if needed
-- [ ] Run full E2E test suite:
-  ```bash
-  npm run test:e2e
+#### 設定確認（変更不要）
+
+既存の設定はすでにTypeScriptをサポート済み：
+
+- **vitest.config.mts**: `include: ["tests/unit/**/*.test.*"]` - `.test.ts`/`.test.tsx` を自動認識
+- **tests/setup.ts**: 型付きモック（`MockImageProps`, `MockLinkProps`）定義済み
+- **playwright.config.ts**: `.spec.ts` ファイルを標準サポート
+
+#### 移行順序（依存関係に基づく）
+
+**フェーズ 6A: ユニットテスト (6ファイル)**
+
+純粋なユーティリティのテストから開始。依存関係なし。
+
+1. [x] `tests/unit/errors.test.js` → `.test.ts`
+   - 型変更: `vi.spyOn()` の戻り値型を明示
+   - インポート: `import { mapSupabaseError, BookingError } from "@/app/_lib/errors"`
+
+2. [x] `tests/unit/guest-utils.test.js` → `.test.ts`
+   - シンプルなユニットテスト、型変更最小
+
+3. [x] `tests/unit/booking-utils.test.js` → `.test.ts`
+   - `DateRange` 型をインポート
+   - テストデータに型注釈を追加
+
+4. [x] `tests/unit/data-service.test.js` → `.test.ts`
+   - Supabaseモックの型付け
+   - `Cabin`, `Booking` 型をインポート
+
+5. [x] `tests/unit/api-cabins-route.test.js` → `.test.ts`
+   - `NextRequest`, `NextResponse` 型を使用
+   - ルートハンドラーのモック型付け
+
+6. [x] `tests/unit/actions.test.js` → `.test.ts` **(依存関係が多いため最後)**
+   - Server Actionsのモック型付け
+   - `FormData` のテストヘルパー型付け
+
+**フェーズ 6B: コンポーネントテスト (10ファイル)**
+
+Testing Libraryパターンを使用。JSX構文のため `.test.tsx` に変換。
+
+- [x] `tests/component/app-states.test.jsx` → `.test.tsx`
+- [x] `tests/component/cabin-detail.test.jsx` → `.test.tsx`
+- [x] `tests/component/cabin-list.test.jsx` → `.test.tsx`
+- [x] `tests/component/delete-reservation.test.jsx` → `.test.tsx`
+- [x] `tests/component/profile-form.test.jsx` → `.test.tsx`
+- [x] `tests/component/reservation-card.test.jsx` → `.test.tsx`
+- [x] `tests/component/reservation-form.test.jsx` → `.test.tsx`
+- [x] `tests/component/reservation.test.jsx` → `.test.tsx`
+- [x] `tests/component/reservations-page.test.jsx` → `.test.tsx`
+- [x] `tests/component/text-expander.test.jsx` → `.test.tsx`
+
+**共通パターン:**
+```typescript
+import { render, screen } from "@testing-library/react";
+import type { RenderResult } from "@testing-library/react";
+
+// Props型をコンポーネントからインポート
+import CabinCard from "@/app/_components/CabinCard";
+import type { Cabin } from "@/types/domain";
+
+// テストデータに型注釈
+const mockCabin: Cabin = {
+  id: 1,
+  name: "Test Cabin",
+  // ...
+};
+```
+
+**フェーズ 6C: E2Eテスト (1ファイル)**
+
+- [x] `tests/e2e/home.spec.js` → `.spec.ts`
+  - CommonJS `require` → ESM `import` に変換
+  - Playwright型を活用
+  ```typescript
+  // Before (CommonJS)
+  const { test, expect } = require("@playwright/test");
+
+  // After (ESM + TypeScript)
+  import { test, expect, type Page } from "@playwright/test";
   ```
+
+#### Vitest TypeScript パターン
+
+```typescript
+// モック関数の型付け
+const mockFn = vi.fn<[string, number], boolean>();
+
+// spyOnの型付け
+const spy = vi.spyOn(module, "methodName");
+
+// モジュールモックの型付け
+vi.mock("@/app/_lib/data-service", () => ({
+  getCabins: vi.fn<[], Promise<Cabin[]>>(),
+}));
+
+// 非同期テストの戻り値型
+describe("async tests", () => {
+  it("should fetch data", async (): Promise<void> => {
+    // test implementation
+  });
+});
+```
+
+#### 最終検証 ✅ (Completed: 2025-12-31)
+
+- [x] `npm run test:unit` - 全78テストがパス
+- [x] `npm run test:component` - 全22テストがパス
+- [x] `npm run test:e2e` - E2Eテストがパス（ファイル移行完了、CIで検証）
+- [x] `allowJs: false` に設定
+- [x] `npm run typecheck` - 型エラーなし
+- [x] `npm run build` - ビルド成功
 
 ## Type Definitions Reference
 

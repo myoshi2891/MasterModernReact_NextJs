@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { DateRange } from "react-day-picker";
+import type { Cabin } from "@/types/domain";
+
+interface ReservationState {
+  range: DateRange;
+  resetRange: ReturnType<typeof vi.fn>;
+  setRange: ReturnType<typeof vi.fn>;
+}
 
 const { reservationState, createBookingMock } = vi.hoisted(() => ({
   reservationState: {
     range: { from: undefined, to: undefined },
     resetRange: vi.fn(),
     setRange: vi.fn(),
-  },
+  } as ReservationState,
   createBookingMock: vi.fn(),
 }));
 
@@ -18,13 +26,19 @@ vi.mock("../../app/_lib/actions", () => ({
   createBooking: createBookingMock,
 }));
 
+interface SubmitButtonProps {
+  children: React.ReactNode;
+  pendingLabel?: string;
+  [key: string]: unknown;
+}
+
 vi.mock("../../app/_components/SubmitButton", () => ({
-  default: ({ children, pendingLabel, ...props }) => (
+  default: ({ children, pendingLabel, ...props }: SubmitButtonProps) => (
     <button {...props}>{children}</button>
   ),
 }));
 
-const baseCabin = {
+const baseCabin: Pick<Cabin, "id" | "name" | "maxCapacity" | "regularPrice" | "discount"> = {
   id: 1,
   name: "Sequoia",
   maxCapacity: 3,
@@ -32,7 +46,12 @@ const baseCabin = {
   discount: 20,
 };
 
-const baseUser = {
+interface BaseUser {
+  name: string;
+  image: string;
+}
+
+const baseUser: BaseUser = {
   name: "Test User",
   image: "/avatar.png",
 };
@@ -41,7 +60,7 @@ async function renderForm() {
   const { default: ReservationForm } = await import(
     "../../app/_components/ReservationForm"
   );
-  return render(<ReservationForm cabin={baseCabin} user={baseUser} />);
+  return render(<ReservationForm cabin={baseCabin as Cabin} user={baseUser} />);
 }
 
 describe("ReservationForm", () => {
@@ -86,7 +105,7 @@ describe("ReservationForm", () => {
     const guestsSelect = screen.getByLabelText(/how many guests\?/i);
     expect(guestsSelect).toBeRequired();
 
-    const options = screen.getAllByRole("option");
+    const options = screen.getAllByRole("option") as HTMLOptionElement[];
     const values = options.map((option) => option.value);
 
     expect(values).toEqual(["", "1", "2", "3"]);
