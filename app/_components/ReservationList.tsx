@@ -27,7 +27,12 @@ function ReservationList({ bookings }: ReservationListProps) {
 
 	async function handleDelete(bookingId: number) {
 		optimisticDelete(bookingId);
-		await deleteBooking(bookingId);
+		try {
+			await deleteBooking(bookingId);
+		} catch (error) {
+			// Server Action handles revalidation, re-throw for error boundary
+			throw error;
+		}
 	}
 
 	return (

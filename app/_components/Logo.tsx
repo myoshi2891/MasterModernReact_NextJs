@@ -12,8 +12,8 @@ function Logo() {
 		<Link href="/" className="z-10 flex items-center gap-4">
 			<Image
 				src={logo}
-				height="60"
-				width="60"
+				height={60}
+				width={60}
 				quality={100}
 				priority
 				sizes="60px"

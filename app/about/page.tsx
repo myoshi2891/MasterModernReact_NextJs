@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import image1 from "@/public/about-1.jpg";
 import image2 from "@/public/about-2.jpg";
@@ -21,8 +22,8 @@ export const metadata: Metadata = {
 export default async function Page() {
 	const cabins = await getCabins();
 	return (
-		<div className="grid grid-cols-5 items-center gap-x-24 gap-y-32 text-lg">
-			<div className="col-span-3">
+		<div className="grid grid-cols-1 items-center gap-x-24 gap-y-16 text-lg md:grid-cols-5 md:gap-y-32">
+			<div className="md:col-span-3">
 				<h1 className="mb-10 text-4xl font-medium text-accent-400">
 					Welcome to The Wild Oasis
 				</h1>
@@ -49,7 +50,7 @@ export default async function Page() {
 				</div>
 			</div>
 
-			<div className="relative col-span-2 aspect-square">
+			<div className="relative aspect-square md:col-span-2">
 				<Image
 					src={image1}
 					fill
@@ -61,7 +62,7 @@ export default async function Page() {
 				/>
 			</div>
 
-			<div className="relative col-span-2 aspect-square">
+			<div className="relative aspect-square md:col-span-2">
 				<Image
 					src={image2}
 					fill
@@ -72,7 +73,7 @@ export default async function Page() {
 				/>
 			</div>
 
-			<div className="col-span-3">
+			<div className="md:col-span-3">
 				<h1 className="mb-10 text-4xl font-medium text-accent-400">
 					Managed by our family since 1962
 				</h1>
@@ -94,12 +95,12 @@ export default async function Page() {
 					</p>
 
 					<div>
-						<a
+						<Link
 							href="/cabins"
 							className="mt-4 inline-block bg-accent-500 px-8 py-5 text-lg font-semibold text-primary-800 transition-all hover:bg-accent-600"
 						>
 							Explore our luxury cabins
-						</a>
+						</Link>
 					</div>
 				</div>
 			</div>

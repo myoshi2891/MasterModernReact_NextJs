@@ -24,9 +24,13 @@ export async function generateMetadata({
 	if (process.env.SKIP_SSG === "true") {
 		return { title: "Cabin" };
 	}
-	const { cabinId } = await params;
-	const { name } = await getCabin(cabinId);
-	return { title: `Cabin ${name}` };
+	try {
+		const { cabinId } = await params;
+		const cabin = await getCabin(cabinId);
+		return { title: `Cabin ${cabin?.name ?? ""}` };
+	} catch {
+		return { title: "Cabin" };
+	}
 }
 
 /**

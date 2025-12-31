@@ -18,7 +18,13 @@ export default function Counter({ users }: CounterProps) {
 	return (
 		<div>
 			<p>There are {users.length} users</p>
-			<button onClick={() => setCount((c) => c + 1)}>{count}</button>
+			<button
+				type="button"
+				onClick={() => setCount((c) => c + 1)}
+				aria-label="Increment counter"
+			>
+				{count}
+			</button>
 		</div>
 	);
 }
