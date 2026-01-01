@@ -26,6 +26,8 @@ export interface CreateBookingData {
   endDate: string | Date | null;
   numNights: number;
   cabinId: string | number;
+  /** Client-generated UUID for idempotency (prevents duplicate submissions) */
+  clientRequestId?: string;
 }
 
 /**
@@ -205,6 +207,9 @@ export async function createBooking(
     isPaid: false,
     hasBreakfast: false,
     status: "unconfirmed" as const,
+    ...(bookingData.clientRequestId && {
+      clientRequestId: bookingData.clientRequestId,
+    }),
   };
 
   const { error } = await supabaseServer.from("bookings").insert([newBooking]);

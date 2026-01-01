@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { calculateNumNights } from "@/app/_lib/booking";
 import { useReservation } from "./ReservationContext";
 import { createBooking, type CreateBookingData } from "../_lib/actions";
@@ -40,11 +41,20 @@ function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const numNights =
 		startDate && endDate ? calculateNumNights(startDate, endDate) : 0;
 
+	// Generate a unique client request ID for idempotency
+	// This ID stays the same for a given date range + cabin combination
+	// and regenerates when the user changes dates
+	const clientRequestId = useMemo(() => {
+		if (!startDate || !endDate) return undefined;
+		return crypto.randomUUID();
+	}, [startDate?.getTime(), endDate?.getTime(), id]);
+
 	const bookingData: CreateBookingData = {
 		startDate: startDate ?? null,
 		endDate: endDate ?? null,
 		numNights,
 		cabinId: id,
+		clientRequestId,
 	};
 
 	const createBookingWithData = createBooking.bind(null, bookingData);

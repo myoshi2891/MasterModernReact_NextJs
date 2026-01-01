@@ -9,7 +9,7 @@
 - [x] migration 適用（Supabase SQL Editorで実行）（2025-12-25完了）
 - [x] トリガー例外の SQLSTATE を決定（P0001 + メッセージ）（保留: トリガーなしで運用）
 - [x] `createBooking` のエラーコード変換（23P01/23514/23505/P0001）（2025-12-28完了）
-- [ ] idempotency key の導入可否を決定（将来検討）
+- [x] idempotency key の導入可否を決定（2026-01-01完了: 導入決定、実装完了）
 - [x] ローカル環境で並列予約テストを実施（2026-01-01完了: Docker Postgres 17）
 - [x] パフォーマンス影響の計測（2026-01-01完了: Docker Postgres 17でベンチマーク実施）
 - [x] 監視・ログの文言を定義（PII なし）（2025-12-28完了: errors.jsで実装）
@@ -37,9 +37,13 @@
 - [x] `startDate >= endDate` で拒否される（2026-01-01検証: 23514エラー）
 - [x] `numGuests = 0` で拒否される（2026-01-01検証: 23514エラー）
 
+### idempotency key（実装済み）
+- [x] clientRequestId カラム追加（2026-01-01: migration作成）
+- [x] クライアント側でUUID生成（2026-01-01: ReservationForm.tsx）
+- [ ] idempotency key の重複で 409（migration適用後に検証予定）
+
 ### 未実装（将来対応）
 - [ ] `numGuests > maxCapacity` で拒否される（トリガー未実装のため未検証）
-- [ ] idempotency key の重複で 409（未実装のため未検証）
 - [ ] CAPACITY_EXCEEDED の P0001 が 400 に変換される（トリガー未実装のため未検証）
 
 ### ローカル並列予約テスト結果（2026-01-01）

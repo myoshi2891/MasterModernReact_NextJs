@@ -44,7 +44,12 @@ next-env.d.ts
 .env
 .vscode
 config.toml
-supabase
+
+# Supabase CLI generated files (but keep migrations)
+supabase/.branches/
+supabase/.temp/
+.supabase/
+!supabase/migrations/
 
 # Kilo Code / Spec Kit cache
 .kilocode/.cache/
