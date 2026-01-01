@@ -14,6 +14,7 @@
 - [x] パフォーマンス影響の計測（2026-01-01完了: Docker Postgres 17でベンチマーク実施）
 - [x] 監視・ログの文言を定義（PII なし）（2025-12-28完了: errors.jsで実装）
 - [x] 409 連発時の運用判断基準（混雑/システム異常）を整理（2026-01-01完了: operations.md作成）
+- [x] structured logging 実装（2026-01-01完了: logger.ts + actions.ts統合）
 
 ## 依存関係
 - Supabase ローカル環境 or ステージング環境
