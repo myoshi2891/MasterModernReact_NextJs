@@ -5,6 +5,15 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | fc06cc2 | 2026-01-01 | chore: migrate from npm to bun package manager | npm→bun移行 |
+| 完了 | a09e76b | 2026-01-01 | feat: implement structured logging for booking conflicts | 409構造化ログ実装 |
+| 完了 | fbcc3ec | 2026-01-01 | feat: implement idempotency key for booking duplicate prevention | 二重送信防止 |
+| 完了 | c9e30fe | 2026-01-01 | docs: enhance 409 log format with diagnostic fields | 409ログ仕様拡充 |
+| 完了 | 0c44197 | 2026-01-01 | docs: add 409 Conflict operational guidelines | 運用ガイドライン作成 |
+| 完了 | 0cfa723 | 2026-01-01 | docs: add EXCLUDE constraint performance benchmark results | パフォーマンス計測結果 |
+| 完了 | c57c9eb | 2026-01-01 | fix: correct garbled text in progress.md | 文字化け修正 |
+| 完了 | 8c8dc26 | 2026-01-01 | docs: align test perspectives with test results table | テスト観点整合 |
+| 完了 | 5ad2f0a | 2026-01-01 | test: complete local parallel booking constraint tests | ローカル並列予約テスト完了 |
 | 完了 | 8f3bdaf | 2025-12-31 | fix: address CodeRabbit review feedback for test files | テストファイルレビュー対応 |
 | 完了 | 58d0c7f | 2025-12-31 | refactor: complete TypeScript Phase 6 - migrate all tests to TypeScript | **TypeScript Phase 6 完了** |
 | 完了 | 988f063 | 2025-12-31 | fix: address CodeRabbit review feedback (round 5) | Counter動的aria-label、TextExpander改善 |
@@ -402,13 +411,13 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
   - タスク分解の進捗を更新（エラーコード変換完了、監視ログ定義完了）
   - 本セクション（2025-12-28）を追加
 
-#### 4. 今後の残タスク（specs/002関連）
+#### 4. specs/002関連タスク（全完了）
 
-- [ ] idempotency key の導入可否を決定
-- [x] ~~ローカル Supabase で並列予約テストを実施~~ → 本番DBで制約動作を確認（2025-12-30）
-  - EXCLUDE制約 `bookings_no_overlap` が正常動作（エラーコード `23P01`）
-- [ ] パフォーマンス影響の計測（ステージング環境）
-- [ ] 409 連発時の運用判断基準を整理
+- [x] idempotency key の導入 → 2026-01-01完了（clientRequestId、UUID生成）
+- [x] ~~ローカル Supabase で並列予約テストを実施~~ → 2026-01-01完了（Docker Postgres 17）
+- [x] パフォーマンス影響の計測 → 2026-01-01完了（ベンチマーク実施）
+- [x] 409 連発時の運用判断基準を整理 → 2026-01-01完了（operations.md作成）
+- [x] structured logging 実装 → 2026-01-01完了（logger.ts + actions.ts統合）
 
 ### 2025-12-24 変更内容まとめ（詳細）
 

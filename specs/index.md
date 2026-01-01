@@ -1,6 +1,6 @@
 # 仕様書インデックス
 
-> 更新履歴: 2025-12-24 初版策定、2025-12-31 TypeScript Phase 6 完了
+> 更新履歴: 2025-12-24 初版策定、2025-12-31 TypeScript Phase 6 完了、2026-01-01 specs/002 全タスク完了・004/005 完了
 
 このディレクトリには、機能ごとの仕様書 (spec/plan/tasks) を管理します。
 
@@ -18,8 +18,10 @@
 | ID | 名称 | Status | 概要 |
 |----|------|--------|------|
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
-| 002 | [booking-concurrency-control](002-booking-concurrency-control/) | DB制約実装完了 | 予約の同時実行対策（重複予約防止） |
+| 002 | [booking-concurrency-control](002-booking-concurrency-control/) | **完了** | 予約の同時実行対策（重複予約防止） |
 | 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 6 完了** | JSからTSへの段階的移行 |
+| 004 | npm-to-bun | **完了** | npmからBunへの移行 |
+| 005 | structured-logging | **完了** | 409 Conflict の構造化ログ導入 |
 
 ## 詳細
 
@@ -69,12 +71,50 @@
   - `types/env.d.ts` - 環境変数型定義
   - `types/server-actions.ts` - Server Action ヘルパー
 
+### 004: npm-to-bun
+
+- **目的**: パッケージマネージャーを npm から Bun へ移行
+- **現在のステータス**: **完了**（2026-01-01）
+- **変更内容**:
+  - `Dockerfile`: ベースイメージを `oven/bun:1.3-debian` に変更
+  - `.github/workflows/ci.yml`: `setup-bun` アクション追加、全コマンドを bun へ
+  - `CLAUDE.md`: クイックスタート/コマンドを bun に更新
+  - `package-lock.json` → `bun.lock` へ置換
+- **メリット**:
+  - インストール速度の向上
+  - CI/CD パイプラインの高速化
+  - 依存関係解決の改善
+
+### 005: structured-logging
+
+- **目的**: 409 Conflict 発生時の構造化ログ導入（運用・監視強化）
+- **現在のステータス**: **完了**（2026-01-01）
+- **関連ファイル**:
+  - `app/_lib/logger.ts` - StructuredLogger クラス
+  - `app/_lib/actions.ts` - createBooking へのログ統合
+  - `specs/002-booking-concurrency-control/operations.md` - ログ仕様定義
+- **主要機能**:
+  - PII-safe な hashedUserId（SHA-256 先頭16文字）
+  - requestId によるトレーサビリティ
+  - responseTimeMs によるパフォーマンス計測
+  - JSON 構造化出力（CloudWatch/Datadog 連携対応）
+- **ログフォーマット例**:
+  ```json
+  {
+    "timestamp": "2026-01-01T12:00:00.000Z",
+    "level": "warn",
+    "event": "BOOKING_CONFLICT",
+    "hashedUserId": "sha256:abc123...",
+    "cabinId": 1,
+    "startDate": "2026-01-15",
+    "endDate": "2026-01-20",
+    "errorDetail": "23P01:conflicting key value"
+  }
+  ```
+
 ## 今後追加予定
 
-| ID | 名称 | 優先度 | 概要 |
-|----|------|--------|------|
-| 004 | npm-to-bun | 低 | npmからBunへの移行 |
-| 005 | structured-logging | 低 | 構造化ログの導入 |
+現在、新規仕様の追加予定はありません。
 
 ## テンプレート
 
