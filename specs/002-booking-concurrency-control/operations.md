@@ -57,14 +57,44 @@
   "timestamp": "2026-01-01T12:00:00.000Z",
   "level": "warn",
   "event": "BOOKING_CONFLICT",
+  "hashedUserId": "sha256:a1b2c3...",
   "cabinId": 123,
   "startDate": "2026-01-15",
   "endDate": "2026-01-18",
-  "requestId": "req_abc123"
+  "requestId": "req_abc123",
+  "responseTimeMs": 45,
+  "cabinAvailability": "appeared_available",
+  "errorDetail": "23P01:bookings_no_overlap"
 }
 ```
 
-**注意**: PIIを含まないこと（guestId、email、名前は記録しない）
+### PII方針
+
+| フィールド | 記録可否 | 理由 |
+|-----------|---------|------|
+| guestId | ❌ | 直接的なユーザー識別子 |
+| email | ❌ | PII |
+| 氏名 | ❌ | PII |
+| hashedUserId | ✅ | 一方向ハッシュ（SHA-256）のため逆変換不可、相関分析のみ可能 |
+| cabinId | ✅ | システム内部ID |
+| requestId | ✅ | リクエスト追跡用 |
+| responseTimeMs | ✅ | レスポンス時間（遅延がコンフリクトに寄与しているか判断） |
+| cabinAvailability | ✅ | リクエスト前のキャビン表示状態（キャッシュ不整合検出用） |
+| errorDetail | ✅ | SQLSTATE:制約名（DBエラーとアプリバグの切り分け用） |
+
+**hashedUserIdの生成例**:
+```typescript
+import { createHash } from "crypto";
+
+function hashUserId(guestId: number): string {
+  return `sha256:${createHash("sha256")
+    .update(`${guestId}:${process.env.HASH_SALT}`)
+    .digest("hex")
+    .substring(0, 16)}`;
+}
+```
+
+**注意**: `HASH_SALT`は環境変数で管理し、ソースコードにハードコードしないこと
 
 ### ダッシュボード推奨項目
 
@@ -96,12 +126,26 @@
    ```bash
    # 直近1時間の409をキャビン別に集計
    grep "BOOKING_CONFLICT" app.log | jq -r '.cabinId' | sort | uniq -c | sort -rn
+
+   # 直近1時間の409をユーザー別に集計（hashedUserIdで相関）
+   grep "BOOKING_CONFLICT" app.log | jq -r '.hashedUserId' | sort | uniq -c | sort -rn | head -20
+
+   # キャッシュ不整合の検出（appeared_availableなのに409）
+   grep "BOOKING_CONFLICT" app.log | jq 'select(.cabinAvailability == "appeared_available")' | wc -l
+
+   # レスポンス遅延の確認（100ms以上は遅延）
+   grep "BOOKING_CONFLICT" app.log | jq 'select(.responseTimeMs > 100) | .responseTimeMs' | sort -rn | head -10
+
+   # エラー種別の集計（DBエラー vs アプリエラー）
+   grep "BOOKING_CONFLICT" app.log | jq -r '.errorDetail' | sort | uniq -c | sort -rn
    ```
 
 2. 以下を確認:
-   - 同一ユーザーからの連続リクエストはないか
+   - 同一hashedUserIdからの連続リクエストはないか（5回以上は異常）
    - 特定のキャビン/日程に集中していないか
-   - 空き状況キャッシュとDBに不整合はないか
+   - `cabinAvailability == "appeared_available"` が多い場合はキャッシュ不整合
+   - `responseTimeMs` が高い場合はDB負荷を確認
+   - `errorDetail` が想定外の場合はアプリバグの可能性
 
 3. 原因特定後:
    - 混雑: 経過観察、必要に応じてキャッシュTTL調整
@@ -134,7 +178,7 @@
 
 ### システム異常の特徴
 
-- ⚠️ 同一ユーザーから短時間に複数回
+- ⚠️ 同一hashedUserIdから短時間に複数回（10分間5回以上）
 - ⚠️ 特定条件で100%失敗
 - ⚠️ 時間が経っても収束しない
 - ⚠️ 空き表示と実際の状態が乖離
