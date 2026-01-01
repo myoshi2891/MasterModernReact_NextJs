@@ -11,6 +11,7 @@ import {
 import { getBookings } from "./data-service";
 import { mapSupabaseError } from "./errors";
 import { normalizeNationalId } from "./guest";
+import { logger, generateRequestId } from "./logger";
 import { supabaseServer } from "./supabaseServer";
 
 function normalizeObservations(value: FormDataEntryValue | null): string {
@@ -149,6 +150,9 @@ export async function createBooking(
   bookingData: CreateBookingData,
   formData: FormData
 ): Promise<void> {
+  const requestId = generateRequestId();
+  const startTime = performance.now();
+
   const session = await auth();
   if (!session) {
     throw new Error("You must be logged in");
@@ -215,7 +219,24 @@ export async function createBooking(
   const { error } = await supabaseServer.from("bookings").insert([newBooking]);
 
   if (error) {
-    throw mapSupabaseError(error);
+    const responseTimeMs = Math.round(performance.now() - startTime);
+    const mappedError = mapSupabaseError(error);
+
+    // Log conflict events (23P01: exclusion violation, 23505: unique violation)
+    if (error.code === "23P01" || error.code === "23505") {
+      logger.bookingConflict({
+        guestId,
+        cabinId: Number(cabinId),
+        startDate: startDate!,
+        endDate: endDate!,
+        errorDetail: `${error.code}:${error.message?.substring(0, 50) ?? "unknown"}`,
+        requestId,
+        responseTimeMs,
+        cabinAvailability: "appeared_available",
+      });
+    }
+
+    throw mappedError;
   }
 
   revalidatePath("/account/reservations");

@@ -14,19 +14,19 @@
 
 ```bash
 # 依存関係インストール
-npm install
+bun install
 
 # 開発サーバー起動
-npm run dev
+bun run dev
 
 # テスト実行
-npm run test:unit       # ユニットテスト
-npm run test:component  # コンポーネントテスト
-npm run test:e2e        # E2Eテスト (Playwright)
-npm run test:all        # 全テスト
+bun run test:unit       # ユニットテスト
+bun run test:component  # コンポーネントテスト
+bun run test:e2e        # E2Eテスト (Playwright)
+bun run test:all        # 全テスト
 
 # ビルド
-npm run build
+bun run build
 ```
 
 ## ディレクトリ構造
@@ -164,10 +164,10 @@ NEXTAUTH_SECRET=
 
 ```bash
 # Lint
-npm run lint
+bun run lint
 
 # 型チェック (TypeScript移行後)
-npm run typecheck
+bun run typecheck
 
 # Supabaseローカル
 supabase start
