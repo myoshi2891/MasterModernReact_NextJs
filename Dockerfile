@@ -1,11 +1,17 @@
-FROM node:20.19.0-bullseye
+FROM oven/bun:1.3-debian AS base
 
 WORKDIR /app
 
+# Install Node.js for Next.js compatibility and gosu for user switching
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends curl gosu ca-certificates && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install dependencies with cache leverage
-RUN apt-get update -y && apt-get install -y --no-install-recommends gosu=1.14-* && rm -rf /var/lib/apt/lists/*
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 # Copy the rest of the application source
 COPY . .
@@ -24,4 +30,4 @@ COPY docker/start-dev.sh /usr/local/bin/start-dev.sh
 RUN chmod +x /usr/local/bin/start-dev.sh
 
 ENTRYPOINT ["/usr/local/bin/start-dev.sh"]
-CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+CMD ["bun", "run", "dev", "--", "--hostname", "0.0.0.0"]

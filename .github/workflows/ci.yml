@@ -30,28 +30,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
       - name: Lint
-        run: npm run lint
+        run: bun run lint
       - name: Type check
-        run: npm run typecheck
+        run: bun run typecheck
       - name: Unit tests
-        run: npm run test:unit
+        run: bun run test:unit
       - name: Component tests
-        run: npm run test:component
+        run: bun run test:component
       - name: Build
         env:
           SKIP_SSG: "true"
-        run: npm run build
+        run: bun run build
       - name: Smoke test
         run: |
-          npm run start -- --hostname localhost --port 3000 > server.log 2>&1 &
+          bun run start -- --hostname localhost --port 3000 > server.log 2>&1 &
           server_pid=$!
           echo "Server PID: $server_pid"
           sleep 3
@@ -78,21 +81,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20.19.6
-          cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
       - name: Build
         env:
           SKIP_SSG: "true"
-        run: npm run build
+        run: bun run build
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: bun run test:e2e
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
