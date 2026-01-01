@@ -2,6 +2,9 @@ FROM oven/bun:1.3-debian AS base
 
 WORKDIR /app
 
+# Set shell with pipefail for safer pipe handling
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install Node.js for Next.js compatibility and gosu for user switching
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends curl gosu ca-certificates && \

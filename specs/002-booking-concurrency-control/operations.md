@@ -75,7 +75,7 @@
 | guestId | ❌ | 直接的なユーザー識別子 |
 | email | ❌ | PII |
 | 氏名 | ❌ | PII |
-| hashedUserId | ✅ | 一方向ハッシュ（SHA-256）のため逆変換不可、相関分析のみ可能 |
+| hashedUserId | ✅ | 一方向ハッシュ（SHA-256）のため逆変換不可、相関分析のみ可能。※HASH_SALTは32バイト以上のランダム値を使用 |
 | cabinId | ✅ | システム内部ID |
 | requestId | ✅ | リクエスト追跡用 |
 | responseTimeMs | ✅ | レスポンス時間（遅延がコンフリクトに寄与しているか判断） |
@@ -87,6 +87,8 @@
 import { createHash } from "crypto";
 
 function hashUserId(guestId: number): string {
+  // ログ相関分析用。監視ダッシュボードで同一ユーザーの連続409を検出するため、
+  // SHA-256の先頭16文字（64ビット）を使用。認証には使用しないため衝突許容。
   return `sha256:${createHash("sha256")
     .update(`${guestId}:${process.env.HASH_SALT}`)
     .digest("hex")
@@ -94,7 +96,11 @@ function hashUserId(guestId: number): string {
 }
 ```
 
-**注意**: `HASH_SALT`は環境変数で管理し、ソースコードにハードコードしないこと
+**HASH_SALT要件**:
+- 環境変数で管理し、ソースコードにハードコードしないこと
+- 最低32バイト以上の暗号学的にセキュアなランダム値を使用
+- 生成例: `openssl rand -hex 32`
+- 本番環境では必須（未設定時はアプリ起動エラー）
 
 ### ダッシュボード推奨項目
 
@@ -144,7 +150,9 @@ function hashUserId(guestId: number): string {
    - 同一hashedUserIdからの連続リクエストはないか（5回以上は異常）
    - 特定のキャビン/日程に集中していないか
    - `cabinAvailability == "appeared_available"` が多い場合はキャッシュ不整合
-   - `responseTimeMs` が高い場合はDB負荷を確認
+   - `responseTimeMs` が高い場合はDB負荷を確認:
+     - 100-500ms: 一時的な負荷の可能性、監視継続
+     - 500ms以上: DB接続プール飽和の可能性、接続数上限またはクエリ最適化を検討
    - `errorDetail` が想定外の場合はアプリバグの可能性
 
 3. 原因特定後:
@@ -190,12 +198,13 @@ function hashUserId(guestId: number): string {
 - [x] DB制約による重複防止（EXCLUDE制約）
 - [x] エラーコードの適切なマッピング（errors.ts）
 - [x] ユーザーフレンドリーなエラーメッセージ
+- [x] idempotency keyによる二重送信防止（clientRequestId）
+- [x] 構造化ログ出力（logger.ts）
 
 ### 推奨（将来対応）
 
 - [ ] クライアント側での楽観的ロック表示
 - [ ] 予約前の空き状況リアルタイム更新（WebSocket）
-- [ ] idempotency keyによる二重送信防止
 - [ ] レート制限の導入（1ユーザー/分 N回）
 
 ## 関連ドキュメント

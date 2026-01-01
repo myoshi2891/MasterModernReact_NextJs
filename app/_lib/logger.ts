@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 
 /**
  * Log levels for structured logging.
@@ -49,9 +49,15 @@ export type LogEntry = BookingConflictLogEntry | GenericLogEntry;
  * @returns Hashed user ID in format "sha256:xxxxxxxx..."
  */
 export function hashUserId(guestId: number): string {
-  const salt = process.env.HASH_SALT ?? "default-salt-change-in-production";
+  const salt = process.env.HASH_SALT;
+  if (!salt && process.env.NODE_ENV === "production") {
+    throw new Error("HASH_SALT environment variable must be set in production");
+  }
+  const effectiveSalt = salt ?? "default-salt-for-development-only";
+
+  // SHA-256の先頭16文字（64ビット）を使用。ログ相関分析用であり、認証には使用しない
   return `sha256:${createHash("sha256")
-    .update(`${guestId}:${salt}`)
+    .update(`${guestId}:${effectiveSalt}`)
     .digest("hex")
     .substring(0, 16)}`;
 }
@@ -62,7 +68,7 @@ export function hashUserId(guestId: number): string {
  * @returns Request ID in format "req_xxxxxxxx"
  */
 export function generateRequestId(): string {
-  return `req_${crypto.randomUUID().substring(0, 8)}`;
+  return `req_${randomUUID().substring(0, 8)}`;
 }
 
 /**
