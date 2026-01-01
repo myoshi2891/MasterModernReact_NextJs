@@ -20,8 +20,8 @@
 | 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
 | 002 | [booking-concurrency-control](002-booking-concurrency-control/) | **完了** | 予約の同時実行対策（重複予約防止） |
 | 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 6 完了** | JSからTSへの段階的移行 |
-| 004 | npm-to-bun | **完了** | npmからBunへの移行 |
-| 005 | structured-logging | **完了** | 409 Conflict の構造化ログ導入 |
+| 004 | [npm-to-bun](004-npm-to-bun/) | **完了** | npmからBunへの移行 |
+| 005 | [structured-logging](005-structured-logging/) | **完了** | 409 Conflict の構造化ログ導入 |
 
 ## 詳細
 
@@ -75,6 +75,10 @@
 
 - **目的**: パッケージマネージャーを npm から Bun へ移行
 - **現在のステータス**: **完了**（2026-01-01）
+- **ファイル**:
+  - [spec.md](004-npm-to-bun/spec.md)
+  - [plan.md](004-npm-to-bun/plan.md)
+  - [tasks.md](004-npm-to-bun/tasks.md)
 - **変更内容**:
   - `Dockerfile`: ベースイメージを `oven/bun:1.3-debian` に変更
   - `.github/workflows/ci.yml`: `setup-bun` アクション追加、全コマンドを bun へ
@@ -89,6 +93,10 @@
 
 - **目的**: 409 Conflict 発生時の構造化ログ導入（運用・監視強化）
 - **現在のステータス**: **完了**（2026-01-01）
+- **ファイル**:
+  - [spec.md](005-structured-logging/spec.md)
+  - [plan.md](005-structured-logging/plan.md)
+  - [tasks.md](005-structured-logging/tasks.md)
 - **関連ファイル**:
   - `app/_lib/logger.ts` - StructuredLogger クラス
   - `app/_lib/actions.ts` - createBooking へのログ統合
