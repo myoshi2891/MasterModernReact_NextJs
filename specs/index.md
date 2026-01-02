@@ -17,9 +17,9 @@
 
 | ID | 名称 | Status | 概要 |
 |----|------|--------|------|
-| 001 | [sample-feature](001-sample-feature/) | サンプル | テンプレートの使用例 |
+| 001 | [sample-feature](001-sample-feature/) | **サンプル** | テンプレートの使用例 |
 | 002 | [booking-concurrency-control](002-booking-concurrency-control/) | **完了** | 予約の同時実行対策（重複予約防止） |
-| 003 | [typescript-migration](../typescript-migration-plan.md) | **Phase 6 完了** | JSからTSへの段階的移行 |
+| 003 | [typescript-migration](../typescript-migration-plan.md) | **完了** | JSからTSへの段階的移行 |
 | 004 | [npm-to-bun](004-npm-to-bun/) | **完了** | npmからBunへの移行 |
 | 005 | [structured-logging](005-structured-logging/) | **完了** | 409 Conflict の構造化ログ導入 |
 

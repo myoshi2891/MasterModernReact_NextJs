@@ -1,5 +1,33 @@
 import { createHash, randomUUID } from "crypto";
 
+// Cache validated salt to avoid repeated validation
+let validatedSalt: string | null = null;
+
+/**
+ * Get the validated HASH_SALT, validating on first access.
+ * This lazy approach avoids build-time errors in Next.js.
+ */
+function getEffectiveSalt(): string {
+  if (validatedSalt !== null) {
+    return validatedSalt;
+  }
+
+  const salt = process.env.HASH_SALT;
+  if (process.env.NODE_ENV === "production") {
+    if (!salt) {
+      throw new Error("HASH_SALT environment variable must be set in production");
+    }
+    if (salt.length < 32) {
+      throw new Error(
+        "HASH_SALT must be at least 32 characters for cryptographic security"
+      );
+    }
+  }
+
+  validatedSalt = salt ?? "default-salt-for-development-only";
+  return validatedSalt;
+}
+
 /**
  * Log levels for structured logging.
  */
@@ -49,15 +77,9 @@ export type LogEntry = BookingConflictLogEntry | GenericLogEntry;
  * @returns Hashed user ID in format "sha256:xxxxxxxx..."
  */
 export function hashUserId(guestId: number): string {
-  const salt = process.env.HASH_SALT;
-  if (!salt && process.env.NODE_ENV === "production") {
-    throw new Error("HASH_SALT environment variable must be set in production");
-  }
-  const effectiveSalt = salt ?? "default-salt-for-development-only";
-
-  // SHA-256の先頭16文字（64ビット）を使用。ログ相関分析用であり、認証には使用しない
+  // Use first 16 chars of SHA-256 (64 bits) for log correlation, not for authentication
   return `sha256:${createHash("sha256")
-    .update(`${guestId}:${effectiveSalt}`)
+    .update(`${guestId}:${getEffectiveSalt()}`)
     .digest("hex")
     .substring(0, 16)}`;
 }
