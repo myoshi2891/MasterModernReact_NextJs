@@ -50,12 +50,19 @@ export type LogEntry = BookingConflictLogEntry | GenericLogEntry;
  */
 export function hashUserId(guestId: number): string {
   const salt = process.env.HASH_SALT;
-  if (!salt && process.env.NODE_ENV === "production") {
-    throw new Error("HASH_SALT environment variable must be set in production");
+  if (process.env.NODE_ENV === "production") {
+    if (!salt) {
+      throw new Error("HASH_SALT environment variable must be set in production");
+    }
+    if (salt.length < 32) {
+      throw new Error(
+        "HASH_SALT must be at least 32 characters for cryptographic security"
+      );
+    }
   }
   const effectiveSalt = salt ?? "default-salt-for-development-only";
 
-  // SHA-256の先頭16文字（64ビット）を使用。ログ相関分析用であり、認証には使用しない
+  // Use first 16 chars of SHA-256 (64 bits) for log correlation, not for authentication
   return `sha256:${createHash("sha256")
     .update(`${guestId}:${effectiveSalt}`)
     .digest("hex")
