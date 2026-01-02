@@ -14,8 +14,8 @@ export default defineConfig({
   },
   webServer: {
     command: process.env.CI
-      ? "npm run start -- --port 3000 --hostname localhost"
-      : "npm run dev -- --port 3000 --hostname localhost",
+      ? "bun run start -- --port 3000 --hostname localhost"
+      : "bun run dev -- --port 3000 --hostname localhost",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     env: {
