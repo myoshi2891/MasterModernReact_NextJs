@@ -1,5 +1,19 @@
 import { createHash, randomUUID } from "crypto";
 
+// Validate HASH_SALT at module load time in production (fail-fast)
+const HASH_SALT = process.env.HASH_SALT;
+if (process.env.NODE_ENV === "production") {
+  if (!HASH_SALT) {
+    throw new Error("HASH_SALT environment variable must be set in production");
+  }
+  if (HASH_SALT.length < 32) {
+    throw new Error(
+      "HASH_SALT must be at least 32 characters for cryptographic security"
+    );
+  }
+}
+const effectiveSalt = HASH_SALT ?? "default-salt-for-development-only";
+
 /**
  * Log levels for structured logging.
  */
@@ -49,19 +63,6 @@ export type LogEntry = BookingConflictLogEntry | GenericLogEntry;
  * @returns Hashed user ID in format "sha256:xxxxxxxx..."
  */
 export function hashUserId(guestId: number): string {
-  const salt = process.env.HASH_SALT;
-  if (process.env.NODE_ENV === "production") {
-    if (!salt) {
-      throw new Error("HASH_SALT environment variable must be set in production");
-    }
-    if (salt.length < 32) {
-      throw new Error(
-        "HASH_SALT must be at least 32 characters for cryptographic security"
-      );
-    }
-  }
-  const effectiveSalt = salt ?? "default-salt-for-development-only";
-
   // Use first 16 chars of SHA-256 (64 bits) for log correlation, not for authentication
   return `sha256:${createHash("sha256")
     .update(`${guestId}:${effectiveSalt}`)
