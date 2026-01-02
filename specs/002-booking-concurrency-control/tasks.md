@@ -41,7 +41,10 @@
 ### idempotency key（実装済み）
 - [x] clientRequestId カラム追加（2026-01-01: migration作成）
 - [x] クライアント側でUUID生成（2026-01-01: ReservationForm.tsx）
-- [ ] idempotency key の重複で 409（migration適用後に検証予定）
+- [x] idempotency key の重複で 409（23505 → 409 マッピング済み in errors.ts）
+
+**注**: マイグレーション `20260101_add_idempotency_key.sql` は各環境で適用が必要。
+適用後、同一 `clientRequestId` での二重送信は 23505 (unique violation) → 409 Conflict で拒否される。
 
 ### 未実装（将来対応）
 - [ ] `numGuests > maxCapacity` で拒否される（トリガー未実装のため未検証）

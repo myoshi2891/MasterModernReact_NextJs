@@ -159,7 +159,8 @@ class StructuredLogger {
       }),
     };
 
-    this.warn(entry);
+    // Call log directly to avoid type mismatch with GenericLogEntry
+    this.log("warn", entry);
   }
 }
 
