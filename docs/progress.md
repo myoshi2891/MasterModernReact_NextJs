@@ -5,6 +5,12 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | c141e82 | 2026-01-02 | fix: use lazy HASH_SALT validation for Next.js build compatibility | ビルド時エラー修正 |
+| 完了 | 0496bea | 2026-01-02 | refactor: move HASH_SALT validation to module load time | モジュールロード時検証 |
+| 完了 | d75e11b | 2026-01-02 | fix: improve security and documentation quality | HASH_SALT追加、Playwright簡素化 |
+| 完了 | ba8f3d1 | 2026-01-02 | fix: address additional code review feedback | 型安全性、E2E設定改善 |
+| 完了 | 034daa0 | 2026-01-02 | fix: address code review feedback for specs/002-005 | specs作成、ドキュメント改善 |
+| 完了 | d2cf382 | 2026-01-01 | docs: update progress and specs for Phase 6 completion | 進捗更新 |
 | 完了 | fc06cc2 | 2026-01-01 | chore: migrate from npm to bun package manager | npm→bun移行 |
 | 完了 | a09e76b | 2026-01-01 | feat: implement structured logging for booking conflicts | 409構造化ログ実装 |
 | 完了 | fbcc3ec | 2026-01-01 | feat: implement idempotency key for booking duplicate prevention | 二重送信防止 |
@@ -65,6 +71,60 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 ## 作業ログ（統合）
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
+
+### 2026-01-02 変更内容まとめ（詳細）
+
+#### 概要
+
+- **コードレビュー対応**（複数ラウンド）
+- **HASH_SALT検証強化**（長さチェック、空文字列対応、遅延検証）
+- **CI/CD改善**（Playwrightキャッシュ簡素化、環境変数追加）
+- **ドキュメント改善**（specs/004-005作成、EOF改行修正）
+
+#### コードレビュー対応
+
+- **レビューラウンド**: 4回
+- **主な対応内容**:
+  - specs/004-npm-to-bun/ と specs/005-structured-logging/ を新規作成
+  - Dockerfile に SHELL pipefail を追加
+  - Bun バージョンを 1.3 にピン
+  - crypto import 修正（randomUUID 追加）
+  - logger.ts の型安全性修正（bookingConflict が log() を直接呼び出し）
+  - playwright.config.ts のコマンドを bun に変更
+  - マイグレーションにロールバック手順を追加
+  - operations.md に HASH_SALT セキュリティ要件を追加
+  - EOF改行を修正（MD047対応）
+  - specs/index.md の Status フォーマット統一
+
+#### HASH_SALT検証強化
+
+- **変更内容**:
+  - 最小32文字のバリデーション追加（暗号学的セキュリティ）
+  - 空文字列も `||` でデフォルト値にフォールバック
+  - モジュールロード時検証 → 遅延検証に変更（Next.jsビルド互換性）
+- **理由**:
+  - モジュールロード時の検証がNext.jsビルド時に実行され、`NODE_ENV=production` かつ `HASH_SALT` 未設定でエラーになるため
+- **実装**:
+  ```typescript
+  function getEffectiveSalt(): string {
+    if (validatedSalt !== null) return validatedSalt;
+    // production時のみ検証、初回アクセス時に実行
+    ...
+    validatedSalt = salt || "default-salt-for-development-only";
+    return validatedSalt;
+  }
+  ```
+
+#### CI/CD改善
+
+- **Playwrightキャッシング**:
+  - 公式推奨に従いキャッシュステップを削除
+  - `bunx playwright install --with-deps chromium` のみに簡素化
+- **環境変数**:
+  - `HASH_SALT` を CI workflow に追加
+  - `.env.example` に `HASH_SALT` エントリを追加（生成コマンド付き）
+
+---
 
 ### 2026-01-01 変更内容まとめ（詳細）
 

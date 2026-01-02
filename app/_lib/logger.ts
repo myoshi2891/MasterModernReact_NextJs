@@ -24,7 +24,7 @@ function getEffectiveSalt(): string {
     }
   }
 
-  validatedSalt = salt ?? "default-salt-for-development-only";
+  validatedSalt = salt || "default-salt-for-development-only";
   return validatedSalt;
 }
 
