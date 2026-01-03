@@ -107,8 +107,8 @@ create extension if not exists btree_gist;
 alter table bookings
   add constraint bookings_no_overlap
   exclude using gist (
-    cabinId with =,
-    tstzrange(startDate, endDate, '[)') with &&
+    "cabinId" with =,
+    tstzrange("startDate", "endDate", '[)') with &&
   )
   where (status <> 'canceled');
 
@@ -116,8 +116,8 @@ alter table bookings
 alter table bookings
   add constraint bookings_no_overlap
   exclude using gist (
-    cabinId with =,
-    daterange(startDate, endDate, '[)') with &&
+    "cabinId" with =,
+    daterange("startDate", "endDate", '[)') with &&
   )
   where (status <> 'canceled');
 ```
@@ -191,6 +191,11 @@ create unique index bookings_request_id_unique
 - server action は `clientRequestId` を必須パラメータとして受け取る設計が望ましい
 - 予約完了または日付変更時に新しい `clientRequestId` を再生成する
 - UUIDの衝突は現実的に無視できるため、TTLは必須ではない
+
+**ライフサイクル方針:**
+- 予約完了後のレコードは監査目的で保持（削除しない）
+- 将来的にストレージが問題になる場合は、90日以上経過したレコードのクリーンアップバッチを検討
+- 現時点では予約件数が限定的であり、即時対応は不要
 
 ## アプリ側のエラーマッピング
 | SQLSTATE | 原因 | HTTP | 返却メッセージ例 |
