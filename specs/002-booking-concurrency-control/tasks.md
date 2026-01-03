@@ -54,7 +54,7 @@
 
 **マイグレーションファイル**: `supabase/migrations/20260103_add_capacity_check_trigger.sql`
 **ロールバック**: `supabase/migrations/20260103_add_capacity_check_trigger_rollback.sql`
-**最適化**: WHEN句により `numGuests`/`cabinId` 変更時のみトリガー発火（status等の更新時は実行されない）
+**最適化**: UPDATE OF句により `numGuests`/`cabinId` 変更時のみトリガー発火（status等の更新時は実行されない）
 
 ### ローカル並列予約テスト結果（2026-01-01）
 
