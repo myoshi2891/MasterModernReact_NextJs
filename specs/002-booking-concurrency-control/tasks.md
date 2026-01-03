@@ -46,9 +46,13 @@
 **注**: マイグレーション `20260101_add_idempotency_key.sql` は各環境で適用が必要。
 適用後、同一 `clientRequestId` での二重送信は 23505 (unique violation) → 409 Conflict で拒否される。
 
-### 未実装（将来対応）
-- [ ] `numGuests > maxCapacity` で拒否される（トリガー未実装のため未検証）
-- [ ] CAPACITY_EXCEEDED の P0001 が 400 に変換される（トリガー未実装のため未検証）
+### キャパシティチェックトリガー（2026-01-03実装）
+- [x] `numGuests > maxCapacity` で拒否される（トリガー実装: P0001 CAPACITY_EXCEEDED）
+- [x] CAPACITY_EXCEEDED の P0001 が 400 に変換される（errors.ts で実装済み）
+- [x] CABIN_NOT_FOUND の P0001 が 404 に変換される（errors.ts で実装済み）
+
+**マイグレーションファイル**: `supabase/migrations/20260103_add_capacity_check_trigger.sql`
+**ロールバック**: `supabase/migrations/20260103_add_capacity_check_trigger_rollback.sql`
 
 ### ローカル並列予約テスト結果（2026-01-01）
 
