@@ -39,8 +39,9 @@ $$ LANGUAGE plpgsql;
 -- Create the trigger (drop if exists for idempotency)
 DROP TRIGGER IF EXISTS bookings_capacity_check ON bookings;
 
+-- Trigger fires on INSERT (always) and UPDATE (only when numGuests or cabinId changes)
 CREATE TRIGGER bookings_capacity_check
-  BEFORE INSERT OR UPDATE ON bookings
+  BEFORE INSERT OR UPDATE OF "numGuests", "cabinId" ON bookings
   FOR EACH ROW
   EXECUTE FUNCTION check_booking_capacity();
 
