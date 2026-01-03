@@ -308,13 +308,13 @@ where id in (select id from conflicts);
 | `startDate`/`endDate` の型 | `timestamp without time zone` → `tsrange` を使用 |
 | 予約更新で日付変更を許可するか | 現時点では許可（制約により重複は自動防止）|
 
-## 実装状況（2025-12-25）
+## 実装状況（2026-01-03更新）
 
 - [x] 重複データのクリーンアップ完了（id: 89, 124, 126 を削除）
 - [x] `btree_gist` 拡張有効化
 - [x] `bookings_no_overlap` 排他制約追加（`WHERE (status <> 'canceled')` 付き）
 - [x] `bookings_date_order` チェック制約追加
 - [x] `bookings_num_guests` チェック制約追加
-- [ ] キャパシティチェックトリガー（将来対応）
-- [ ] idempotency key（将来対応）
-- [ ] SQLSTATE→HTTP マッピング（Phase 2.1 で対応予定）
+- [x] キャパシティチェックトリガー（2026-01-03完了: `check_booking_capacity()` 関数 + トリガー）
+- [x] idempotency key（2026-01-01完了: `clientRequestId` カラム + unique index）
+- [x] SQLSTATE→HTTP マッピング（2025-12-28完了: `errors.ts` で実装）
