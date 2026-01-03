@@ -48,11 +48,13 @@
 
 ### キャパシティチェックトリガー（2026-01-03実装）
 - [x] `numGuests > maxCapacity` で拒否される（トリガー実装: P0001 CAPACITY_EXCEEDED）
+- [x] `numGuests == maxCapacity` は許容される（境界値テスト: 2026-01-03検証）
 - [x] CAPACITY_EXCEEDED の P0001 が 400 に変換される（errors.ts で実装済み）
 - [x] CABIN_NOT_FOUND の P0001 が 404 に変換される（errors.ts で実装済み）
 
 **マイグレーションファイル**: `supabase/migrations/20260103_add_capacity_check_trigger.sql`
 **ロールバック**: `supabase/migrations/20260103_add_capacity_check_trigger_rollback.sql`
+**最適化**: WHEN句により `numGuests`/`cabinId` 変更時のみトリガー発火（status等の更新時は実行されない）
 
 ### ローカル並列予約テスト結果（2026-01-01）
 
