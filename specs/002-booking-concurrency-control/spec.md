@@ -151,27 +151,29 @@ alter table bookings
 
 ### 3. キャパシティチェック（トリガー）
 
-```
+```sql
 create or replace function check_booking_capacity()
 returns trigger as $$
 declare max_cap int;
 begin
-  select maxCapacity into max_cap from cabins where id = new.cabinId;
+  select "maxCapacity" into max_cap from cabins where id = new."cabinId";
   if max_cap is null then
     raise exception using errcode = 'P0001', message = 'CABIN_NOT_FOUND';
   end if;
-  if new.numGuests > max_cap then
+  if new."numGuests" > max_cap then
     raise exception using errcode = 'P0001', message = 'CAPACITY_EXCEEDED';
   end if;
   return new;
 end;
 $$ language plpgsql;
 
+-- UPDATE OF句により、numGuests/cabinId変更時のみトリガー発火（最適化）
 create trigger bookings_capacity_check
-before insert or update on bookings
+before insert or update of "numGuests", "cabinId" on bookings
 for each row execute function check_booking_capacity();
 ```
 
+- `UPDATE OF` 句により、`status` や `observations` の更新時はトリガーが発火しない（パフォーマンス最適化）
 - `update` で人数変更を許可する場合も防御できる
 
 ### 4. idempotency key（任意）

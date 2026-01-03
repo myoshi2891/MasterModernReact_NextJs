@@ -5,6 +5,8 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | e529093 | 2026-01-03 | refactor(db): optimize capacity check trigger with UPDATE OF clause | トリガー最適化、境界テスト追加 |
+| 完了 | 632db2f | 2026-01-03 | feat(db): add capacity check trigger for bookings | キャパシティチェックトリガー実装 |
 | 完了 | c141e82 | 2026-01-02 | fix: use lazy HASH_SALT validation for Next.js build compatibility | ビルド時エラー修正 |
 | 完了 | 0496bea | 2026-01-02 | refactor: move HASH_SALT validation to module load time | モジュールロード時検証 |
 | 完了 | d75e11b | 2026-01-02 | fix: improve security and documentation quality | HASH_SALT追加、Playwright簡素化 |
