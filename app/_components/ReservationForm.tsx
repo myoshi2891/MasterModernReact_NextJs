@@ -48,14 +48,20 @@ function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const numNights =
 		startDate && endDate ? calculateNumNights(startDate, endDate) : 0;
 
+	// 日付は値（getTime）で比較するため、依存配列を単純式にできるよう
+	// あらかじめタイムスタンプへ変換しておく（react-hooks/use-memo 対応）
+	const startTime = startDate?.getTime();
+	const endTime = endDate?.getTime();
+
 	// Generate a unique client request ID for idempotency
 	// This ID stays the same for a given date range + cabin combination
 	// and regenerates when the user changes dates
 	const clientRequestId = useMemo(() => {
-		if (!startDate || !endDate) return undefined;
+		if (startTime == null || endTime == null) return undefined;
 		return crypto.randomUUID();
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- .getTime() で値比較を意図的に行っている
-	}, [startDate?.getTime(), endDate?.getTime(), id]);
+		// id は cabin 変更時に冪等キーを再生成するための意図的な依存
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [startTime, endTime, id]);
 
 	const bookingData: CreateBookingData = {
 		startDate: startDate ?? null,
