@@ -14,7 +14,7 @@
 		"test:component": "vitest run tests/component",
 		"test:e2e": "playwright test",
 		"test:all": "bun run test:unit && bun run test:component && bun run test:e2e",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "next typegen && tsc --noEmit"
 	},
 	"dependencies": {
 		"@heroicons/react": "^2.2.0",
