@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+/* v3 形式の tailwind.config.js（colors パレット・content）を後方互換で読み込む */
+@config "../../tailwind.config.js";
 
 /* ── Entrance animations ──────────────────────────── */
 @keyframes fade-in-up {
