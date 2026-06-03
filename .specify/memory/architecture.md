@@ -1,6 +1,6 @@
 # アーキテクチャ設計
 
-> 更新履歴: 2025-12-24 初版策定、2026-02-20 i18n・TypeScript 移行反映
+> 更新履歴: 2025-12-24 初版策定、2026-02-20 i18n・TypeScript 移行反映、2026-03-02 Next.js 15 移行反映、2026-06-02 Next.js 16・TypeScript 6・Tailwind v4・Auth.js v5 移行反映
 
 ## システム概要図
 
@@ -19,7 +19,7 @@
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Next.js 14 (App Router)                    │
+│                   Next.js 16 (App Router)                    │
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │                   Server Components                      ││
 │  │  - データ取得 (data-service.ts)                           ││
@@ -173,7 +173,7 @@ app/_lib/
 | `/` | `app/page.tsx` | Static |
 | `/about` | `app/about/page.tsx` | Static |
 | `/cabins` | `app/cabins/page.tsx` | ISR (3600s) |
-| `/cabins/[cabinId]` | `app/cabins/[cabinId]/page.tsx` | SSG + Dynamic |
+| `/cabins/[cabinId]` | `app/cabins/[cabinId]/page.tsx` | Dynamic (既定。SSG/ISRの復元にはPPRが必要) |
 | `/cabins/thankyou` | `app/cabins/thankyou/page.tsx` | Static |
 | `/login` | `app/login/page.tsx` | Static |
 
@@ -217,7 +217,9 @@ export const revalidate = 3600; // 1時間
 export const dynamic = "force-dynamic";
 ```
 
-### SSG with generateStaticParams
+### Dynamic with generateStaticParams (Next.js 16)
+
+Next.js 16 では既定が request-time レンダリングとなるため、`generateStaticParams` を定義していても詳細ページは Dynamic レンダリング（オンデマンド描画）として動作します。ビルド時の静的生成 (SSG/ISR) を復元するには、PPR (Partial Prerendering) や `"use cache"` などの追加機能の採用が必要です。
 
 ```javascript
 // app/cabins/[cabinId]/page.tsx
