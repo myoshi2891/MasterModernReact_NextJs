@@ -25,12 +25,16 @@ interface CustomCSSProperties extends CSSProperties {
 }
 
 /**
- * Renders a responsive date-range picker and live booking summary for a cabin.
+ * Render a responsive date-range picker with a live booking summary for a cabin.
  *
- * @param settings - Booking settings; used to enforce minimum and maximum nights.
- * @param cabin - Cabin pricing info (e.g., `regularPrice` and `discount`) used to compute per-night and total price.
- * @param bookedDates - Dates that are unavailable for selection; disabled in the picker and used to detect booked ranges.
- * @returns A JSX element that displays the date-range selector and a live per-night and total price summary.
+ * Enforces minimum and maximum booking lengths, disables unavailable dates, detects already-booked ranges,
+ * and displays per-night and total pricing (including discount) for the selected range. Shows a Clear button
+ * when a selection exists.
+ *
+ * @param settings - Booking settings used to enforce minimum and maximum nights
+ * @param cabin - Cabin pricing information (e.g., `regularPrice` and `discount`) used to compute per-night and total price
+ * @param bookedDates - Dates that are unavailable for selection and used to detect booked ranges
+ * @returns The JSX element containing the date-range selector and the live per-night and total price summary
  */
 function DateSelector({ settings, cabin, bookedDates }: DateSelectorProps) {
 	const { t } = useLanguage();

@@ -34,7 +34,19 @@ interface ReservationFormProps {
  * @returns A JSX element containing the reservation form UI
  */
 // TODO: useActionState + useFormStatus でクライアント側エラーフィードバックを表示し、
-// Error Boundary 遷移を回避する。
+/**
+ * Render a reservation form for a specific cabin and the currently logged-in user.
+ *
+ * Shows the user's identity (image or initial), collects number of guests and observations,
+ * disables submission until both start and end dates are selected, and submits a bound
+ * Server Action to create a booking. After a successful submission the selected date range
+ * is cleared. A clientRequestId used for idempotency is generated when both dates are present
+ * and is tied to the cabin + date range.
+ *
+ * @param cabin - Cabin data; expected to include `maxCapacity` and `id`
+ * @param user - User data; expected to include `name` and optional `image`
+ * @returns The reservation form JSX element
+ */
 function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const { t } = useLanguage();
 	const { range, resetRange } = useReservation();
