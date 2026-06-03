@@ -5,11 +5,12 @@
 ## プロジェクト概要
 
 **The Wild Oasis** は、キャビン宿泊予約システムです。
-- フレームワーク: Next.js 14 (App Router)
-- 言語: TypeScript (strict モード)
+- フレームワーク: Next.js 16 (App Router / Turbopack 既定)
+- 言語: TypeScript 6 (strict モード)
 - データベース: Supabase (PostgreSQL)
-- 認証: NextAuth.js 4.x (Google OAuth)
-- スタイリング: Tailwind CSS
+- 認証: Auth.js (NextAuth) v5 (Google OAuth)
+- スタイリング: Tailwind CSS v4 (`@import "tailwindcss"` + `@config` 互換読み込み)
+- Lint: ESLint 9 Flat Config (`eslint.config.mjs`、`next lint` は Next 16 で廃止)
 - 多言語: 日英2言語対応 (クライアントサイド Context)
 
 ## クイックスタート
@@ -64,9 +65,11 @@ app/
 ## 主要機能
 
 ### 1. キャビン一覧・詳細 (`/cabins`)
-- ISR (revalidate: 3600秒)
-- 容量でフィルタリング (small/medium/large)
-- `generateStaticParams()` による静的生成
+- 一覧: `revalidate: 3600` (ISR)、容量でフィルタリング (small/medium/large)
+- 詳細: `generateStaticParams()` でパラメータ列挙
+- 注: Next.js 16 では既定が request-time レンダリングのため、詳細ページ
+  (`/cabins/[cabinId]`) は dynamic 描画。SSG/ISR 復元には Cache Components
+  (PPR / `"use cache"`) の採用が別途必要
 
 ### 2. 予約システム
 - 日付選択 (react-day-picker)

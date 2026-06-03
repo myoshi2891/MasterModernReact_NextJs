@@ -1,7 +1,8 @@
 /** @type {import('postcss-load-config').Config} */
 const config = {
   plugins: {
-    tailwindcss: {},
+    // Tailwind v4 では PostCSS プラグインが独立パッケージに分離
+    "@tailwindcss/postcss": {},
   },
 };
 

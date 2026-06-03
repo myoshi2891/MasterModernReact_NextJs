@@ -5,6 +5,16 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 | Status | Commit | Date | Summary | Notes |
 | --- | --- | --- | --- | --- |
+| 完了 | f0310fc | 2026-06-02 | fix(next): configure images.qualities for Next 16 | quality=100/80 が 75 へ劣化する回帰を修正 |
+| 完了 | 4426493 | 2026-06-02 | chore(docs): update CLAUDE.md for Next 16 / TS6 / Tailwind v4 / Auth.js v5 | スタック記述更新、詳細ページ dynamic 化を明記 |
+| 完了 | dcc96d9 | 2026-06-02 | build(css): migrate Tailwind CSS to v4 | `@import` + `@config` 互換、postcss プラグイン分離。視覚回帰なし |
+| 完了 | 76197e8 | 2026-06-02 | build(lint): migrate to ESLint flat config | `next lint` 廃止対応。ESLint 10 非互換のため 9 系最新に固定 |
+| 完了 | 596cb27 | 2026-06-02 | build(next): upgrade Next.js to 16 | middleware export 修正、tsconfig 必須更新。詳細ページ SSG→dynamic |
+| 完了 | 8d33a46 | 2026-06-02 | build(test): upgrade vitest to 4 and jsdom to 29 | 設定変更なし、全テスト緑 |
+| 完了 | c57cd8a | 2026-06-02 | refactor(date-picker): migrate react-day-picker to v10 | fromMonth/fromDate/toYear→startMonth/endMonth、`.rdp-root` |
+| 完了 | 1dbcb9e | 2026-06-02 | refactor(date): upgrade date-fns to v4 | 使用 API は v4 で互換 |
+| 完了 | 2d2f739 | 2026-06-02 | chore(deps): upgrade TypeScript to 6 and @types/node to 25 | ignoreDeprecations、CSS side-effect import のアンビエント宣言追加 |
+| 完了 | 3a191a6 | 2026-06-02 | chore(deps): bump low-risk dependencies to latest | react 19.2 / supabase / next-auth beta.31 / playwright 等 |
 | 完了 | 51c8c74 | 2026-03-02 | feat: upgrade to Next.js 15, React 19, and Auth.js v5 | セキュリティアップデート・アーキテクチャ刷新 |
 | 完了 | 17bfd0e | 2026-02-20 | fix(test): accept null from async Server Components in renderWithProviders | CabinList null 戻り値の型対応 |
 | 完了 | 174720c | 2026-02-20 | chore: resolve merge conflict in LanguageContext.tsx | docstrings ブランチとのマージ |

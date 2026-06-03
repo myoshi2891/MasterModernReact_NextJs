@@ -43,6 +43,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       const rawLang = localStorage.getItem("app-language");
       if (isValidLanguage(rawLang)) {
+        // SSR では "en" 固定でハイドレーション不整合を避け、マウント後に
+        // localStorage の保存値で復元する意図的なパターン
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLanguage(rawLang);
       }
     } catch {

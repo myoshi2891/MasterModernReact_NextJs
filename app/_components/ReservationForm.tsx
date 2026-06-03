@@ -34,7 +34,19 @@ interface ReservationFormProps {
  * @returns A JSX element containing the reservation form UI
  */
 // TODO: useActionState + useFormStatus でクライアント側エラーフィードバックを表示し、
-// Error Boundary 遷移を回避する。
+/**
+ * Render a reservation form for a specific cabin and the currently logged-in user.
+ *
+ * Shows the user's identity (image or initial), collects number of guests and observations,
+ * disables submission until both start and end dates are selected, and submits a bound
+ * Server Action to create a booking. After a successful submission the selected date range
+ * is cleared. A clientRequestId used for idempotency is generated when both dates are present
+ * and is tied to the cabin + date range.
+ *
+ * @param cabin - Cabin data; expected to include `maxCapacity` and `id`
+ * @param user - User data; expected to include `name` and optional `image`
+ * @returns The reservation form JSX element
+ */
 function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const { t } = useLanguage();
 	const { range, resetRange } = useReservation();
@@ -48,14 +60,20 @@ function ReservationForm({ cabin, user }: ReservationFormProps) {
 	const numNights =
 		startDate && endDate ? calculateNumNights(startDate, endDate) : 0;
 
+	// 日付は値（getTime）で比較するため、依存配列を単純式にできるよう
+	// あらかじめタイムスタンプへ変換しておく（react-hooks/use-memo 対応）
+	const startTime = startDate?.getTime();
+	const endTime = endDate?.getTime();
+
 	// Generate a unique client request ID for idempotency
 	// This ID stays the same for a given date range + cabin combination
 	// and regenerates when the user changes dates
 	const clientRequestId = useMemo(() => {
-		if (!startDate || !endDate) return undefined;
+		if (startTime == null || endTime == null) return undefined;
 		return crypto.randomUUID();
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- .getTime() で値比較を意図的に行っている
-	}, [startDate?.getTime(), endDate?.getTime(), id]);
+		// id は cabin 変更時に冪等キーを再生成するための意図的な依存
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [startTime, endTime, id]);
 
 	const bookingData: CreateBookingData = {
 		startDate: startDate ?? null,
