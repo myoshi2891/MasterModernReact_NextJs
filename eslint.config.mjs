@@ -22,7 +22,7 @@ const eslintConfig = [
     // バージョンを明示して検出をスキップする。
     settings: {
       react: {
-        version: "19.2",
+        version: "19.2.7",
       },
     },
   },

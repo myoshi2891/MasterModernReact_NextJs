@@ -83,6 +83,8 @@ function DateSelector({ settings, cabin, bookedDates }: DateSelectorProps) {
 		};
 	}, []);
 
+	const today = new Date();
+
 	return (
 		<div
 			className={`flex w-full flex-col bg-primary-950 ${
@@ -100,8 +102,8 @@ function DateSelector({ settings, cabin, bookedDates }: DateSelectorProps) {
 				selected={displayRange}
 				min={minBookingLength + 1}
 				max={maxBookingLength}
-				startMonth={new Date()}
-				endMonth={new Date(new Date().getFullYear() + 5, 11)}
+				startMonth={today}
+				endMonth={new Date(today.getFullYear() + 5, 11)}
 				captionLayout="dropdown"
 				numberOfMonths={monthsToShow}
 				style={

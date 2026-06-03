@@ -34,7 +34,7 @@ export default async function formatMarkdown(filePath) {
     let line = lines[i];
     const trimmed = line.trim();
     // Strip only the first blockquote token for fence detection (preserves nested > patterns)
-    const lineWithoutBlockquote = line.replace(/^\s*>\s?/, "").trim();
+    const lineWithoutBlockquote = line.replace(/^\s*(?:>\s*)+/, "").trim();
 
     // 1. Preserve YAML front matter verbatim
     if (i === 0 && trimmed === "---") {
