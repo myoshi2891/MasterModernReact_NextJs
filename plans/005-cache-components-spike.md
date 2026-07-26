@@ -96,11 +96,13 @@ Next.js 16 では既定が request-time レンダリングとなり、`/cabins/[
    `bun run dev` + 手動または E2E で確認できる範囲で検証
 9. 検証結果とプロトタイプを `/tmp/plan-005-prototype.patch` および
    `/tmp/plan-005-prototype-stat.txt` に保存した後、次を実行して変更を破棄する。
-   clean にならない場合は STOP し、強制リセットしない
+   未追跡ファイルがある場合は restore を実行せず STOP する。clean にならない
+   場合も STOP し、強制リセットしない
 
 ```bash
-git diff --binary > /tmp/plan-005-prototype.patch
-git diff --stat > /tmp/plan-005-prototype-stat.txt
+git diff --binary HEAD > /tmp/plan-005-prototype.patch
+git diff --stat HEAD > /tmp/plan-005-prototype-stat.txt
+test -z "$(git ls-files --others --exclude-standard)"
 git restore --staged --worktree -- next.config.mjs app/_lib/data-service.ts app/_lib/actions.ts app/cabins/
 test -z "$(git status --porcelain)"
 ```
@@ -142,8 +144,10 @@ git branch -d spike/cache-components
 - `grep -nF "spike/cache-components" plans/005-report-cache-components.md` — 1件以上
 - `grep -nF "スパイクブランチを削除済み" plans/005-report-cache-components.md`
   — 1件以上
-- `git branch --show-current` — `/tmp/plan-005-start-branch` に保存したブランチ名と一致
-- `git status --porcelain`（開始ブランチ上）— クリーン（作業ツリーを汚していない）
+- `test "$(git branch --show-current)" = "$(cat /tmp/plan-005-start-branch)"` — 開始時に
+  保存したブランチ名と一致
+- `test -z "$(git status --porcelain)"`（開始ブランチ上）— クリーン
+  （作業ツリーを汚していない）
 
 ## Test plan
 
