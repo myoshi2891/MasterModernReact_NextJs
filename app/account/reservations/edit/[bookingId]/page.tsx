@@ -1,6 +1,8 @@
 import SubmitButton from "@/app/_components/SubmitButton";
 import { updateBooking } from "@/app/_lib/actions";
+import { auth } from "@/app/_lib/auth";
 import { getBooking } from "@/app/_lib/data-service";
+import { notFound } from "next/navigation";
 
 interface PageParams {
 	bookingId: string;
@@ -21,6 +23,12 @@ interface PageProps {
  */
 export default async function Page({ params }: PageProps) {
 	const { bookingId } = await params;
+	const session = await auth();
+	const guestId = session?.user?.guestId;
+	if (!guestId) {
+		notFound();
+	}
+
 	let booking;
 
 	try {
@@ -28,6 +36,10 @@ export default async function Page({ params }: PageProps) {
 	} catch (error) {
 		console.error(`Failed to load booking ${bookingId}:`, error);
 		throw new Error(`Failed to load booking. Booking ID: ${bookingId}`);
+	}
+
+	if (booking.guestId !== guestId) {
+		notFound();
 	}
 
 	// nullセーフな値の取得
