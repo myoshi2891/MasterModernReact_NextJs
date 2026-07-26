@@ -15,9 +15,10 @@
 - **Priority**: P3
 - **Effort**: M
 - **Risk**: LOW（調査のみ。プロトタイプは使い捨てブランチで実施）
-- **Depends on**: plans/003-data-service-efficiency.md（`getCabin` の
-  キャッシュラップ後の形を前提に調査するため。003 未実施でも調査自体は可能だが、
-  レポートにその旨を明記すること）
+- **Depends on**: none
+- **Recommended order**: plans/003-data-service-efficiency.md の後
+  （`getCabin` のキャッシュラップ後の形で調査できるため。003 未実施でも実行可能で、
+  その場合はレポートに明記すること）
 - **Category**: direction
 - **Planned at**: commit `5457faa`, 2026-07-04
 
@@ -75,17 +76,41 @@ Next.js 16 では既定が request-time レンダリングとなり、`/cabins/[
 
 ### Step 3: 使い捨てブランチでプロトタイプ
 
-1. `git switch -c spike/cache-components`（このブランチは最後に削除するか、
-   レポートから参照するだけにする。**main / dev へのマージ・push はしない**）
-2. 最小の変更で試す（候補、調査結果に応じて選択）:
+1. `git branch --show-current > /tmp/plan-005-start-branch` と
+   `test -s /tmp/plan-005-start-branch` を実行し、開始ブランチ名を保存する
+   （detached HEAD の場合は STOP）
+2. `test -z "$(git status --porcelain)"` を実行し、作業ツリーが clean であることを
+   確認する（出力がある場合は STOP）
+3. `test -z "$(git branch --list 'spike/cache-components')"` を実行し、同名ブランチが
+   存在しないことを確認する（存在する場合は STOP）
+4. `git switch -c spike/cache-components` で使い捨てブランチを作成する
+   （**main / dev へのマージ・push はしない**）
+5. 最小の変更で試す（候補、調査結果に応じて選択）:
    - `next.config.mjs` に `cacheComponents: true`（または該当フラグ）を設定
    - `getCabin` に `"use cache"` + `cacheTag("cabin-" + id)` を付与、または
      ページレベルで `"use cache"` を試す
-3. `bun run build` で `/cabins/[cabinId]` の区分が Static / Partial に変わるかを
+6. `bun run build` で `/cabins/[cabinId]` の区分が Static / Partial に変わるかを
    確認し、出力を記録
-4. `bun run test:all` を実行し、何が壊れるか（特に E2E）を記録
-5. 予約作成 → キャビン詳細の予約済み日付が更新されるか（無効化フロー）を
+7. `bun run test:all` を実行し、何が壊れるか（特に E2E）を記録
+8. 予約作成 → キャビン詳細の予約済み日付が更新されるか（無効化フロー）を
    `bun run dev` + 手動または E2E で確認できる範囲で検証
+9. 検証結果とプロトタイプを `/tmp/plan-005-prototype.patch` および
+   `/tmp/plan-005-prototype-stat.txt` に保存した後、次を実行して変更を破棄する。
+   clean にならない場合は STOP し、強制リセットしない
+
+```bash
+git diff --binary > /tmp/plan-005-prototype.patch
+git diff --stat > /tmp/plan-005-prototype-stat.txt
+git restore --staged --worktree -- next.config.mjs app/_lib/data-service.ts app/_lib/actions.ts 'app/cabins/[cabinId]/page.tsx'
+test -z "$(git status --porcelain)"
+```
+
+10. 保存した開始ブランチへ戻り、スパイクブランチを削除する
+
+```bash
+git switch "$(cat /tmp/plan-005-start-branch)"
+git branch -d spike/cache-components
+```
 
 ### Step 4: レポート作成
 
@@ -97,6 +122,7 @@ Next.js 16 では既定が request-time レンダリングとなり、`/cabins/[
 - go/no-go 推奨と、go の場合の本実装プラン骨子（触るファイル、テスト戦略、
   リスク）
 - 使い捨てブランチの diff 要約（ブランチ名を記載）
+- スパイクブランチを削除済みであること
 
 コミット（レポートのみ）: `docs(plans): add cache components spike report`
 コミット前に PII チェックを実行（`plans/README.md` 参照）。
@@ -111,9 +137,12 @@ Next.js 16 では既定が request-time レンダリングとなり、`/cabins/[
 ## Done criteria（機械検証可能）
 
 - `plans/005-report-cache-components.md` が存在し、「go/no-go」見出しを含む
-- `git branch --list "spike/*"` — プロトタイプブランチが存在する（または削除済み
-  である旨がレポートに記載されている）
-- `git status --porcelain`（dev ブランチ上）— クリーン（作業ツリーを汚していない）
+- `test -z "$(git branch --list 'spike/cache-components')"` — スパイクブランチが
+  削除済み
+- `grep -n "spike/cache-components.*削除済み" plans/005-report-cache-components.md`
+  — 1件以上
+- `git branch --show-current` — `/tmp/plan-005-start-branch` に保存したブランチ名と一致
+- `git status --porcelain`（開始ブランチ上）— クリーン（作業ツリーを汚していない）
 
 ## Test plan
 

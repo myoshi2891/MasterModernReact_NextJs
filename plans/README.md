@@ -15,15 +15,20 @@ Drift check を必ず実行すること。
 | 002 | [クリティカルパスのテスト補強](002-critical-path-test-coverage.md) | tests | P2 | M | なし | TODO |
 | 003 | [data-service のクエリ効率改善](003-data-service-efficiency.md) | perf | P2 | M | 002 | TODO |
 | 004 | [ドキュメントドリフト解消](004-docs-drift-sync.md) | docs | P2 | M | なし | TODO |
-| 005 | [Cache Components スパイク](005-cache-components-spike.md) | direction | P3 | M | 003（推奨） | TODO |
+| 005 | [Cache Components スパイク](005-cache-components-spike.md) | direction | P3 | M | なし | TODO |
+
+Plan 005 に必須依存はない。Plan 003 の後に実施する順序は任意の推奨であり、
+Plan 003 が未完了でも Plan 005 を開始できる。
 
 依存グラフ:
 
 ```text
 001 (独立・最優先)
-002 ──→ 003 ──→ 005
+002 ──→ 003 ⋯→ 005
 004 (独立・随時)
 ```
+
+`──→` は必須依存、`⋯→` は任意の推奨順序を表す。
 
 ## 選定方針の記録
 
