@@ -70,7 +70,8 @@ Next 15 と存在しない `.js` ファイルパスを大量に参照し、`CLAU
   （`.claude/rules/no-absolute-paths.md`）。コミット前に必ず:
 
 ```bash
-git diff --cached | grep -E '^\+[^+]' | grep -E '(/Users/|/home/|C:\\Users\\)' | grep -vE 'johndoe'
+PII_PATTERN='/(Users|home)/|C:\\Users\\'
+git diff --cached | grep -E '^\+[^+]' | grep -E "$PII_PATTERN"
 ```
 
   が**空出力**であることを確認すること。

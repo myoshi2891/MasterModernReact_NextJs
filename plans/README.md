@@ -105,7 +105,8 @@ Plan 003 が未完了でも Plan 005 を開始できる。
 - 本ディレクトリへのコミット前に PII チェックを必ず実行すること:
 
 ```bash
-git diff --cached | grep -E '^\+[^+]' | grep -E '(/Users/|/home/|C:\\Users\\)' | grep -vE 'johndoe'
+PII_PATTERN='/(Users|home)/|C:\\Users\\'
+git diff --cached | grep -E '^\+[^+]' | grep -E "$PII_PATTERN"
 ```
 
 出力が空であることを確認してからコミットする（`.claude/rules/no-absolute-paths.md`）。
