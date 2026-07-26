@@ -66,6 +66,7 @@ async function renderPage() {
 describe("reservation edit page", () => {
 	beforeEach(() => {
 		vi.resetModules();
+		vi.clearAllMocks();
 		notFoundMock.mockImplementation(() => {
 			throw new Error("NEXT_NOT_FOUND");
 		});
