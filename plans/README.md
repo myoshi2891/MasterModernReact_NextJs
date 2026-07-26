@@ -11,7 +11,7 @@ Drift check を必ず実行すること。
 
 | # | プラン | カテゴリ | Priority | Effort | 依存 | Status |
 |---|--------|---------|----------|--------|------|--------|
-| 001 | [予約編集ページの IDOR 解消](001-secure-reservation-edit-page.md) | security | P1 | S | なし | TODO |
+| 001 | [予約編集ページの IDOR 解消](001-secure-reservation-edit-page.md) | security | P1 | S | なし | DONE |
 | 002 | [クリティカルパスのテスト補強](002-critical-path-test-coverage.md) | tests | P2 | M | なし | TODO |
 | 003 | [data-service のクエリ効率改善](003-data-service-efficiency.md) | perf | P2 | M | 002 | TODO |
 | 004 | [ドキュメントドリフト解消](004-docs-drift-sync.md) | docs | P2 | M | なし | TODO |
