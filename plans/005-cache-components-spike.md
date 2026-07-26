@@ -101,7 +101,7 @@ Next.js 16 では既定が request-time レンダリングとなり、`/cabins/[
 ```bash
 git diff --binary > /tmp/plan-005-prototype.patch
 git diff --stat > /tmp/plan-005-prototype-stat.txt
-git restore --staged --worktree -- next.config.mjs app/_lib/data-service.ts app/_lib/actions.ts 'app/cabins/[cabinId]/page.tsx'
+git restore --staged --worktree -- next.config.mjs app/_lib/data-service.ts app/_lib/actions.ts app/cabins/
 test -z "$(git status --porcelain)"
 ```
 
@@ -121,8 +121,8 @@ git branch -d spike/cache-components
 - 無効化フローの結論（`revalidatePath` 継続可否、`cacheTag` 移行の要否）
 - go/no-go 推奨と、go の場合の本実装プラン骨子（触るファイル、テスト戦略、
   リスク）
-- 使い捨てブランチの diff 要約（ブランチ名を記載）
-- スパイクブランチを削除済みであること
+- 使い捨てブランチの diff 要約（`spike/cache-components` ブランチ名を記載）
+- 「スパイクブランチを削除済み」と明記
 
 コミット（レポートのみ）: `docs(plans): add cache components spike report`
 コミット前に PII チェックを実行（`plans/README.md` 参照）。
@@ -139,7 +139,8 @@ git branch -d spike/cache-components
 - `plans/005-report-cache-components.md` が存在し、「go/no-go」見出しを含む
 - `test -z "$(git branch --list 'spike/cache-components')"` — スパイクブランチが
   削除済み
-- `grep -n "spike/cache-components.*削除済み" plans/005-report-cache-components.md`
+- `grep -nF "spike/cache-components" plans/005-report-cache-components.md` — 1件以上
+- `grep -nF "スパイクブランチを削除済み" plans/005-report-cache-components.md`
   — 1件以上
 - `git branch --show-current` — `/tmp/plan-005-start-branch` に保存したブランチ名と一致
 - `git status --porcelain`（開始ブランチ上）— クリーン（作業ツリーを汚していない）
