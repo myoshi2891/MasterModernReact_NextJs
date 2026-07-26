@@ -181,8 +181,8 @@ if (booking.guestId !== guestId) {
 - `bun run typecheck` — exit 0
 - `bun run lint` — exit 0
 - `bun run build` — exit 0
-- `grep -n "auth()" app/account/reservations/edit/[bookingId]/page.tsx` — 1件以上
-- `grep -n "notFound" app/account/reservations/edit/[bookingId]/page.tsx` — 1件以上
+- `grep -n "auth()" -- 'app/account/reservations/edit/[bookingId]/page.tsx'` — 1件以上
+- `grep -n "notFound" -- 'app/account/reservations/edit/[bookingId]/page.tsx'` — 1件以上
 
 ## Test plan
 
