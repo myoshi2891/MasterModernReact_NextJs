@@ -197,11 +197,22 @@ async function getOrCreateGuestByEmail(
 
 ## Done criteria（機械検証可能）
 
+- 着手時に
+  `bun run test:unit -- --reporter=json --outputFile=/tmp/plan-002-unit-baseline.json`
+  を実行し、全テストがパスした時点の `numTotalTests` を保存する
 - `bun run test:unit` — 全パス、テスト件数が着手前より増えている
   （着手前の件数を最初に記録すること）
 - `bun run typecheck` — exit 0
 - `bun run lint` — exit 0
 - `grep -c "describe" tests/unit/auth.test.ts` — 1以上
+- 完了時に
+  `bun run test:unit -- --reporter=json --outputFile=/tmp/plan-002-unit-final.json`
+  を実行してから、次の比較を実行する — baseline と final の件数を表示し、
+  `final > baseline` でなければ exit 1
+
+```bash
+bun -e 'const baseline = await Bun.file("/tmp/plan-002-unit-baseline.json").json(); const final = await Bun.file("/tmp/plan-002-unit-final.json").json(); console.log(`baseline=${baseline.numTotalTests} final=${final.numTotalTests}`); if (final.numTotalTests <= baseline.numTotalTests) process.exit(1);'
+```
 
 ## Test plan
 
