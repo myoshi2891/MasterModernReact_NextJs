@@ -1,0 +1,26 @@
+diff --git a/minimatch.js b/minimatch.js
+index 2e4a058a130dceebf83a7bd435f5d22b765ac836..742bb57ab24b06e9e8ec273457c043758c8641ca 100644
+--- a/minimatch.js
++++ b/minimatch.js
+@@ -7,7 +7,7 @@ var path = (function () { try { return require('path') } catch (e) {}}()) || {
+ minimatch.sep = path.sep
+ 
+ var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
+-var expand = require('brace-expansion')
++var expand = require('brace-expansion').expand
+ 
+ var plTypes = {
+   '!': { open: '(?:(?!(?:', close: '))[^/]*?)'},
+diff --git a/package.json b/package.json
+index 563d2184370b69bad91039364f9543c88a64a158..831d3d8dcffc4e3569fc54d0bac64e668bdc6d1c 100644
+--- a/package.json
++++ b/package.json
+@@ -21,7 +21,7 @@
+     "node": "*"
+   },
+   "dependencies": {
+-    "brace-expansion": "^1.1.7"
++    "brace-expansion": "5.0.8"
+   },
+   "devDependencies": {
+     "tap": "^15.1.6"

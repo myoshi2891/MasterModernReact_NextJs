@@ -101,6 +101,28 @@ Status: 未確認 / 確認中 / 完了 / 差し戻し
 
 このセクションに `docs/README_20251018.md` と `docs/2025-10-13-postgres-maintenance.md` の内容を統合して管理する。
 
+### 2026-06-02 Next.js 16 / TypeScript 6 / Tailwind CSS v4 メジャーアップグレード
+
+#### 概要
+
+Next.js 16 への移行および TypeScript 6 / Tailwind CSS v4 などの各種依存関係のメジャーアップグレードと環境最適化。
+
+#### 主要変更
+
+- **Next.js 16 への移行**: Next.js 16 への移行を実施。また、Next 16 で廃止された `next lint` に対応するため、ESLint 9 Flat Config への移行を行い、`eslint.config.mjs` を適正化。
+- **TypeScript 6 & @types/node 25 への移行**: TypeScript 6 へのアップグレードを行い、CSS side-effect import 等に必要なアンビエント宣言などを追加。
+- **Tailwind CSS v4 への移行**: `@import "tailwindcss"` および `@config` を用いた v4 互換読み込み構成へ移行し、`@tailwindcss/postcss` プラグインなどの設定を整理。
+- **react-day-picker v10 & date-fns v4 への移行**: react-day-picker v10 へのメジャーアップデートに伴い、カレンダー日付選択 API （`fromMonth` / `fromDate` / `toYear` → `startMonth` / `endMonth`）を書き換え、`date-fns` も v4 へ更新。
+- **Next.js Image コンポーネント最適化**: Next.js 16 で `images.qualities` を設定し、品質低下の回帰問題を解消。
+- **テスト環境アップデート**: Vitest を v4、JSDom を v29 にそれぞれアップデートし、動作の安定性を確保。
+
+#### アーキテクチャ上の改善
+
+- 詳細ページ (`/cabins/[cabinId]`) が Next.js 16 で既定で request-time レンダリング（Dynamic）となったことに伴い、SSG/ISRの復元には PPR (`"use cache"`) が必要となる点を考慮した構成に調整。
+- ESLint Flat Config 移行に伴い、依存関係を ESLint 9 系で固定。
+
+---
+
 ### 2026-03-02 Next.js 15 メジャーアップグレード
 
 #### 概要
